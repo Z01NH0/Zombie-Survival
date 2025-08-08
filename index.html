@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombie Survival</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            font-family: 'Press Start 2P', cursive;
+            background: #000;
+            color: #fff;
+            cursor: crosshair;
+        }
+        
+        #gameCanvas {
+            display: block;
+            background: #0a0a12;
+        }
+        
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            font-size: 12px;
+            color: #ff5555;
+            text-shadow: 2px 2px 0 #000;
+        }
+        
+        .stat-bar {
+            height: 20px;
+            margin: 8px 0;
+            border: 3px solid #333;
+            background: #222;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        #healthBarFill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to right, #ff3333, #ff5555);
+            transition: width 0.3s;
+        }
+        
+        #staminaBarFill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to right, #55aaff, #77ccff);
+            transition: width 0.3s;
+        }
+        
+        #inventory {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #444;
+            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+        }
+        
+        .inventory-slot {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #555;
+            background: rgba(30, 30, 30, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.2s;
+        }
+        
+        .inventory-slot.active {
+            border: 3px solid #ff5555;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #ff5555;
+        }
+        
+        .slot-ammo {
+            font-size: 10px;
+            margin-top: 5px;
+            color: #77ccff;
+        }
+        
+        #dayTime {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 14px;
+            color: #ffcc55;
+            text-shadow: 2px 2px 0 #000;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 2px solid #ffcc55;
+        }
+        
+        #gameOverScreen, #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            text-align: center;
+        }
+        
+        #gameOverScreen h1, #startScreen h1 {
+            font-size: 48px;
+            color: #ff5555;
+            margin-bottom: 30px;
+            font-family: 'Bungee', cursive;
+            text-shadow: 5px 5px 0 #000;
+            letter-spacing: 3px;
+        }
+        
+        #startScreen h1 {
+            color: #ffcc55;
+            font-size: 64px;
+            margin-bottom: 10px;
+        }
+        
+        .screen-description {
+            font-size: 16px;
+            color: #aaa;
+            margin-bottom: 30px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(to bottom, #ff5555, #cc0000);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            margin: 10px;
+            transition: all 0.2s;
+            box-shadow: 0 5px 0 #880000;
+            text-transform: uppercase;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #880000;
+        }
+        
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #880000;
+        }
+        
+        #controls {
+            margin-top: 30px;
+            color: #777;
+            font-size: 12px;
+            line-height: 2;
+        }
+        
+        #bloodOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 150;
+            transition: opacity 0.3s;
+        }
+        
+        .night-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 30, 0.7);
+            pointer-events: none;
+            z-index: 120;
+        }
+        
+        #shop {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border: 3px solid #ffcc55;
+            border-radius: 10px;
+            z-index: 200;
+            display: none;
+            width: 400px;
+        }
+        
+        #shop h2 {
+            color: #ffcc55;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(50, 50, 50, 0.5);
+            border-radius: 5px;
+        }
+        
+        .shop-item button {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin: 0;
+        }
+        
+        #coins {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 14px;
+            color: #ffcc55;
+            text-shadow: 2px 2px 0 #000;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 2px solid #ffcc55;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="bloodOverlay"></div>
+    <div id="nightOverlay" class="night-overlay" style="display: none;"></div>
+    
+    <div id="ui">
+        <div>SAÚDE: <span id="health">100</span>%</div>
+        <div class="stat-bar"><div id="healthBarFill"></div></div>
+        <div>ENERGIA: <span id="stamina">100</span>%</div>
+        <div class="stat-bar"><div id="staminaBarFill"></div></div>
+        <div>ZUMBIS: <span id="zombieCount">0</span></div>
+        <div>DIA: <span id="day">1</span></div>
+    </div>
+    
+    <div id="dayTime">☀️ DIA</div>
+    <div id="coins">MOEDAS: <span id="coinCount">0</span></div>
+    
+    <div id="inventory">
+        <div class="inventory-slot active">🔪<div class="slot-ammo">-</div></div>
+        <div class="inventory-slot">🔫<div class="slot-ammo">0</div></div>
+        <div class="inventory-slot">💥<div class="slot-ammo">0</div></div>
+        <div class="inventory-slot">🩹<div class="slot-ammo">0</div></div>
+        <div class="inventory-slot">🧨<div class="slot-ammo">0</div></div>
+    </div>
+    
+    <div id="shop">
+        <h2>LOJA DE MELHORIAS</h2>
+        <div class="shop-item">
+            <span>+12 Munição Pistola (12 moedas)</span>
+            <button id="buyAmmo">COMPRAR</button>
+        </div>
+        <div class="shop-item">
+            <span>+5 Munição Shotgun (25 moedas)</span>
+            <button id="buyShotgunAmmo">COMPRAR</button>
+        </div>
+        <div class="shop-item">
+            <span>+25% Vida (20 moedas)</span>
+            <button id="buyHealth">COMPRAR</button>
+        </div>
+        <div class="shop-item">
+            <span>+10% Dano (15 moedas)</span>
+            <button id="buyDamage">COMPRAR</button>
+        </div>
+        <div class="shop-item">
+            <span>+10% Velocidade (18 moedas)</span>
+            <button id="buySpeed">COMPRAR</button>
+        </div>
+        <div class="shop-item">
+            <span>Kit Médico (8 moedas)</span>
+            <button id="buyMedkit">COMPRAR</button>
+        </div>
+        <button id="closeShop" style="width: 100%; margin-top: 15px;">FECHAR LOJA</button>
+    </div>
+    
+    <div id="startScreen">
+        <h1>ZOMBIE SURVIVAL</h1>
+        <p class="screen-description">O apocalipse zumbi chegou. Sobreviva o máximo que puder em um mundo hostil. Durante o dia, compre melhorias na loja. À noite, enfrente hordas de zumbis cada vez maiores.</p>
+        <button id="startButton">INICIAR SOBREVIVÊNCIA</button>
+        <div id="controls">
+            WASD: MOVER | SHIFT: CORRER | 1-5: TROCAR ARMA<br>
+            CLIQUE: ATACAR | R: RECARREGAR 
+        </div>
+    </div>
+    
+    <div id="gameOverScreen" style="display: none;">
+        <h1>FIM DE JOGO</h1>
+        <p class="screen-description">Você sobreviveu <span id="survivedDays">0</span> dias no apocalipse zumbi.</p>
+        <button id="restartButton">TENTAR NOVAMENTE</button>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script>
+        // Configurações do jogo
+        const config = {
+            width: 1280,
+            height: 720,
+            playerSpeed: 3.5,
+            zombieSpawnRate: 1500,
+            nightDuration: 45000,
+            dayDuration: 15000, // 15 segundos de dia
+            mapTiles: 20,
+            itemSpawnChance: 0.05,
+            itemSpawnInterval: 20000, // 20 segundos
+            baseZombiesPerNight: 5,
+            zombieIncreasePerDay: 2
+        };
+
+        // Estado do jogo
+        const gameState = {
+            player: null,
+            zombies: [],
+            bullets: [],
+            acidBullets: [],
+            obstacles: [],
+            items: [],
+            isNight: false,
+            day: 1,
+            gameTime: 0,
+            gameOver: false,
+            inventory: [
+                { type: 'knife', ammo: null },
+                { type: 'pistol', ammo: 0 },
+                { type: 'shotgun', ammo: 0 },
+                { type: 'medkit', ammo: 0 },
+                { type: 'grenade', ammo: 0 }
+            ],
+            selectedSlot: 0,
+            map: [],
+            bloodEffect: 0,
+            attackCooldown: 0,
+            knifeAngle: 0,
+            isAttacking: false,
+            coins: 0,
+            playerDamageMultiplier: 1,
+            zombiesToSpawn: 0,
+            zombiesSpawned: 0,
+            shopOpen: false,
+            itemSpawnTimer: 0
+        };
+
+        // Sons
+        const sounds = {
+            zombieGroan: [
+                new Howl({ src: ['https://assets.codepen.io/21542/zombie1.mp3'], volume: 0.4 }),
+                new Howl({ src: ['https://assets.codepen.io/21542/zombie2.mp3'], volume: 0.4 }),
+                new Howl({ src: ['https://assets.codepen.io/21542/zombie3.mp3'], volume: 0.4 })
+            ],
+            gunshot: new Howl({ src: ['https://assets.codepen.io/21542/gunshot.mp3'], volume: 0.6 }),
+            shotgun: new Howl({ src: ['https://assets.codepen.io/21542/shotgun.mp3'], volume: 0.7 }),
+            reload: new Howl({ src: ['https://assets.codepen.io/21542/reload.mp3'], volume: 0.5 }),
+            playerHurt: new Howl({ src: ['https://assets.codepen.io/21542/hurt.mp3'], volume: 0.7 }),
+            knifeSwing: new Howl({ src: ['https://assets.codepen.io/21542/knife.mp3'], volume: 0.6 }),
+            pickup: new Howl({ src: ['https://assets.codepen.io/21542/pickup.mp3'], volume: 0.5 }),
+            dayStart: new Howl({ src: ['https://assets.codepen.io/21542/day.mp3'], volume: 0.5 }),
+            nightStart: new Howl({ src: ['https://assets.codepen.io/21542/night.mp3'], volume: 0.5 }),
+            coinPickup: new Howl({ src: ['https://assets.codepen.io/21542/coin.mp3'], volume: 0.5 }),
+            heal: new Howl({ src: ['https://assets.codepen.io/21542/heal.mp3'], volume: 0.5 })
+        };
+
+        // Inicialização
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = config.width;
+        canvas.height = config.height;
+
+        // Sprites
+        const sprites = {
+            player: createPlayerSprite(),
+            zombies: {
+                normal: createZombieSprite('#8fbb6b'),
+                runner: createZombieSprite('#c78f6b'),
+                brute: createZombieSprite('#6b8fbb'),
+                crawler: createZombieSprite('#6b8f6b'),
+                toxic: createZombieSprite('#8fbb8f'),
+                tank: createZombieSprite('#ff8800'),
+                fast: createZombieSprite('#aa55ff'),
+                spitter: createZombieSprite('#55aaff')
+            },
+            items: {
+                pistol: createItemSprite('🔫', '#ff5555'),
+                shotgun: createItemSprite('💥', '#ffaa00'),
+                pistolAmmo: createItemSprite('➖', '#ffcc55'),
+                shotgunAmmo: createItemSprite('➖', '#ffaa55'),
+                medkit: createItemSprite('🩹', '#55ff55'),
+                grenade: createItemSprite('🧨', '#ff55ff'),
+                coin: createItemSprite('🪙', '#ffcc00')
+            },
+            terrain: {
+                grass: createTerrainSprite('#3a5c3a'),
+                road: createTerrainSprite('#555555'),
+                water: createTerrainSprite('#3a5c8f'),
+                building: createTerrainSprite('#8f3a3a')
+            }
+        };
+
+        function createPlayerSprite() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 50;
+            canvas.height = 50;
+            const ctx = canvas.getContext('2d');
+            
+            // Corpo
+            ctx.fillStyle = '#55aaff';
+            ctx.fillRect(10, 10, 30, 40);
+            
+            // Cabeça
+            ctx.fillStyle = '#ffccaa';
+            ctx.beginPath();
+            ctx.arc(25, 15, 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            return canvas;
+        }
+
+        function createZombieSprite(color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 40;
+            canvas.height = 40;
+            const ctx = canvas.getContext('2d');
+            
+            // Corpo
+            ctx.fillStyle = color;
+            ctx.fillRect(5, 10, 30, 30);
+            
+            // Cabeça
+            ctx.fillStyle = '#8fbb6b';
+            ctx.beginPath();
+            ctx.arc(20, 15, 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Ferimentos
+            ctx.fillStyle = '#a00';
+            ctx.beginPath();
+            ctx.arc(15, 12, 2, 0, Math.PI * 2);
+            ctx.arc(25, 12, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            return canvas;
+        }
+
+        function createItemSprite(emoji, bgColor) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 30;
+            canvas.height = 30;
+            const ctx = canvas.getContext('2d');
+            
+            // Fundo
+            ctx.fillStyle = bgColor;
+            ctx.beginPath();
+            ctx.arc(15, 15, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Emoji
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#fff';
+            ctx.fillText(emoji, 15, 15);
+            
+            return canvas;
+        }
+
+        function createTerrainSprite(color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = color;
+            ctx.fillRect(0, 0, 64, 64);
+            
+            // Adiciona textura
+            if (color !== '#555555') {
+                ctx.strokeStyle = color === '#3a5c8f' ? '#2a4c7f' : '#2a4a2a';
+                for (let i = 0; i < 10; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(Math.random() * 64, Math.random() * 64);
+                    ctx.lineTo(Math.random() * 64, Math.random() * 64);
+                    ctx.stroke();
+                }
+            }
+            
+            return canvas;
+        }
+
+        // Classe do Jogador
+        class Player {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.width = 40;
+                this.height = 40;
+                this.speed = config.playerSpeed;
+                this.health = 100;
+                this.maxHealth = 100;
+                this.stamina = 100;
+                this.direction = { x: 0, y: 0 };
+                this.lastShot = 0;
+                this.isRunning = false;
+                this.angle = 0;
+                this.knifeAngle = 0;
+                this.isAttacking = false;
+                this.damageMultiplier = 1;
+            }
+
+            update() {
+                // Movimentação
+                const speedMultiplier = this.isRunning ? (this.stamina > 0 ? 1.8 : 1) : 1;
+                this.x += this.direction.x * this.speed * speedMultiplier;
+                this.y += this.direction.y * this.speed * speedMultiplier;
+
+                // Limites do mapa
+                this.x = Math.max(0, Math.min(config.width - this.width, this.x));
+                this.y = Math.max(0, Math.min(config.height - this.height, this.y));
+
+                // Stamina
+                if (this.isRunning) {
+                    this.stamina -= 0.3;
+                    if (this.stamina <= 0) {
+                        this.stamina = 0;
+                        this.isRunning = false;
+                    }
+                } else {
+                    this.stamina += 0.15;
+                    if (this.stamina > 100) this.stamina = 100;
+                }
+
+                // Atualiza UI
+                document.getElementById('health').textContent = Math.floor(this.health);
+                document.getElementById('healthBarFill').style.width = `${(this.health / this.maxHealth) * 100}%`;
+                document.getElementById('stamina').textContent = Math.floor(this.stamina);
+                document.getElementById('staminaBarFill').style.width = `${this.stamina}%`;
+
+                // Animação da faca
+                if (this.isAttacking) {
+                    this.knifeAngle += 0.3;
+                    if (this.knifeAngle >= Math.PI) {
+                        this.knifeAngle = 0;
+                        this.isAttacking = false;
+                    }
+                }
+
+                // Verifica colisão com itens
+                for (let i = gameState.items.length - 1; i >= 0; i--) {
+                    const item = gameState.items[i];
+                    if (
+                        this.x < item.x + item.width &&
+                        this.x + this.width > item.x &&
+                        this.y < item.y + item.height &&
+                        this.y + this.height > item.y
+                    ) {
+                        this.pickupItem(item, i);
+                    }
+                }
+
+                // Verifica colisão com ácido
+                for (let i = gameState.acidBullets.length - 1; i >= 0; i--) {
+                    const acid = gameState.acidBullets[i];
+                    if (
+                        this.x < acid.x + acid.width &&
+                        this.x + this.width > acid.x &&
+                        this.y < acid.y + acid.height &&
+                        this.y + this.height > acid.y
+                    ) {
+                        this.takeDamage(5);
+                        gameState.acidBullets.splice(i, 1);
+                    }
+                }
+            }
+
+            pickupItem(item, index) {
+                let added = false;
+                
+                if (item.type === 'coin') {
+                    gameState.coins += item.value;
+                    sounds.coinPickup.play();
+                    gameState.items.splice(index, 1);
+                    updateCoinUI();
+                    return;
+                }
+
+                // Verifica se já tem o item no inventário
+                for (let j = 0; j < gameState.inventory.length; j++) {
+                    const slot = gameState.inventory[j];
+                    
+                    if (slot.type === item.type) {
+                        if (slot.ammo !== null) {
+                            // Itens com quantidade (munição, kits médicos)
+                            if (item.type === 'pistolAmmo') {
+                                slot.ammo += 12;
+                                added = true;
+                            } else if (item.type === 'shotgunAmmo') {
+                                slot.ammo += 5;
+                                added = true;
+                            } else {
+                                slot.ammo += 1;
+                                added = true;
+                            }
+                        } else if (slot.type === 'empty') {
+                            // Slot vazio
+                            if (item.type === 'pistolAmmo') {
+                                gameState.inventory[j] = { type: 'pistolAmmo', ammo: 12 };
+                            } else if (item.type === 'shotgunAmmo') {
+                                gameState.inventory[j] = { type: 'shotgunAmmo', ammo: 5 };
+                            } else {
+                                gameState.inventory[j] = { type: item.type, ammo: 1 };
+                            }
+                            added = true;
+                        }
+                        break;
+                    } else if (slot.type === 'empty' && !added) {
+                        // Preenche slot vazio
+                        if (item.type === 'pistolAmmo') {
+                            gameState.inventory[j] = { type: 'pistolAmmo', ammo: 12 };
+                        } else if (item.type === 'shotgunAmmo') {
+                            gameState.inventory[j] = { type: 'shotgunAmmo', ammo: 5 };
+                        } else {
+                            gameState.inventory[j] = { type: item.type, ammo: 1 };
+                        }
+                        added = true;
+                        break;
+                    }
+                }
+                
+                if (added) {
+                    sounds.pickup.play();
+                    gameState.items.splice(index, 1);
+                    updateInventoryUI();
+                }
+            }
+
+            draw() {
+                // Desenha sombra
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.beginPath();
+                ctx.ellipse(
+                    this.x + this.width / 2,
+                    this.y + this.height - 5,
+                    this.width / 2,
+                    this.width / 6,
+                    0, 0, Math.PI * 2
+                );
+                ctx.fill();
+                
+                // Desenha jogador
+                ctx.save();
+                ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                ctx.rotate(this.angle);
+                ctx.drawImage(
+                    sprites.player,
+                    -this.width / 2,
+                    -this.height / 2,
+                    this.width,
+                    this.height
+                );
+                
+                // Desenha arma
+                if (gameState.inventory[gameState.selectedSlot].type === 'knife' && this.isAttacking) {
+                    ctx.save();
+                    ctx.rotate(this.knifeAngle - Math.PI / 4);
+                    ctx.fillStyle = '#aaa';
+                    ctx.fillRect(25, -3, 30, 6);
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(50, -2, 15, 4);
+                    ctx.restore();
+                } else if (gameState.inventory[gameState.selectedSlot].type === 'pistol') {
+                    ctx.fillStyle = '#777';
+                    ctx.fillRect(25, -3, 30, 6);
+                } else if (gameState.inventory[gameState.selectedSlot].type === 'shotgun') {
+                    ctx.fillStyle = '#aa5';
+                    ctx.fillRect(25, -4, 40, 8);
+                }
+                
+                ctx.restore();
+            }
+
+            takeDamage(amount) {
+                this.health -= amount;
+                sounds.playerHurt.play();
+                gameState.bloodEffect = 1;
+                document.getElementById('bloodOverlay').style.opacity = '0.7';
+                setTimeout(() => {
+                    document.getElementById('bloodOverlay').style.opacity = '0';
+                }, 300);
+                
+                if (this.health <= 0) {
+                    this.health = 0;
+                    gameState.gameOver = true;
+                    document.getElementById('gameOverScreen').style.display = 'flex';
+                    document.getElementById('survivedDays').textContent = gameState.day;
+                }
+            }
+
+            meleeAttack() {
+                if (gameState.attackCooldown > 0 || this.isAttacking) return;
+                
+                this.isAttacking = true;
+                this.knifeAngle = 0;
+                gameState.attackCooldown = 30; // 1 segundo
+                sounds.knifeSwing.play();
+                
+                // Verifica acerto nos zumbis
+                const attackRange = 70;
+                const attackAngle = this.angle;
+                const attackArc = Math.PI / 2;
+                
+                gameState.zombies.forEach(zombie => {
+                    const dx = zombie.x + zombie.width / 2 - (this.x + this.width / 2);
+                    const dy = zombie.y + zombie.height / 2 - (this.y + this.height / 2);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < attackRange) {
+                        const angleToZombie = Math.atan2(dy, dx);
+                        const angleDiff = Math.abs(normalizeAngle(angleToZombie - attackAngle));
+                        
+                        if (angleDiff < attackArc / 2) {
+                            zombie.takeDamage(25 * this.damageMultiplier);
+                        }
+                    }
+                });
+                
+                this.stamina -= 10;
+                if (this.stamina < 0) this.stamina = 0;
+            }
+
+            heal(amount) {
+                this.health = Math.min(this.health + amount, this.maxHealth);
+                sounds.heal.play();
+            }
+
+            increaseMaxHealth(amount) {
+                this.maxHealth += amount;
+                this.health += amount;
+            }
+
+            increaseDamage(multiplier) {
+                this.damageMultiplier += multiplier;
+            }
+
+            increaseSpeed(amount) {
+                this.speed += amount;
+            }
+
+            useMedkit() {
+                if (gameState.inventory[3].ammo > 0) {
+                    this.heal(this.maxHealth * 0.15);
+                    gameState.inventory[3].ammo--;
+                    updateInventoryUI();
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        // Classe de Projétil de Ácido
+        class AcidBullet {
+            constructor(x, y, angle) {
+                this.x = x;
+                this.y = y;
+                this.width = 20;
+                this.height = 20;
+                this.speed = 5;
+                this.angle = angle;
+                this.lifetime = 100;
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                this.lifetime--;
+            }
+
+            draw() {
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Tipos de zumbis
+        class Zombie {
+            constructor(x, y, type = 'normal') {
+                this.x = x;
+                this.y = y;
+                this.width = 40;
+                this.height = 40;
+                this.type = type;
+                this.health = this.getMaxHealth();
+                this.speed = this.getSpeed();
+                this.detectionRange = this.getDetectionRange();
+                this.attackCooldown = 0;
+                this.damage = this.getDamage();
+                this.color = this.getColor();
+                this.randomAngle = Math.random() * Math.PI * 2;
+                this.lastSoundTime = 0;
+                this.coinValue = this.getCoinValue();
+                this.lastAcidShot = 0;
+            }
+            
+            getMaxHealth() {
+                switch (this.type) {
+                    case 'runner': return 80;
+                    case 'brute': return 150;
+                    case 'crawler': return 60;
+                    case 'toxic': return 90;
+                    case 'tank': return 250;
+                    case 'fast': return 80;
+                    case 'spitter': return 100;
+                    default: return 100;
+                }
+            }
+            
+            getSpeed() {
+                const nightBonus = gameState.isNight ? 1.2 : 1;
+                switch (this.type) {
+                    case 'runner': return 2.5 * nightBonus;
+                    case 'brute': return 1.2 * nightBonus;
+                    case 'crawler': return 1.5 * nightBonus;
+                    case 'toxic': return 1.8 * nightBonus;
+                    case 'tank': return 1.0 * nightBonus;
+                    case 'fast': return 3.0 * nightBonus;
+                    case 'spitter': return 1.8 * nightBonus;
+                    default: return 1.8 * nightBonus;
+                }
+            }
+            
+            getDetectionRange() {
+                switch (this.type) {
+                    case 'runner': return 250;
+                    case 'brute': return 350;
+                    case 'crawler': return 200;
+                    case 'toxic': return 300;
+                    case 'tank': return 400;
+                    case 'fast': return 300;
+                    case 'spitter': return 350;
+                    default: return 300;
+                }
+            }
+            
+            getDamage() {
+                switch (this.type) {
+                    case 'runner': return 8;
+                    case 'brute': return 15;
+                    case 'crawler': return 5;
+                    case 'toxic': return 12;
+                    case 'tank': return 20;
+                    case 'fast': return 6;
+                    case 'spitter': return 5;
+                    default: return 10;
+                }
+            }
+            
+            getColor() {
+                switch (this.type) {
+                    case 'runner': return '#c78f6b';
+                    case 'brute': return '#6b8fbb';
+                    case 'crawler': return '#6b8f6b';
+                    case 'toxic': return '#8fbb8f';
+                    case 'tank': return '#ff8800';
+                    case 'fast': return '#aa55ff';
+                    case 'spitter': return '#55aaff';
+                    default: return '#8fbb6b';
+                }
+            }
+
+            getCoinValue() {
+                switch (this.type) {
+                    case 'runner': return 3;
+                    case 'brute': return 5;
+                    case 'crawler': return 2;
+                    case 'toxic': return 4;
+                    case 'tank': return 15;
+                    case 'fast': return 10;
+                    case 'spitter': return 13;
+                    default: return 2;
+                }
+            }
+
+            update() {
+                const player = gameState.player;
+                const dx = player.x - this.x;
+                const dy = player.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                // IA: Perseguição ou movimento aleatório
+                if (distance < this.detectionRange) {
+                    // Persegue o jogador
+                    const angle = Math.atan2(dy, dx);
+                    this.x += Math.cos(angle) * this.speed;
+                    this.y += Math.sin(angle) * this.speed;
+                    
+                    // Emite sons ocasionais
+                    if (Date.now() - this.lastSoundTime > 5000 && Math.random() < 0.1) {
+                        const sound = sounds.zombieGroan[Math.floor(Math.random() * sounds.zombieGroan.length)];
+                        sound.play();
+                        this.lastSoundTime = Date.now();
+                    }
+                    
+                    // Ataque se estiver perto
+                    if (distance < 40 && this.attackCooldown <= 0) {
+                        player.takeDamage(this.damage);
+                        this.attackCooldown = 60;
+                    }
+                    
+                    // Zumbis cuspidores atiram ácido
+                    if (this.type === 'spitter' && Date.now() - this.lastAcidShot > 4000 && distance < 300) {
+                        this.lastAcidShot = Date.now();
+                        gameState.acidBullets.push(new AcidBullet(
+                            this.x + this.width / 2,
+                            this.y + this.height / 2,
+                            angle
+                        ));
+                    }
+                } else {
+                    // Movimento aleatório
+                    if (Math.random() < 0.02) {
+                        this.randomAngle = Math.random() * Math.PI * 2;
+                    }
+                    this.x += Math.cos(this.randomAngle) * this.speed * 0.5;
+                    this.y += Math.sin(this.randomAngle) * this.speed * 0.5;
+                }
+
+                // Cooldown do ataque
+                if (this.attackCooldown > 0) this.attackCooldown--;
+
+                // Limites do mapa
+                this.x = Math.max(0, Math.min(config.width - this.width, this.x));
+                this.y = Math.max(0, Math.min(config.height - this.height, this.y));
+            }
+
+            draw() {
+                // Desenha sombra
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.beginPath();
+                ctx.ellipse(
+                    this.x + this.width / 2,
+                    this.y + this.height - 5,
+                    this.width / 2,
+                    this.width / 6,
+                    0, 0, Math.PI * 2
+                );
+                ctx.fill();
+                
+                // Desenha zumbi
+                let sprite;
+                switch (this.type) {
+                    case 'runner': sprite = sprites.zombies.runner; break;
+                    case 'brute': sprite = sprites.zombies.brute; break;
+                    case 'crawler': sprite = sprites.zombies.crawler; break;
+                    case 'toxic': sprite = sprites.zombies.toxic; break;
+                    case 'tank': sprite = sprites.zombies.tank; break;
+                    case 'fast': sprite = sprites.zombies.fast; break;
+                    case 'spitter': sprite = sprites.zombies.spitter; break;
+                    default: sprite = sprites.zombies.normal;
+                }
+                
+                ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
+                
+                // Barra de vida
+                if (this.health < this.getMaxHealth()) {
+                    ctx.fillStyle = '#300';
+                    ctx.fillRect(this.x, this.y - 12, this.width, 5);
+                    ctx.fillStyle = '#f00';
+                    ctx.fillRect(this.x, this.y - 12, this.width * (this.health / this.getMaxHealth()), 5);
+                }
+            }
+
+            takeDamage(amount) {
+                this.health -= amount;
+                if (this.health <= 0) {
+                    // Drop de moedas
+                    gameState.items.push({
+                        type: 'coin',
+                        x: this.x,
+                        y: this.y,
+                        width: 20,
+                        height: 20,
+                        value: this.coinValue
+                    });
+                    
+                    // Chance de dropar item
+                    if (Math.random() < 0.2) {
+                        this.dropItem();
+                    }
+                    
+                    gameState.coins += this.coinValue;
+                    updateCoinUI();
+                    
+                    const index = gameState.zombies.indexOf(this);
+                    if (index !== -1) gameState.zombies.splice(index, 1);
+                    gameState.zombiesSpawned--;
+                }
+            }
+            
+            dropItem() {
+                const items = [
+                    { type: 'pistolAmmo', chance: 0.4 },
+                    { type: 'shotgunAmmo', chance: 0.1 },
+                    { type: 'medkit', chance: 0.2 },
+                    { type: 'grenade', chance: 0.05 }
+                ];
+                
+                let selectedItem = null;
+                let roll = Math.random();
+                
+                for (const item of items) {
+                    if (roll < item.chance) {
+                        selectedItem = item.type;
+                        break;
+                    }
+                    roll -= item.chance;
+                }
+                
+                if (selectedItem) {
+                    gameState.items.push({
+                        type: selectedItem,
+                        x: this.x,
+                        y: this.y,
+                        width: 20,
+                        height: 20
+                    });
+                }
+            }
+        }
+
+        // Classe de Projétil
+        class Bullet {
+            constructor(x, y, angle, type = 'pistol') {
+                this.x = x;
+                this.y = y;
+                this.speed = type === 'pistol' ? 15 : 12;
+                this.angle = angle;
+                this.damage = type === 'pistol' ? 35 : 50;
+                this.lifetime = type === 'pistol' ? 70 : 50;
+                this.type = type;
+                this.spread = type === 'pistol' ? 0 : Math.PI / 16;
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                this.lifetime--;
+
+                // Verifica colisão com zumbis
+                gameState.zombies.forEach(zombie => {
+                    if (
+                        this.x > zombie.x && this.x < zombie.x + zombie.width &&
+                        this.y > zombie.y && this.y < zombie.y + zombie.height
+                    ) {
+                        zombie.takeDamage(this.damage * gameState.player.damageMultiplier);
+                        this.lifetime = 0;
+                        
+                        // Efeito de sangue
+                        for (let i = 0; i < 5; i++) {
+                            createParticle(
+                                this.x,
+                                this.y,
+                                Math.random() * 4 - 2,
+                                Math.random() * 4 - 2,
+                                '#f00',
+                                20
+                            );
+                        }
+                    }
+                });
+
+                // Verifica colisão com obstáculos
+                for (const obstacle of gameState.obstacles) {
+                    if (
+                        this.x > obstacle.x && this.x < obstacle.x + obstacle.width &&
+                        this.y > obstacle.y && this.y < obstacle.y + obstacle.height
+                    ) {
+                        this.lifetime = 0;
+                        break;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.type === 'pistol' ? '#ffcc55' : '#ffaa00';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.type === 'pistol' ? 3 : 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Rastro
+                ctx.strokeStyle = this.type === 'pistol' ? 'rgba(255, 200, 0, 0.5)' : 'rgba(255, 170, 0, 0.5)';
+                ctx.lineWidth = this.type === 'pistol' ? 1 : 2;
+                ctx.beginPath();
+                ctx.moveTo(
+                    this.x - Math.cos(this.angle) * 10,
+                    this.y - Math.sin(this.angle) * 10
+                );
+                ctx.lineTo(this.x, this.y);
+                ctx.stroke();
+            }
+        }
+
+        // Sistema de partículas
+        const particles = [];
+        
+        function createParticle(x, y, vx, vy, color, lifetime) {
+            particles.push({
+                x, y, vx, vy, color, lifetime, maxLifetime: lifetime
+            });
+        }
+        
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.lifetime--;
+                
+                if (p.lifetime <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+        
+        function drawParticles() {
+            particles.forEach(p => {
+                const alpha = p.lifetime / p.maxLifetime;
+                ctx.fillStyle = `${p.color}${Math.floor(alpha * 255).toString(16).padStart(2, '0')}`;
+                ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+            });
+        }
+
+        // Geração procedural de mapa
+        function generateMap() {
+            const tileSize = Math.max(config.width, config.height) / config.mapTiles;
+            const map = [];
+            
+            // Gera um mapa baseado em ruído
+            for (let y = 0; y < config.mapTiles; y++) {
+                map[y] = [];
+                for (let x = 0; x < config.mapTiles; x++) {
+                    // Usa um ruído simples para determinar o tipo de terreno
+                    const noise = Math.random();
+                    
+                    if (noise < 0.1) {
+                        map[y][x] = 'water';
+                    } else if (noise < 0.3) {
+                        map[y][x] = 'road';
+                    } else if (noise < 0.35) {
+                        map[y][x] = 'building';
+                    } else {
+                        map[y][x] = 'grass';
+                    }
+                }
+            }
+            
+            return map;
+        }
+        
+        function drawMap() {
+            const tileSize = Math.max(config.width, config.height) / config.mapTiles;
+            
+            for (let y = 0; y < gameState.map.length; y++) {
+                for (let x = 0; x < gameState.map[y].length; x++) {
+                    const tileType = gameState.map[y][x];
+                    let sprite;
+                    
+                    switch (tileType) {
+                        case 'water': sprite = sprites.terrain.water; break;
+                        case 'road': sprite = sprites.terrain.road; break;
+                        case 'building': sprite = sprites.terrain.building; break;
+                        default: sprite = sprites.terrain.grass;
+                    }
+                    
+                    ctx.drawImage(
+                        sprite,
+                        x * tileSize,
+                        y * tileSize,
+                        tileSize,
+                        tileSize
+                    );
+                }
+            }
+        }
+
+        // Inicialização do jogo
+        function initGame() {
+            gameState.player = new Player(config.width / 2, config.height / 2);
+            gameState.zombies = [];
+            gameState.bullets = [];
+            gameState.acidBullets = [];
+            gameState.items = [];
+            gameState.day = 1;
+            gameState.gameTime = 0;
+            gameState.gameOver = false;
+            gameState.attackCooldown = 0;
+            gameState.map = generateMap();
+            gameState.coins = 0;
+            gameState.playerDamageMultiplier = 1;
+            gameState.zombiesToSpawn = config.baseZombiesPerNight;
+            gameState.zombiesSpawned = 0;
+            gameState.shopOpen = false;
+            gameState.itemSpawnTimer = 0;
+            
+            // Inicia com faca e sem outras armas
+            gameState.inventory = [
+                { type: 'knife', ammo: null },
+                { type: 'pistol', ammo: 0 },
+                { type: 'shotgun', ammo: 0 },
+                { type: 'medkit', ammo: 0 },
+                { type: 'grenade', ammo: 0 }
+            ];
+            gameState.selectedSlot = 0;
+            updateInventoryUI();
+            updateCoinUI();
+            
+            // Geração de obstáculos
+            gameState.obstacles = [];
+            for (let i = 0; i < 15; i++) {
+                gameState.obstacles.push({
+                    x: Math.random() * (config.width - 100),
+                    y: Math.random() * (config.height - 100),
+                    width: 60 + Math.random() * 80,
+                    height: 60 + Math.random() * 80,
+                    type: ['building', 'car', 'tree'][Math.floor(Math.random() * 3)]
+                });
+            }
+            
+            // Inicia o loop do jogo
+            gameLoop();
+            dayNightCycle();
+            itemSpawnLoop();
+        }
+
+        // Loop principal do jogo
+        function gameLoop() {
+            if (gameState.gameOver) return;
+            
+            ctx.clearRect(0, 0, config.width, config.height);
+            
+            // Desenha mapa
+            drawMap();
+            
+            // Desenha obstáculos
+            ctx.fillStyle = 'rgba(50, 50, 50, 0.7)';
+            gameState.obstacles.forEach(obstacle => {
+                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                
+                // Detalhes dos obstáculos
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            });
+            
+            // Desenha itens no chão
+            gameState.items.forEach(item => {
+                let sprite;
+                switch (item.type) {
+                    case 'pistol': sprite = sprites.items.pistol; break;
+                    case 'shotgun': sprite = sprites.items.shotgun; break;
+                    case 'pistolAmmo': sprite = sprites.items.pistolAmmo; break;
+                    case 'shotgunAmmo': sprite = sprites.items.shotgunAmmo; break;
+                    case 'medkit': sprite = sprites.items.medkit; break;
+                    case 'grenade': sprite = sprites.items.grenade; break;
+                    case 'coin': sprite = sprites.items.coin; break;
+                }
+                
+                // Efeito de flutuação
+                const floatY = Math.sin(Date.now() / 500) * 3;
+                
+                ctx.drawImage(
+                    sprite,
+                    item.x,
+                    item.y + floatY,
+                    item.width,
+                    item.height
+                );
+            });
+            
+            // Atualiza e desenha partículas
+            updateParticles();
+            drawParticles();
+            
+            // Atualiza e desenha projéteis de ácido
+            gameState.acidBullets.forEach((acid, index) => {
+                acid.update();
+                acid.draw();
+                
+                if (acid.lifetime <= 0) {
+                    gameState.acidBullets.splice(index, 1);
+                }
+            });
+            
+            // Atualiza e desenha jogador
+            gameState.player.update();
+            gameState.player.draw();
+            
+            // Atualiza e desenha zumbis
+            gameState.zombies.forEach(zombie => {
+                zombie.update();
+                zombie.draw();
+            });
+            
+            // Spawn de zumbis durante a noite
+            if (gameState.isNight && gameState.zombiesSpawned < gameState.zombiesToSpawn) {
+                spawnZombie();
+            }
+            
+            // Remove todos os zumbis quando o dia começa
+            if (!gameState.isNight && gameState.zombies.length > 0) {
+                gameState.zombies = [];
+                gameState.zombiesSpawned = 0;
+            }
+            
+            // Atualiza e desenha projéteis
+            gameState.bullets.forEach((bullet, index) => {
+                bullet.update();
+                bullet.draw();
+                
+                // Remove projéteis fora do mapa ou sem vida útil
+                if (
+                    bullet.lifetime <= 0 ||
+                    bullet.x < 0 || bullet.x > config.width ||
+                    bullet.y < 0 || bullet.y > config.height
+                ) {
+                    gameState.bullets.splice(index, 1);
+                }
+            });
+            
+            // Atualiza cooldown do ataque
+            if (gameState.attackCooldown > 0) {
+                gameState.attackCooldown--;
+            }
+            
+            // Atualiza UI
+            document.getElementById('zombieCount').textContent = gameState.zombies.length;
+            document.getElementById('day').textContent = gameState.day;
+            document.getElementById('dayTime').textContent = gameState.isNight ? '🌙 NOITE' : '☀️ DIA';
+            document.getElementById('dayTime').style.color = gameState.isNight ? '#ff5555' : '#ffcc55';
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Spawn de zumbis
+        function spawnZombie() {
+            const side = Math.floor(Math.random() * 4);
+            let x, y;
+            
+            switch (side) {
+                case 0: x = -50; y = Math.random() * config.height; break; // Esquerda
+                case 1: x = config.width + 50; y = Math.random() * config.height; break; // Direita
+                case 2: x = Math.random() * config.width; y = -50; break; // Topo
+                case 3: x = Math.random() * config.width; y = config.height + 50; break; // Base
+            }
+            
+            // Escolhe tipo de zumbi baseado no dia
+            let zombieTypes = ['normal', 'normal', 'normal', 'runner', 'brute', 'crawler', 'toxic'];
+            let weights = [0.5, 0.5, 0.5, 0.3, 0.2, 0.3, 0.2];
+            
+            // Adiciona tipos especiais conforme os dias avançam
+            if (gameState.day >= 3) {
+                zombieTypes.push('tank');
+                weights.push(0.1);
+            }
+            if (gameState.day >= 5) {
+                zombieTypes.push('fast');
+                weights.push(0.15);
+            }
+            if (gameState.day >= 7) {
+                zombieTypes.push('spitter');
+                weights.push(0.15);
+            }
+            
+            // Normaliza os pesos
+            const sum = weights.reduce((a, b) => a + b, 0);
+            weights = weights.map(w => w / sum);
+            
+            let selectedType = 'normal';
+            let roll = Math.random();
+            
+            for (let i = 0; i < zombieTypes.length; i++) {
+                if (roll < weights[i]) {
+                    selectedType = zombieTypes[i];
+                    break;
+                }
+                roll -= weights[i];
+            }
+            
+            gameState.zombies.push(new Zombie(x, y, selectedType));
+            gameState.zombiesSpawned++;
+        }
+
+        // Ciclo dia/noite
+        function dayNightCycle() {
+            if (gameState.gameOver) return;
+            
+            gameState.gameTime += 100;
+            
+            if (gameState.isNight) {
+                if (gameState.gameTime >= config.nightDuration) {
+                    // Fim da noite
+                    gameState.isNight = false;
+                    gameState.gameTime = 0;
+                    gameState.day++;
+                    gameState.zombiesToSpawn = config.baseZombiesPerNight + (gameState.day - 1) * config.zombieIncreasePerDay;
+                    gameState.zombiesSpawned = 0;
+                    document.getElementById('nightOverlay').style.display = 'none';
+                    sounds.dayStart.play();
+                    
+                    // Abre a loja automaticamente
+                    openShop();
+                }
+            } else {
+                if (gameState.gameTime >= config.dayDuration) {
+                    // Fim do dia
+                    gameState.isNight = true;
+                    gameState.gameTime = 0;
+                    document.getElementById('nightOverlay').style.display = 'block';
+                    sounds.nightStart.play();
+                    
+                    // Fecha a loja se estiver aberta
+                    if (gameState.shopOpen) {
+                        closeShop();
+                    }
+                }
+            }
+            
+            setTimeout(dayNightCycle, 100);
+        }
+
+        // Spawn de itens
+        function itemSpawnLoop() {
+            if (gameState.gameOver) return;
+            
+            gameState.itemSpawnTimer += 100;
+            
+            if (gameState.itemSpawnTimer >= config.itemSpawnInterval) {
+                gameState.itemSpawnTimer = 0;
+                
+                if (Math.random() < config.itemSpawnChance) {
+                    const items = ['pistolAmmo', 'medkit'];
+                    const selectedItem = items[Math.floor(Math.random() * items.length)];
+                    
+                    gameState.items.push({
+                        type: selectedItem,
+                        x: Math.random() * (config.width - 50),
+                        y: Math.random() * (config.height - 50),
+                        width: 20,
+                        height: 20
+                    });
+                }
+            }
+            
+            setTimeout(itemSpawnLoop, 100);
+        }
+
+        // Loja de melhorias
+        function openShop() {
+            gameState.shopOpen = true;
+            document.getElementById('shop').style.display = 'block';
+        }
+        
+        function closeShop() {
+            gameState.shopOpen = false;
+            document.getElementById('shop').style.display = 'none';
+        }
+        
+        function buyAmmo() {
+            if (gameState.coins >= 12) {
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i].type === 'pistol') {
+                        gameState.inventory[i].ammo += 12;
+                        gameState.coins -= 12;
+                        updateInventoryUI();
+                        updateCoinUI();
+                        sounds.pickup.play();
+                        break;
+                    }
+                }
+            }
+        }
+        
+        function buyShotgunAmmo() {
+            if (gameState.coins >= 25) {
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i].type === 'shotgun') {
+                        gameState.inventory[i].ammo += 5;
+                        gameState.coins -= 25;
+                        updateInventoryUI();
+                        updateCoinUI();
+                        sounds.pickup.play();
+                        break;
+                    }
+                }
+            }
+        }
+        
+        function buyHealth() {
+            if (gameState.coins >= 20) {
+                gameState.player.increaseMaxHealth(25);
+                gameState.coins -= 20;
+                updateCoinUI();
+                sounds.pickup.play();
+            }
+        }
+        
+        function buyDamage() {
+            if (gameState.coins >= 15) {
+                gameState.player.increaseDamage(0.1);
+                gameState.coins -= 15;
+                updateCoinUI();
+                sounds.pickup.play();
+            }
+        }
+        
+        function buySpeed() {
+            if (gameState.coins >= 18) {
+                gameState.player.increaseSpeed(0.35);
+                gameState.coins -= 18;
+                updateCoinUI();
+                sounds.pickup.play();
+            }
+        }
+        
+        function buyMedkit() {
+            if (gameState.coins >= 8) {
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i].type === 'medkit') {
+                        gameState.inventory[i].ammo += 1;
+                        gameState.coins -= 8;
+                        updateInventoryUI();
+                        updateCoinUI();
+                        sounds.pickup.play();
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Atualiza UI do inventário
+        function updateInventoryUI() {
+            document.querySelectorAll('.inventory-slot').forEach((slot, index) => {
+                slot.innerHTML = getWeaponIcon(gameState.inventory[index].type);
+                
+                if (gameState.inventory[index].ammo !== null) {
+                    slot.innerHTML += `<div class="slot-ammo">${gameState.inventory[index].ammo}</div>`;
+                } else {
+                    slot.innerHTML += '<div class="slot-ammo">-</div>';
+                }
+                
+                if (index === gameState.selectedSlot) {
+                    slot.classList.add('active');
+                } else {
+                    slot.classList.remove('active');
+                }
+            });
+        }
+        
+        function updateCoinUI() {
+            document.getElementById('coinCount').textContent = gameState.coins;
+        }
+        
+        function getWeaponIcon(type) {
+            switch (type) {
+                case 'knife': return '🔪';
+                case 'pistol': return '🔫';
+                case 'shotgun': return '🔫';
+                case 'medkit': return '🩹';
+                case 'grenade': return '🧨';
+                case 'pistolAmmo': return '➖';
+                case 'shotgunAmmo': return '➖';
+                default: return '❓';
+            }
+        }
+
+        // Controles
+        window.addEventListener('keydown', (e) => {
+            const player = gameState.player;
+            
+            switch (e.key) {
+                case 'w': player.direction.y = -1; break;
+                case 's': player.direction.y = 1; break;
+                case 'a': player.direction.x = -1; break;
+                case 'd': player.direction.x = 1; break;
+                case 'Shift': player.isRunning = true; break;
+                case '1': gameState.selectedSlot = 0; updateInventoryUI(); break;
+                case '2': gameState.selectedSlot = 1; updateInventoryUI(); break;
+                case '3': gameState.selectedSlot = 2; updateInventoryUI(); break;
+                case '4': gameState.selectedSlot = 3; updateInventoryUI(); break;
+                case '5': gameState.selectedSlot = 4; updateInventoryUI(); break;
+                case 'r': reloadWeapon(); break;
+                case 'e': 
+                    if (!gameState.isNight && !gameState.shopOpen) {
+                        openShop();
+                    } else if (gameState.shopOpen) {
+                        closeShop();
+                    }
+                    break;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const player = gameState.player;
+            
+            switch (e.key) {
+                case 'w': if (player.direction.y === -1) player.direction.y = 0; break;
+                case 's': if (player.direction.y === 1) player.direction.y = 0; break;
+                case 'a': if (player.direction.x === -1) player.direction.x = 0; break;
+                case 'd': if (player.direction.x === 1) player.direction.x = 0; break;
+                case 'Shift': player.isRunning = false; break;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            gameState.player.angle = Math.atan2(
+                mouseY - (gameState.player.y + gameState.player.height / 2),
+                mouseX - (gameState.player.x + gameState.player.width / 2)
+            );
+        });
+
+        canvas.addEventListener('click', (e) => {
+            if (gameState.shopOpen) return;
+            
+            const weapon = gameState.inventory[gameState.selectedSlot];
+            
+            if (weapon.type === 'knife') {
+                gameState.player.meleeAttack();
+            } else if (weapon.type === 'pistol' && weapon.ammo > 0 && gameState.attackCooldown <= 0) {
+                const player = gameState.player;
+                gameState.bullets.push(new Bullet(
+                    player.x + player.width / 2,
+                    player.y + player.height / 2,
+                    player.angle,
+                    'pistol'
+                ));
+                sounds.gunshot.play();
+                weapon.ammo--;
+                gameState.attackCooldown = 10; // Pequeno cooldown entre tiros
+                updateInventoryUI();
+            } else if (weapon.type === 'shotgun' && weapon.ammo > 0 && gameState.attackCooldown <= 0) {
+                const player = gameState.player;
+                for (let i = 0; i < 5; i++) {
+                    const spread = (Math.random() - 0.5) * Math.PI / 8;
+                    gameState.bullets.push(new Bullet(
+                        player.x + player.width / 2,
+                        player.y + player.height / 2,
+                        player.angle + spread,
+                        'shotgun'
+                    ));
+                }
+                sounds.shotgun.play();
+                weapon.ammo--;
+                gameState.attackCooldown = 30; // Maior cooldown para shotgun
+                updateInventoryUI();
+            } else if (weapon.type === 'medkit') {
+                gameState.player.useMedkit();
+            }
+        });
+        
+        function reloadWeapon() {
+            const weapon = gameState.inventory[gameState.selectedSlot];
+            
+            if (weapon.type === 'pistol') {
+                // Verifica se tem munição no inventário
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i].type === 'pistolAmmo' && gameState.inventory[i].ammo > 0) {
+                        const ammoNeeded = 12 - weapon.ammo;
+                        const ammoTaken = Math.min(ammoNeeded, gameState.inventory[i].ammo);
+                        
+                        weapon.ammo += ammoTaken;
+                        gameState.inventory[i].ammo -= ammoTaken;
+                        
+                        if (gameState.inventory[i].ammo <= 0) {
+                            gameState.inventory[i] = { type: 'empty', ammo: null };
+                        }
+                        
+                        sounds.reload.play();
+                        updateInventoryUI();
+                        break;
+                    }
+                }
+            } else if (weapon.type === 'shotgun') {
+                // Verifica se tem munição no inventário
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i].type === 'shotgunAmmo' && gameState.inventory[i].ammo > 0) {
+                        const ammoNeeded = 5 - weapon.ammo;
+                        const ammoTaken = Math.min(ammoNeeded, gameState.inventory[i].ammo);
+                        
+                        weapon.ammo += ammoTaken;
+                        gameState.inventory[i].ammo -= ammoTaken;
+                        
+                        if (gameState.inventory[i].ammo <= 0) {
+                            gameState.inventory[i] = { type: 'empty', ammo: null };
+                        }
+                        
+                        sounds.reload.play();
+                        updateInventoryUI();
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Função auxiliar para normalizar ângulos
+        function normalizeAngle(angle) {
+            while (angle > Math.PI) angle -= Math.PI * 2;
+            while (angle < -Math.PI) angle += Math.PI * 2;
+            return angle;
+        }
+
+        // Botões de início/reinício
+        document.getElementById('startButton').addEventListener('click', () => {
+            document.getElementById('startScreen').style.display = 'none';
+            initGame();
+        });
+
+        document.getElementById('restartButton').addEventListener('click', () => {
+            document.getElementById('gameOverScreen').style.display = 'none';
+            initGame();
+        });
+
+        // Botões da loja
+        document.getElementById('buyAmmo').addEventListener('click', buyAmmo);
+        document.getElementById('buyShotgunAmmo').addEventListener('click', buyShotgunAmmo);
+        document.getElementById('buyHealth').addEventListener('click', buyHealth);
+        document.getElementById('buyDamage').addEventListener('click', buyDamage);
+        document.getElementById('buySpeed').addEventListener('click', buySpeed);
+        document.getElementById('buyMedkit').addEventListener('click', buyMedkit);
+        document.getElementById('closeShop').addEventListener('click', closeShop);
+
+        // Efeito de sangue
+        document.getElementById('bloodOverlay').style.background = 
+            'radial-gradient(circle, rgba(255,0,0,0.7) 0%, rgba(255,0,0,0) 70%)';
+    </script>
+</body>
+</html>
