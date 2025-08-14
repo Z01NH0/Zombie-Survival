@@ -301,6 +301,20 @@
             z-index: 110;
             pointer-events: none;
         }
+        
+        #bossMessage {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            font-size: 14px;
+            color: #ff5555;
+            text-shadow: 2px 2px 0 #000;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 2px solid #ff5555;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -320,6 +334,7 @@
     
     <div id="dayTime">☀️ DIA</div>
     <div id="timeLeft">TEMPO: 15s</div>
+    <div id="bossMessage">MATE-O PARA PROSSEGUIR</div>
     <div id="coins">MOEDAS: <span id="coinCount">0</span></div>
     
     <div id="inventory">
@@ -432,7 +447,8 @@
             zombiesSpawned: 0,
             shopOpen: false,
             itemSpawnTimer: 0,
-            bossSpawned: false
+            bossSpawned: false,
+            bossAlive: false
         };
 
         // Sprites
@@ -1164,25 +1180,6 @@
                     
                     // Habilidade especial do boss
                     if (this.type === 'boss') {
-                        // Ataque de explosão ao redor
-                        if (this.specialAbilityCooldown <= 0 && distance < 400) {
-                            this.specialAbilityCooldown = 120;
-                            
-                            // Cria uma explosão ao redor do boss
-                            gameState.explosions.push({
-                                x: this.x + this.width/2,
-                                y: this.y + this.height/2,
-                                radius: 0,
-                                maxRadius: 150,
-                                timer: 30
-                            });
-                            
-                            // Dano aos arredores
-                            if (distance < 150) {
-                                player.takeDamage(15);
-                            }
-                        }
-                        
                         // Ataque de projéteis
                         if (Date.now() - this.lastBossAttack > 3000 && distance < 500) {
                             this.lastBossAttack = Date.now();
@@ -1288,6 +1285,9 @@
                     
                     if (this.type === 'boss') {
                         gameState.bossSpawned = false;
+                        gameState.bossAlive = false;
+                        // Quando o boss morre, termina a noite imediatamente
+                        endNight();
                     }
                     
                     const index = gameState.zombies.indexOf(this);
@@ -1334,7 +1334,7 @@
                 this.y = y;
                 this.speed = type === 'pistol' ? 15 : 12;
                 this.angle = angle;
-                this.damage = type === 'pistol' ? 35 : 50;
+                this.damage = type === 'pistol' ? 35 * gameState.player.damageMultiplier : 28 * gameState.player.damageMultiplier; // Shotgun faz 20% menos dano por projétil
                 this.lifetime = type === 'pistol' ? 70 : 50;
                 this.type = type;
                 this.spread = type === 'pistol' ? 0 : Math.PI / 16;
@@ -1351,7 +1351,7 @@
                         this.x > zombie.x && this.x < zombie.x + zombie.width &&
                         this.y > zombie.y && this.y < zombie.y + zombie.height
                     ) {
-                        zombie.takeDamage(this.damage * gameState.player.damageMultiplier);
+                        zombie.takeDamage(this.damage);
                         this.lifetime = 0;
                     }
                 });
@@ -1492,6 +1492,7 @@
             gameState.shopOpen = false;
             gameState.itemSpawnTimer = 0;
             gameState.bossSpawned = false;
+            gameState.bossAlive = false;
             
             // Inicia com faca e sem outras armas
             gameState.inventory = [
@@ -1629,18 +1630,18 @@
                             x: grenade.x,
                             y: grenade.y,
                             radius: 0,
-                            maxRadius: 150, // Explosão maior
+                            maxRadius: 120, // Raio um pouco menor
                             timer: 30
                         });
                         
-                        // Dano aos zumbis
+                        // Dano aos zumbis - dano total em todo o raio
                         gameState.zombies.forEach(zombie => {
                             const dx = zombie.x + zombie.width/2 - grenade.x;
                             const dy = zombie.y + zombie.height/2 - grenade.y;
                             const distance = Math.sqrt(dx * dx + dy * dy);
                             
-                            if (distance < 150) {
-                                zombie.takeDamage(150); // Dano maior
+                            if (distance < 120) {
+                                zombie.takeDamage(150); // Dano total em todo o raio
                             }
                         });
                         
@@ -1697,7 +1698,7 @@
             });
             
             // Spawn de zumbis durante a noite
-            if (gameState.isNight && gameState.zombiesSpawned < gameState.zombiesToSpawn) {
+            if (gameState.isNight && gameState.zombiesSpawned < gameState.zombiesToSpawn && !gameState.bossAlive) {
                 spawnZombie();
             }
             
@@ -1705,6 +1706,7 @@
             if (gameState.isNight && gameState.day % 5 === 0 && !gameState.bossSpawned && gameState.zombiesSpawned >= Math.floor(gameState.zombiesToSpawn * 0.7)) {
                 spawnBoss();
                 gameState.bossSpawned = true;
+                gameState.bossAlive = true;
             }
             
             // Remove todos os zumbis quando o dia começa
@@ -1712,6 +1714,7 @@
                 gameState.zombies = [];
                 gameState.zombiesSpawned = 0;
                 gameState.bossSpawned = false;
+                gameState.bossAlive = false;
             }
             
             // Atualiza e desenha projéteis
@@ -1740,11 +1743,18 @@
             document.getElementById('dayTime').textContent = gameState.isNight ? '🌙 NOITE' : '☀️ DIA';
             document.getElementById('dayTime').style.color = gameState.isNight ? '#ff5555' : '#ffcc55';
             
-            // Atualiza contador de tempo
-            const timeLeft = gameState.isNight 
-                ? Math.ceil((config.nightDuration - gameState.gameTime) / 1000)
-                : Math.ceil((config.dayDuration - gameState.gameTime) / 1000);
-            document.getElementById('timeLeft').textContent = `TEMPO: ${timeLeft}s`;
+            // Atualiza contador de tempo ou mensagem do boss
+            if (gameState.bossAlive) {
+                document.getElementById('timeLeft').style.display = 'none';
+                document.getElementById('bossMessage').style.display = 'block';
+            } else {
+                document.getElementById('timeLeft').style.display = 'block';
+                document.getElementById('bossMessage').style.display = 'none';
+                const timeLeft = gameState.isNight 
+                    ? Math.ceil((config.nightDuration - gameState.gameTime) / 1000)
+                    : Math.ceil((config.dayDuration - gameState.gameTime) / 1000);
+                document.getElementById('timeLeft').textContent = `TEMPO: ${timeLeft}s`;
+            }
             
             requestAnimationFrame(gameLoop);
         }
@@ -1814,15 +1824,31 @@
             gameState.zombiesSpawned++;
         }
 
+        // Termina a noite imediatamente
+        function endNight() {
+            gameState.isNight = false;
+            gameState.gameTime = 0;
+            gameState.day++;
+            gameState.zombiesToSpawn = config.baseZombiesPerNight + (gameState.day - 1) * config.zombieIncreasePerDay;
+            gameState.zombiesSpawned = 0;
+            document.getElementById('nightOverlay').style.display = 'none';
+            
+            // Abre a loja automaticamente
+            openShop();
+        }
+
         // Ciclo dia/noite
         function dayNightCycle() {
             if (gameState.gameOver) return;
             
-            gameState.gameTime += 100;
+            // Se for noite e tiver boss vivo, não conta o tempo
+            if (!(gameState.isNight && gameState.bossAlive)) {
+                gameState.gameTime += 100;
+            }
             
             if (gameState.isNight) {
-                if (gameState.gameTime >= config.nightDuration) {
-                    // Fim da noite
+                if (gameState.gameTime >= config.nightDuration && !gameState.bossAlive) {
+                    // Fim da noite (só se não tiver boss vivo)
                     gameState.isNight = false;
                     gameState.gameTime = 0;
                     gameState.day++;
@@ -2076,8 +2102,9 @@
                 updateInventoryUI();
             } else if (weapon.type === 'shotgun' && weapon.ammo > 0 && gameState.attackCooldown <= 0) {
                 const player = gameState.player;
-                for (let i = 0; i < 3; i++) {
-                    const spread = (Math.random() - 0.5) * Math.PI / 8;
+                // Atira 5 projéteis em leque
+                for (let i = 0; i < 5; i++) {
+                    const spread = (i - 2) * Math.PI / 16; // Leque mais amplo
                     gameState.bullets.push(new Bullet(
                         player.x + player.width / 2,
                         player.y + player.height / 2,
