@@ -1970,7 +1970,7 @@
                 updateInventoryUI();
             } else if (weapon.type === 'shotgun' && weapon.ammo > 0 && gameState.attackCooldown <= 0) {
                 const player = gameState.player;
-                for (let i = 3; i < 3; i++) {
+                for (let i = 0; i < 5; i++) {
                     const spread = (Math.random() - 0.5) * Math.PI / 8;
                     gameState.bullets.push(new Bullet(
                         player.x + player.width / 2,
