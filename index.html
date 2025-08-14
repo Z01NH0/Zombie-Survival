@@ -291,6 +291,16 @@
             z-index: 110;
             pointer-events: none;
         }
+        
+        .boss-projectile {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ff00ff 0%, #880088 100%);
+            border-radius: 50%;
+            z-index: 110;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -394,6 +404,7 @@
             zombies: [],
             bullets: [],
             acidBullets: [],
+            bossProjectiles: [],
             grenades: [],
             explosions: [],
             obstacles: [],
@@ -742,6 +753,20 @@
                         gameState.acidBullets.splice(i, 1);
                     }
                 }
+                
+                // Verifica colisão com projéteis do boss
+                for (let i = gameState.bossProjectiles.length - 1; i >= 0; i--) {
+                    const projectile = gameState.bossProjectiles[i];
+                    if (
+                        this.x < projectile.x + projectile.width &&
+                        this.x + this.width > projectile.x &&
+                        this.y < projectile.y + projectile.height &&
+                        this.y + this.height > projectile.y
+                    ) {
+                        this.takeDamage(15);
+                        gameState.bossProjectiles.splice(i, 1);
+                    }
+                }
             }
 
             pickupItem(item, index) {
@@ -922,28 +947,23 @@
                     const startX = this.x + this.width / 2;
                     const startY = this.y + this.height / 2;
                     
-                    // Calcula a distância até o alvo
-                    const dx = targetX - startX;
-                    const dy = targetY - startY;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    // Limita a distância máxima
-                    const maxDistance = 500;
-                    const actualDistance = Math.min(distance, maxDistance);
-                    
                     // Calcula o ângulo
-                    const angle = Math.atan2(dy, dx);
+                    const angle = Math.atan2(
+                        targetY - startY,
+                        targetX - startX
+                    );
                     
-                    // Calcula a velocidade baseada na distância
-                    const speed = actualDistance / 20;
-                    
+                    // Cria granada que vai em linha reta
                     gameState.grenades.push({
                         x: startX,
                         y: startY,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
+                        vx: Math.cos(angle) * 8, // Velocidade fixa
+                        vy: Math.sin(angle) * 8,
                         timer: 90, // 1.5 segundos
-                        exploded: false
+                        exploded: false,
+                        distanceTraveled: 0,
+                        maxDistance: 500, // Distância máxima
+                        flashTimer: 0
                     });
                     
                     gameState.inventory[4].ammo--;
@@ -980,6 +1000,32 @@
             }
         }
 
+        // Classe de Projétil do Boss
+        class BossProjectile {
+            constructor(x, y, angle) {
+                this.x = x;
+                this.y = y;
+                this.width = 20;
+                this.height = 20;
+                this.speed = 4;
+                this.angle = angle;
+                this.lifetime = 180;
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                this.lifetime--;
+            }
+
+            draw() {
+                ctx.fillStyle = 'rgba(255, 0, 255, 0.8)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
         // Tipos de zumbis
         class Zombie {
             constructor(x, y, type = 'normal') {
@@ -999,6 +1045,7 @@
                 this.coinValue = this.getCoinValue();
                 this.lastAcidShot = 0;
                 this.specialAbilityCooldown = 0;
+                this.lastBossAttack = 0;
             }
             
             getMaxHealth() {
@@ -1116,21 +1163,39 @@
                     }
                     
                     // Habilidade especial do boss
-                    if (this.type === 'boss' && this.specialAbilityCooldown <= 0 && distance < 400) {
-                        this.specialAbilityCooldown = 120;
+                    if (this.type === 'boss') {
+                        // Ataque de explosão ao redor
+                        if (this.specialAbilityCooldown <= 0 && distance < 400) {
+                            this.specialAbilityCooldown = 120;
+                            
+                            // Cria uma explosão ao redor do boss
+                            gameState.explosions.push({
+                                x: this.x + this.width/2,
+                                y: this.y + this.height/2,
+                                radius: 0,
+                                maxRadius: 150,
+                                timer: 30
+                            });
+                            
+                            // Dano aos arredores
+                            if (distance < 150) {
+                                player.takeDamage(15);
+                            }
+                        }
                         
-                        // Cria uma explosão ao redor do boss
-                        gameState.explosions.push({
-                            x: this.x + this.width/2,
-                            y: this.y + this.height/2,
-                            radius: 0,
-                            maxRadius: 150,
-                            timer: 30
-                        });
-                        
-                        // Dano aos arredores
-                        if (distance < 150) {
-                            player.takeDamage(15);
+                        // Ataque de projéteis
+                        if (Date.now() - this.lastBossAttack > 3000 && distance < 500) {
+                            this.lastBossAttack = Date.now();
+                            
+                            // Dispara 3 projéteis em direções diferentes
+                            for (let i = 0; i < 3; i++) {
+                                const spread = (i - 1) * Math.PI / 8;
+                                gameState.bossProjectiles.push(new BossProjectile(
+                                    this.x + this.width/2,
+                                    this.y + this.height/2,
+                                    angle + spread
+                                ));
+                            }
                         }
                     }
                 } else {
@@ -1190,6 +1255,17 @@
             }
 
             takeDamage(amount) {
+                // Boss tem 50% de resistência a projéteis
+                if (this.type === 'boss') {
+                    // Verifica se o dano vem de projéteis (pistola, shotgun ou granada)
+                    const isProjectileDamage = gameState.bullets.length > 0 || 
+                                             (gameState.grenades.length > 0 && gameState.grenades.some(g => !g.exploded));
+                    
+                    if (isProjectileDamage) {
+                        amount *= 0.5; // Reduz o dano pela metade
+                    }
+                }
+                
                 this.health -= amount;
                 if (this.health <= 0) {
                     // Drop de moedas
@@ -1400,6 +1476,7 @@
             gameState.zombies = [];
             gameState.bullets = [];
             gameState.acidBullets = [];
+            gameState.bossProjectiles = [];
             gameState.grenades = [];
             gameState.explosions = [];
             gameState.items = [];
@@ -1495,51 +1572,80 @@
             updateParticles();
             drawParticles();
             
+            // Atualiza e desenha projéteis do boss
+            for (let i = gameState.bossProjectiles.length - 1; i >= 0; i--) {
+                const projectile = gameState.bossProjectiles[i];
+                projectile.update();
+                
+                // Desenha projétil
+                ctx.fillStyle = 'rgba(255, 0, 255, 0.8)';
+                ctx.beginPath();
+                ctx.arc(projectile.x, projectile.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Remove projéteis fora do mapa ou sem vida útil
+                if (projectile.lifetime <= 0 ||
+                    projectile.x < 0 || projectile.x > config.width ||
+                    projectile.y < 0 || projectile.y > config.height) {
+                    gameState.bossProjectiles.splice(i, 1);
+                }
+            }
+            
             // Atualiza e desenha granadas
             for (let i = gameState.grenades.length - 1; i >= 0; i--) {
                 const grenade = gameState.grenades[i];
                 
                 // Desenha granada
-                ctx.fillStyle = 'red';
+                const flashIntensity = grenade.flashTimer > 0 ? 
+                    (grenade.flashTimer % 10 < 5 ? 1 : 0.5) : 1;
+                
+                ctx.fillStyle = `rgba(255, 0, 0, ${flashIntensity})`;
                 ctx.beginPath();
                 ctx.arc(grenade.x, grenade.y, 8, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = 'orange';
+                ctx.fillStyle = `rgba(255, 165, 0, ${flashIntensity})`;
                 ctx.beginPath();
                 ctx.arc(grenade.x, grenade.y, 5, 0, Math.PI * 2);
                 ctx.fill();
                 
                 // Atualiza posição
-                grenade.x += grenade.vx;
-                grenade.y += grenade.vy;
-                grenade.vy += 0.2; // Gravidade
-                grenade.timer--;
-                
-                // Verifica se explodiu
-                if (grenade.timer <= 0 && !grenade.exploded) {
-                    grenade.exploded = true;
+                if (!grenade.exploded) {
+                    grenade.x += grenade.vx;
+                    grenade.y += grenade.vy;
+                    grenade.distanceTraveled += Math.sqrt(grenade.vx * grenade.vx + grenade.vy * grenade.vy);
                     
-                    // Cria explosão
-                    gameState.explosions.push({
-                        x: grenade.x,
-                        y: grenade.y,
-                        radius: 0,
-                        maxRadius: 100,
-                        timer: 30
-                    });
+                    // Verifica se chegou no limite de distância
+                    if (grenade.distanceTraveled >= grenade.maxDistance) {
+                        grenade.exploded = true;
+                        grenade.flashTimer = 90; // 1.5 segundos de piscar
+                    }
+                } else {
+                    // Contagem regressiva para explosão
+                    grenade.flashTimer--;
                     
-                    // Dano aos zumbis
-                    gameState.zombies.forEach(zombie => {
-                        const dx = zombie.x + zombie.width/2 - grenade.x;
-                        const dy = zombie.y + zombie.height/2 - grenade.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (grenade.flashTimer <= 0) {
+                        // Cria explosão
+                        gameState.explosions.push({
+                            x: grenade.x,
+                            y: grenade.y,
+                            radius: 0,
+                            maxRadius: 150, // Explosão maior
+                            timer: 30
+                        });
                         
-                        if (distance < 100) {
-                            zombie.takeDamage(100);
-                        }
-                    });
-                    
-                    gameState.grenades.splice(i, 1);
+                        // Dano aos zumbis
+                        gameState.zombies.forEach(zombie => {
+                            const dx = zombie.x + zombie.width/2 - grenade.x;
+                            const dy = zombie.y + zombie.height/2 - grenade.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (distance < 150) {
+                                zombie.takeDamage(150); // Dano maior
+                            }
+                        });
+                        
+                        gameState.grenades.splice(i, 1);
+                    }
                 }
             }
             
@@ -1561,7 +1667,7 @@
                 ctx.fill();
                 
                 // Expande a explosão
-                explosion.radius += 5;
+                explosion.radius += explosion.maxRadius / 6; // Mais rápido
                 explosion.timer--;
                 
                 // Remove explosão acabada
@@ -1970,7 +2076,7 @@
                 updateInventoryUI();
             } else if (weapon.type === 'shotgun' && weapon.ammo > 0 && gameState.attackCooldown <= 0) {
                 const player = gameState.player;
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 3; i++) {
                     const spread = (Math.random() - 0.5) * Math.PI / 8;
                     gameState.bullets.push(new Bullet(
                         player.x + player.width / 2,
