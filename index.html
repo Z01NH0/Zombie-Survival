@@ -23,6 +23,8 @@
         #gameCanvas {
             display: block;
             background: #0a0a12;
+            width: 100%;
+            height: 100vh;
         }
         
         #ui {
@@ -104,6 +106,19 @@
         #dayTime {
             position: absolute;
             top: 10px;
+            right: 10px;
+            font-size: 14px;
+            color: #ffcc55;
+            text-shadow: 2px 2px 0 #000;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 2px solid #ffcc55;
+        }
+        
+        #timeLeft {
+            position: absolute;
+            top: 50px;
             right: 10px;
             font-size: 14px;
             color: #ffcc55;
@@ -254,7 +269,27 @@
             padding: 8px 12px;
             border-radius: 20px;
             border: 2px solid #ffcc55;
-            margin-top: 50px;
+            margin-top: 90px;
+        }
+        
+        .grenade {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: red;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0.7);
+            z-index: 110;
+        }
+        
+        .explosion {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,100,0,0.8) 0%, rgba(255,0,0,0) 70%);
+            z-index: 110;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -274,6 +309,7 @@
     </div>
     
     <div id="dayTime">☀️ DIA</div>
+    <div id="timeLeft">TEMPO: 15s</div>
     <div id="coins">MOEDAS: <span id="coinCount">0</span></div>
     
     <div id="inventory">
@@ -329,29 +365,33 @@
         <button id="restartButton">TENTAR NOVAMENTE</button>
     </div>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
     <script>
-        // Configurações do jogo
-        const config = {
-            width: 1280,
-            height: 720,
+         const config = {
+            width: 1600,
+            height: 900,
             playerSpeed: 3.5,
             zombieSpawnRate: 1500,
             nightDuration: 45000,
-            dayDuration: 15000, // 15 segundos de dia
-            mapTiles: 20,
+            dayDuration: 15000,
+            mapTiles: 25,
             itemSpawnChance: 0.05,
-            itemSpawnInterval: 20000, // 20 segundos
+            itemSpawnInterval: 20000,
             baseZombiesPerNight: 5,
             zombieIncreasePerDay: 2
         };
+       const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = config.width;
+        canvas.height = config.height;
 
-        // Estado do jogo
-        const gameState = {
+
+       const gameState = {
             player: null,
             zombies: [],
             bullets: [],
             acidBullets: [],
+            grenades: [],
+            explosions: [],
             obstacles: [],
             items: [],
             isNight: false,
@@ -379,31 +419,6 @@
             itemSpawnTimer: 0
         };
 
-        // Sons
-        const sounds = {
-            zombieGroan: [
-                new Howl({ src: ['https://assets.codepen.io/21542/zombie1.mp3'], volume: 0.4 }),
-                new Howl({ src: ['https://assets.codepen.io/21542/zombie2.mp3'], volume: 0.4 }),
-                new Howl({ src: ['https://assets.codepen.io/21542/zombie3.mp3'], volume: 0.4 })
-            ],
-            gunshot: new Howl({ src: ['https://assets.codepen.io/21542/gunshot.mp3'], volume: 0.6 }),
-            shotgun: new Howl({ src: ['https://assets.codepen.io/21542/shotgun.mp3'], volume: 0.7 }),
-            reload: new Howl({ src: ['https://assets.codepen.io/21542/reload.mp3'], volume: 0.5 }),
-            playerHurt: new Howl({ src: ['https://assets.codepen.io/21542/hurt.mp3'], volume: 0.7 }),
-            knifeSwing: new Howl({ src: ['https://assets.codepen.io/21542/knife.mp3'], volume: 0.6 }),
-            pickup: new Howl({ src: ['https://assets.codepen.io/21542/pickup.mp3'], volume: 0.5 }),
-            dayStart: new Howl({ src: ['https://assets.codepen.io/21542/day.mp3'], volume: 0.5 }),
-            nightStart: new Howl({ src: ['https://assets.codepen.io/21542/night.mp3'], volume: 0.5 }),
-            coinPickup: new Howl({ src: ['https://assets.codepen.io/21542/coin.mp3'], volume: 0.5 }),
-            heal: new Howl({ src: ['https://assets.codepen.io/21542/heal.mp3'], volume: 0.5 })
-        };
-
-        // Inicialização
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = config.width;
-        canvas.height = config.height;
-
         // Sprites
         const sprites = {
             player: createPlayerSprite(),
@@ -420,11 +435,16 @@
             items: {
                 pistol: createItemSprite('🔫', '#ff5555'),
                 shotgun: createItemSprite('💥', '#ffaa00'),
-                pistolAmmo: createItemSprite('➖', '#ffcc55'),
-                shotgunAmmo: createItemSprite('➖', '#ffaa55'),
+                pistolAmmo: createItemSprite('🔹', '#55aaff'),
+                shotgunAmmo: createItemSprite('🔸', '#ffaa55'),
                 medkit: createItemSprite('🩹', '#55ff55'),
                 grenade: createItemSprite('🧨', '#ff55ff'),
                 coin: createItemSprite('🪙', '#ffcc00')
+            },
+            weapons: {
+                pistol: createWeaponSprite('#777', '#ffcc55'),
+                shotgun: createWeaponSprite('#aa5', '#ffaa00'),
+                knife: createKnifeSprite()
             },
             terrain: {
                 grass: createTerrainSprite('#3a5c3a'),
@@ -500,6 +520,49 @@
             
             return canvas;
         }
+
+        function createWeaponSprite(handleColor, barrelColor) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 60;
+            canvas.height = 20;
+            const ctx = canvas.getContext('2d');
+            
+            // Coronha
+            ctx.fillStyle = '#5a3a1a';
+            ctx.fillRect(0, 5, 15, 10);
+            
+            // Empunhadura
+            ctx.fillStyle = handleColor;
+            ctx.fillRect(15, 5, 20, 10);
+            
+            // Cano
+            ctx.fillStyle = barrelColor;
+            ctx.fillRect(35, 7, 25, 6);
+            
+            return canvas;
+        }
+
+       function createKnifeSprite() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 60;  // LARGURA DA FACA (altere este valor)
+    canvas.height = 20; // ALTURA DA FACA (altere este valor)
+    const ctx = canvas.getContext('2d');
+    
+    // Lâmina
+    ctx.fillStyle = '#aaa';
+    ctx.beginPath();
+    ctx.moveTo(0, 10);
+    ctx.lineTo(40, 0);  // Ponto de controle 1 (ajuste se aumentar muito)
+    ctx.lineTo(40, 20); // Ponto de controle 2 (ajuste se aumentar muito)
+    ctx.closePath();
+    ctx.fill();
+    
+    // Cabo
+    ctx.fillStyle = '#5a3a1a';
+    ctx.fillRect(40, 5, 20, 10);
+    
+    return canvas;
+}
 
         function createTerrainSprite(color) {
             const canvas = document.createElement('canvas');
@@ -610,63 +673,49 @@
             }
 
             pickupItem(item, index) {
-                let added = false;
-                
                 if (item.type === 'coin') {
                     gameState.coins += item.value;
-                    sounds.coinPickup.play();
                     gameState.items.splice(index, 1);
                     updateCoinUI();
                     return;
                 }
 
-                // Verifica se já tem o item no inventário
-                for (let j = 0; j < gameState.inventory.length; j++) {
-                    const slot = gameState.inventory[j];
-                    
-                    if (slot.type === item.type) {
-                        if (slot.ammo !== null) {
-                            // Itens com quantidade (munição, kits médicos)
-                            if (item.type === 'pistolAmmo') {
-                                slot.ammo += 12;
-                                added = true;
-                            } else if (item.type === 'shotgunAmmo') {
-                                slot.ammo += 5;
-                                added = true;
-                            } else {
-                                slot.ammo += 1;
-                                added = true;
-                            }
-                        } else if (slot.type === 'empty') {
-                            // Slot vazio
-                            if (item.type === 'pistolAmmo') {
-                                gameState.inventory[j] = { type: 'pistolAmmo', ammo: 12 };
-                            } else if (item.type === 'shotgunAmmo') {
-                                gameState.inventory[j] = { type: 'shotgunAmmo', ammo: 5 };
-                            } else {
-                                gameState.inventory[j] = { type: item.type, ammo: 1 };
-                            }
-                            added = true;
+                // Munição vai direto para a arma correspondente
+                if (item.type === 'pistolAmmo') {
+                    for (let i = 0; i < gameState.inventory.length; i++) {
+                        if (gameState.inventory[i].type === 'pistol') {
+                            gameState.inventory[i].ammo += 12;
+                            gameState.items.splice(index, 1);
+                            updateInventoryUI();
+                            return;
                         }
-                        break;
-                    } else if (slot.type === 'empty' && !added) {
-                        // Preenche slot vazio
-                        if (item.type === 'pistolAmmo') {
-                            gameState.inventory[j] = { type: 'pistolAmmo', ammo: 12 };
-                        } else if (item.type === 'shotgunAmmo') {
-                            gameState.inventory[j] = { type: 'shotgunAmmo', ammo: 5 };
-                        } else {
-                            gameState.inventory[j] = { type: item.type, ammo: 1 };
+                    }
+                } else if (item.type === 'shotgunAmmo') {
+                    for (let i = 0; i < gameState.inventory.length; i++) {
+                        if (gameState.inventory[i].type === 'shotgun') {
+                            gameState.inventory[i].ammo += 5;
+                            gameState.items.splice(index, 1);
+                            updateInventoryUI();
+                            return;
                         }
-                        added = true;
-                        break;
                     }
                 }
-                
-                if (added) {
-                    sounds.pickup.play();
-                    gameState.items.splice(index, 1);
-                    updateInventoryUI();
+
+                // Outros itens
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i].type === item.type) {
+                        if (gameState.inventory[i].ammo !== null) {
+                            gameState.inventory[i].ammo += 1;
+                            gameState.items.splice(index, 1);
+                            updateInventoryUI();
+                            return;
+                        }
+                    } else if (gameState.inventory[i].type === 'empty') {
+                        gameState.inventory[i] = { type: item.type, ammo: 1 };
+                        gameState.items.splice(index, 1);
+                        updateInventoryUI();
+                        return;
+                    }
                 }
             }
 
@@ -695,21 +744,31 @@
                     this.height
                 );
                 
-                // Desenha arma
-                if (gameState.inventory[gameState.selectedSlot].type === 'knife' && this.isAttacking) {
-                    ctx.save();
-                    ctx.rotate(this.knifeAngle - Math.PI / 4);
-                    ctx.fillStyle = '#aaa';
-                    ctx.fillRect(25, -3, 30, 6);
-                    ctx.fillStyle = '#fff';
-                    ctx.fillRect(50, -2, 15, 4);
-                    ctx.restore();
-                } else if (gameState.inventory[gameState.selectedSlot].type === 'pistol') {
-                    ctx.fillStyle = '#777';
-                    ctx.fillRect(25, -3, 30, 6);
-                } else if (gameState.inventory[gameState.selectedSlot].type === 'shotgun') {
-                    ctx.fillStyle = '#aa5';
-                    ctx.fillRect(25, -4, 40, 8);
+                
+                const weaponType = gameState.inventory[gameState.selectedSlot].type;
+               if (weaponType === 'knife' && this.isAttacking) {
+    ctx.save();
+    ctx.rotate(this.knifeAngle - Math.PI / 4);
+    const offset = 20; 
+    ctx.drawImage(
+        sprites.weapons.knife,
+        -sprites.weapons.knife.width / 2 + offset, 
+        -sprites.weapons.knife.height / 2
+    );
+    ctx.restore();
+
+                } else if (weaponType === 'pistol') {
+                    ctx.drawImage(
+                        sprites.weapons.pistol,
+                        15,
+                        -sprites.weapons.pistol.height / 2
+                    );
+                } else if (weaponType === 'shotgun') {
+                    ctx.drawImage(
+                        sprites.weapons.shotgun,
+                        15,
+                        -sprites.weapons.shotgun.height / 2
+                    );
                 }
                 
                 ctx.restore();
@@ -717,7 +776,6 @@
 
             takeDamage(amount) {
                 this.health -= amount;
-                sounds.playerHurt.play();
                 gameState.bloodEffect = 1;
                 document.getElementById('bloodOverlay').style.opacity = '0.7';
                 setTimeout(() => {
@@ -737,8 +795,7 @@
                 
                 this.isAttacking = true;
                 this.knifeAngle = 0;
-                gameState.attackCooldown = 30; // 1 segundo
-                sounds.knifeSwing.play();
+                gameState.attackCooldown = 30;
                 
                 // Verifica acerto nos zumbis
                 const attackRange = 70;
@@ -766,7 +823,6 @@
 
             heal(amount) {
                 this.health = Math.min(this.health + amount, this.maxHealth);
-                sounds.heal.play();
             }
 
             increaseMaxHealth(amount) {
@@ -786,6 +842,23 @@
                 if (gameState.inventory[3].ammo > 0) {
                     this.heal(this.maxHealth * 0.15);
                     gameState.inventory[3].ammo--;
+                    updateInventoryUI();
+                    return true;
+                }
+                return false;
+            }
+
+            throwGrenade() {
+                if (gameState.inventory[4].ammo > 0) {
+                    gameState.grenades.push({
+                        x: this.x + this.width / 2,
+                        y: this.y + this.height / 2,
+                        vx: Math.cos(this.angle) * 10,
+                        vy: Math.sin(this.angle) * 10,
+                        timer: 90, // 1.5 segundos
+                        exploded: false
+                    });
+                    gameState.inventory[4].ammo--;
                     updateInventoryUI();
                     return true;
                 }
@@ -930,13 +1003,6 @@
                     const angle = Math.atan2(dy, dx);
                     this.x += Math.cos(angle) * this.speed;
                     this.y += Math.sin(angle) * this.speed;
-                    
-                    // Emite sons ocasionais
-                    if (Date.now() - this.lastSoundTime > 5000 && Math.random() < 0.1) {
-                        const sound = sounds.zombieGroan[Math.floor(Math.random() * sounds.zombieGroan.length)];
-                        sound.play();
-                        this.lastSoundTime = Date.now();
-                    }
                     
                     // Ataque se estiver perto
                     if (distance < 40 && this.attackCooldown <= 0) {
@@ -1091,18 +1157,6 @@
                     ) {
                         zombie.takeDamage(this.damage * gameState.player.damageMultiplier);
                         this.lifetime = 0;
-                        
-                        // Efeito de sangue
-                        for (let i = 0; i < 5; i++) {
-                            createParticle(
-                                this.x,
-                                this.y,
-                                Math.random() * 4 - 2,
-                                Math.random() * 4 - 2,
-                                '#f00',
-                                20
-                            );
-                        }
                     }
                 });
 
@@ -1226,6 +1280,8 @@
             gameState.zombies = [];
             gameState.bullets = [];
             gameState.acidBullets = [];
+            gameState.grenades = [];
+            gameState.explosions = [];
             gameState.items = [];
             gameState.day = 1;
             gameState.gameTime = 0;
@@ -1253,7 +1309,7 @@
             
             // Geração de obstáculos
             gameState.obstacles = [];
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 20; i++) {
                 gameState.obstacles.push({
                     x: Math.random() * (config.width - 100),
                     y: Math.random() * (config.height - 100),
@@ -1318,6 +1374,81 @@
             updateParticles();
             drawParticles();
             
+            // Atualiza e desenha granadas
+            for (let i = gameState.grenades.length - 1; i >= 0; i--) {
+                const grenade = gameState.grenades[i];
+                
+                // Desenha granada
+                ctx.fillStyle = 'red';
+                ctx.beginPath();
+                ctx.arc(grenade.x, grenade.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = 'orange';
+                ctx.beginPath();
+                ctx.arc(grenade.x, grenade.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Atualiza posição
+                grenade.x += grenade.vx;
+                grenade.y += grenade.vy;
+                grenade.vy += 0.2; // Gravidade
+                grenade.timer--;
+                
+                // Verifica se explodiu
+                if (grenade.timer <= 0 && !grenade.exploded) {
+                    grenade.exploded = true;
+                    
+                    // Cria explosão
+                    gameState.explosions.push({
+                        x: grenade.x,
+                        y: grenade.y,
+                        radius: 0,
+                        maxRadius: 100,
+                        timer: 30
+                    });
+                    
+                    // Dano aos zumbis
+                    gameState.zombies.forEach(zombie => {
+                        const dx = zombie.x + zombie.width/2 - grenade.x;
+                        const dy = zombie.y + zombie.height/2 - grenade.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < 100) {
+                            zombie.takeDamage(100);
+                        }
+                    });
+                    
+                    gameState.grenades.splice(i, 1);
+                }
+            }
+            
+            // Atualiza e desenha explosões
+            for (let i = gameState.explosions.length - 1; i >= 0; i--) {
+                const explosion = gameState.explosions[i];
+                
+                // Desenha explosão
+                const gradient = ctx.createRadialGradient(
+                    explosion.x, explosion.y, 0,
+                    explosion.x, explosion.y, explosion.radius
+                );
+                gradient.addColorStop(0, 'rgba(255, 100, 0, 0.8)');
+                gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(explosion.x, explosion.y, explosion.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Expande a explosão
+                explosion.radius += 5;
+                explosion.timer--;
+                
+                // Remove explosão acabada
+                if (explosion.timer <= 0) {
+                    gameState.explosions.splice(i, 1);
+                }
+            }
+            
             // Atualiza e desenha projéteis de ácido
             gameState.acidBullets.forEach((acid, index) => {
                 acid.update();
@@ -1374,6 +1505,12 @@
             document.getElementById('day').textContent = gameState.day;
             document.getElementById('dayTime').textContent = gameState.isNight ? '🌙 NOITE' : '☀️ DIA';
             document.getElementById('dayTime').style.color = gameState.isNight ? '#ff5555' : '#ffcc55';
+            
+            // Atualiza contador de tempo
+            const timeLeft = gameState.isNight 
+                ? Math.ceil((config.nightDuration - gameState.gameTime) / 1000)
+                : Math.ceil((config.dayDuration - gameState.gameTime) / 1000);
+            document.getElementById('timeLeft').textContent = `TEMPO: ${timeLeft}s`;
             
             requestAnimationFrame(gameLoop);
         }
@@ -1442,7 +1579,6 @@
                     gameState.zombiesToSpawn = config.baseZombiesPerNight + (gameState.day - 1) * config.zombieIncreasePerDay;
                     gameState.zombiesSpawned = 0;
                     document.getElementById('nightOverlay').style.display = 'none';
-                    sounds.dayStart.play();
                     
                     // Abre a loja automaticamente
                     openShop();
@@ -1453,7 +1589,6 @@
                     gameState.isNight = true;
                     gameState.gameTime = 0;
                     document.getElementById('nightOverlay').style.display = 'block';
-                    sounds.nightStart.play();
                     
                     // Fecha a loja se estiver aberta
                     if (gameState.shopOpen) {
@@ -1510,7 +1645,6 @@
                         gameState.coins -= 12;
                         updateInventoryUI();
                         updateCoinUI();
-                        sounds.pickup.play();
                         break;
                     }
                 }
@@ -1525,7 +1659,6 @@
                         gameState.coins -= 25;
                         updateInventoryUI();
                         updateCoinUI();
-                        sounds.pickup.play();
                         break;
                     }
                 }
@@ -1537,7 +1670,6 @@
                 gameState.player.increaseMaxHealth(25);
                 gameState.coins -= 20;
                 updateCoinUI();
-                sounds.pickup.play();
             }
         }
         
@@ -1546,7 +1678,6 @@
                 gameState.player.increaseDamage(0.1);
                 gameState.coins -= 15;
                 updateCoinUI();
-                sounds.pickup.play();
             }
         }
         
@@ -1555,7 +1686,6 @@
                 gameState.player.increaseSpeed(0.35);
                 gameState.coins -= 18;
                 updateCoinUI();
-                sounds.pickup.play();
             }
         }
         
@@ -1567,7 +1697,6 @@
                         gameState.coins -= 8;
                         updateInventoryUI();
                         updateCoinUI();
-                        sounds.pickup.play();
                         break;
                     }
                 }
@@ -1604,8 +1733,8 @@
                 case 'shotgun': return '💥';
                 case 'medkit': return '🩹';
                 case 'grenade': return '🧨';
-                case 'pistolAmmo': return '➖';
-                case 'shotgunAmmo': return '➖';
+                case 'pistolAmmo': return '🔹';
+                case 'shotgunAmmo': return '🔸';
                 default: return '❓';
             }
         }
@@ -1674,13 +1803,12 @@
                     player.angle,
                     'pistol'
                 ));
-                sounds.gunshot.play();
                 weapon.ammo--;
-                gameState.attackCooldown = 10; // Pequeno cooldown entre tiros
+                gameState.attackCooldown = 10;
                 updateInventoryUI();
             } else if (weapon.type === 'shotgun' && weapon.ammo > 0 && gameState.attackCooldown <= 0) {
                 const player = gameState.player;
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 3; i++) { // Reduzido para 3 balas
                     const spread = (Math.random() - 0.5) * Math.PI / 8;
                     gameState.bullets.push(new Bullet(
                         player.x + player.width / 2,
@@ -1689,12 +1817,13 @@
                         'shotgun'
                     ));
                 }
-                sounds.shotgun.play();
                 weapon.ammo--;
-                gameState.attackCooldown = 30; // Maior cooldown para shotgun
+                gameState.attackCooldown = 30;
                 updateInventoryUI();
             } else if (weapon.type === 'medkit') {
                 gameState.player.useMedkit();
+            } else if (weapon.type === 'grenade') {
+                gameState.player.throwGrenade();
             }
         });
         
@@ -1715,7 +1844,6 @@
                             gameState.inventory[i] = { type: 'empty', ammo: null };
                         }
                         
-                        sounds.reload.play();
                         updateInventoryUI();
                         break;
                     }
@@ -1734,7 +1862,6 @@
                             gameState.inventory[i] = { type: 'empty', ammo: null };
                         }
                         
-                        sounds.reload.play();
                         updateInventoryUI();
                         break;
                     }
