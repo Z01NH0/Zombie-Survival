@@ -420,7 +420,7 @@
             <div class="shop-column">
                 <div class="shop-column-title">STATUS</div>
                 <div class="shop-item">
-                    <span>+25% Vida (<span id="healthPrice">20</span> moedas)</span>
+                    <span>+10% Vida (<span id="healthPrice">20</span> moedas)</span>
                     <button id="buyHealth">COMPRAR</button>
                 </div>
                 <div class="shop-item">
@@ -428,7 +428,7 @@
                     <button id="buyDamage">COMPRAR</button>
                 </div>
                 <div class="shop-item">
-                    <span>+10% Velocidade (<span id="speedPrice">18</span> moedas)</span>
+                    <span>+10% Stamina (<span id="speedPrice">18</span> moedas)</span>
                     <button id="buySpeed">COMPRAR</button>
                 </div>
             </div>
@@ -550,7 +550,9 @@
                 pistol: createWeaponSprite('#777', '#ffcc55'),
                 shotgun: createShotgunSprite(),
                 knife: createKnifeSprite(),
-                laserRifle: createLaserRifleSprite()
+                laserRifle: createLaserRifleSprite(),
+                medkit: createMedkitSprite(),
+                grenade: createGrenadeSprite()
             },
             terrain: {
                 grass: createTerrainSprite('#3a5c3a'),
@@ -762,6 +764,44 @@
             return canvas;
         }
 
+        function createMedkitSprite() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 40;
+            canvas.height = 30;
+            const ctx = canvas.getContext('2d');
+            
+            // Bolsa médica
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(5, 5, 30, 20);
+            
+            // Cruz branca
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(15, 8, 10, 4);
+            ctx.fillRect(18, 5, 4, 15);
+            
+            return canvas;
+        }
+
+        function createGrenadeSprite() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 30;
+            canvas.height = 30;
+            const ctx = canvas.getContext('2d');
+            
+            // Corpo da granada
+            ctx.fillStyle = '#8B4513';
+            ctx.beginPath();
+            ctx.arc(15, 15, 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Detalhes
+            ctx.fillStyle = '#FF4500';
+            ctx.fillRect(15, 5, 3, 20);
+            ctx.fillRect(5, 15, 20, 3);
+            
+            return canvas;
+        }
+
         function createTerrainSprite(color) {
             const canvas = document.createElement('canvas');
             canvas.width = 64;
@@ -796,6 +836,7 @@
                 this.health = 100;
                 this.maxHealth = 100;
                 this.stamina = 100;
+                this.maxStamina = 100;
                 this.direction = { x: 0, y: 0 };
                 this.lastShot = 0;
                 this.isRunning = false;
@@ -824,14 +865,14 @@
                     }
                 } else {
                     this.stamina += 0.15;
-                    if (this.stamina > 100) this.stamina = 100;
+                    if (this.stamina > this.maxStamina) this.stamina = this.maxStamina;
                 }
 
                 // Atualiza UI
                 document.getElementById('health').textContent = Math.floor(this.health);
                 document.getElementById('healthBarFill').style.width = `${(this.health / this.maxHealth) * 100}%`;
                 document.getElementById('stamina').textContent = Math.floor(this.stamina);
-                document.getElementById('staminaBarFill').style.width = `${this.stamina}%`;
+                document.getElementById('staminaBarFill').style.width = `${(this.stamina / this.maxStamina) * 100}%`;
 
                 // Animação da faca
                 if (this.isAttacking) {
@@ -968,6 +1009,8 @@
                 );
                 
                 const weaponType = gameState.inventory[gameState.selectedSlot].type;
+                const weaponAmmo = gameState.inventory[gameState.selectedSlot].ammo;
+                
                 if (weaponType === 'knife' && this.isAttacking) {
                     ctx.save();
                     ctx.rotate(this.knifeAngle - Math.PI / 4);
@@ -994,6 +1037,18 @@
                         sprites.weapons.laserRifle,
                         15,
                         -sprites.weapons.laserRifle.height / 2
+                    );
+                } else if (weaponType === 'medkit' && weaponAmmo > 0) {
+                    ctx.drawImage(
+                        sprites.weapons.medkit,
+                        15,
+                        -sprites.weapons.medkit.height / 2
+                    );
+                } else if (weaponType === 'grenade' && weaponAmmo > 0) {
+                    ctx.drawImage(
+                        sprites.weapons.grenade,
+                        15,
+                        -sprites.weapons.grenade.height / 2
                     );
                 }
                 
@@ -1059,6 +1114,11 @@
             increaseMaxHealth(amount) {
                 this.maxHealth = Math.floor(this.maxHealth * 1.1);
                 this.health = Math.floor(this.health * 1.1);
+            }
+
+            increaseMaxStamina(amount) {
+                this.maxStamina = Math.floor(this.maxStamina * 1.1);
+                this.stamina = Math.floor(this.stamina * 1.1);
             }
 
             increaseDamage(multiplier) {
@@ -1946,7 +2006,7 @@
                             x: grenade.x,
                             y: grenade.y,
                             radius: 0,
-                            maxRadius: 100, // Raio menor da explosão visual
+                            maxRadius: 150, // Raio maior da explosão visual
                             timer: 30
                         });
                         
@@ -1956,9 +2016,9 @@
                             const dy = zombie.y + zombie.height/2 - grenade.y;
                             const distance = Math.sqrt(dx * dx + dy * dy);
                             
-                            if (distance < 200) { // Área de dano maior
+                            if (distance < 250) { // Área de dano maior
                                 // Dano diminui com a distância
-                                const damage = 200 * (1 - distance/200);
+                                const damage = 300 * (1 - distance/250); // Dano aumentado
                                 zombie.takeDamage(damage);
                             }
                         });
@@ -2298,7 +2358,7 @@
                     if (gameState.inventory[i].type === 'pistol') {
                         gameState.inventory[i].ammo += 12;
                         gameState.coins -= gameState.shopPrices.ammo;
-                        gameState.shopPrices.ammo = Math.floor(gameState.shopPrices.ammo * 1.2); // Aumenta o preço
+                        // Não aumenta o preço para itens do arsenal
                         updateInventoryUI();
                         updateCoinUI();
                         updateShopPricesUI();
@@ -2314,7 +2374,7 @@
                     if (gameState.inventory[i].type === 'shotgun') {
                         gameState.inventory[i].ammo += 5;
                         gameState.coins -= gameState.shopPrices.shotgunAmmo;
-                        gameState.shopPrices.shotgunAmmo = Math.floor(gameState.shopPrices.shotgunAmmo * 1.2); // Aumenta o preço
+                        // Não aumenta o preço para itens do arsenal
                         updateInventoryUI();
                         updateCoinUI();
                         updateShopPricesUI();
@@ -2326,9 +2386,9 @@
         
         function buyHealth() {
             if (gameState.coins >= gameState.shopPrices.health) {
-                gameState.player.increaseMaxHealth(25);
+                gameState.player.increaseMaxHealth(10); // Reduzido para 10%
                 gameState.coins -= gameState.shopPrices.health;
-                gameState.shopPrices.health = Math.floor(gameState.shopPrices.health * 1.2); // Aumenta o preço
+                gameState.shopPrices.health = Math.floor(gameState.shopPrices.health * 1.2); // Aumenta o preço apenas para status
                 updateCoinUI();
                 updateShopPricesUI();
             }
@@ -2338,7 +2398,7 @@
             if (gameState.coins >= gameState.shopPrices.damage) {
                 gameState.player.increaseDamage(0.1);
                 gameState.coins -= gameState.shopPrices.damage;
-                gameState.shopPrices.damage = Math.floor(gameState.shopPrices.damage * 1.2); // Aumenta o preço
+                gameState.shopPrices.damage = Math.floor(gameState.shopPrices.damage * 1.2); // Aumenta o preço apenas para status
                 updateCoinUI();
                 updateShopPricesUI();
             }
@@ -2346,9 +2406,9 @@
         
         function buySpeed() {
             if (gameState.coins >= gameState.shopPrices.speed) {
-                gameState.player.increaseSpeed(0.35);
+                gameState.player.increaseMaxStamina(10); // Agora aumenta stamina em 10%
                 gameState.coins -= gameState.shopPrices.speed;
-                gameState.shopPrices.speed = Math.floor(gameState.shopPrices.speed * 1.2); // Aumenta o preço
+                gameState.shopPrices.speed = Math.floor(gameState.shopPrices.speed * 1.2); // Aumenta o preço apenas para status
                 updateCoinUI();
                 updateShopPricesUI();
             }
@@ -2360,7 +2420,7 @@
                     if (gameState.inventory[i].type === 'medkit') {
                         gameState.inventory[i].ammo += 1;
                         gameState.coins -= gameState.shopPrices.medkit;
-                        gameState.shopPrices.medkit = Math.floor(gameState.shopPrices.medkit * 1.2); // Aumenta o preço
+                        // Não aumenta o preço para itens do arsenal
                         updateInventoryUI();
                         updateCoinUI();
                         updateShopPricesUI();
@@ -2376,7 +2436,7 @@
                     if (gameState.inventory[i].type === 'grenade') {
                         gameState.inventory[i].ammo += 2;
                         gameState.coins -= gameState.shopPrices.grenades;
-                        gameState.shopPrices.grenades = Math.floor(gameState.shopPrices.grenades * 1.2); // Aumenta o preço
+                        // Não aumenta o preço para itens do arsenal
                         updateInventoryUI();
                         updateCoinUI();
                         updateShopPricesUI();
