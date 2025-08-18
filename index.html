@@ -103,6 +103,17 @@
             color: #77ccff;
         }
         
+        .cooldown-indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 8px;
+            color: #ffcc00;
+            background: rgba(0,0,0,0.7);
+            padding: 2px;
+            border-radius: 3px;
+        }
+        
         #dayTime {
             position: absolute;
             top: 10px;
@@ -209,6 +220,19 @@
             opacity: 0;
             z-index: 150;
             transition: opacity 0.3s;
+        }
+        
+        #healEffect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 151;
+            background: radial-gradient(circle, rgba(0,255,0,0.5) 0%, rgba(0,255,0,0) 70%);
+            transition: opacity 0.5s;
         }
         
         .night-overlay {
@@ -332,12 +356,21 @@
             border: 2px solid #ff5555;
             display: none;
         }
+        
+        .laser-beam {
+            position: absolute;
+            background: linear-gradient(to right, rgba(0, 255, 0, 0.3), rgba(0, 255, 0, 0.8));
+            z-index: 110;
+            pointer-events: none;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
     
     <div id="bloodOverlay"></div>
+    <div id="healEffect"></div>
     <div id="nightOverlay" class="night-overlay" style="display: none;"></div>
     
     <div id="ui">
@@ -368,34 +401,34 @@
             <div class="shop-column">
                 <div class="shop-column-title">ARSENAL</div>
                 <div class="shop-item">
-                    <span>+12 Munição Pistola (12 moedas)</span>
+                    <span>+12 Munição Pistola (<span id="ammoPrice">12</span> moedas)</span>
                     <button id="buyAmmo">COMPRAR</button>
                 </div>
                 <div class="shop-item">
-                    <span>+5 Munição Shotgun (25 moedas)</span>
+                    <span>+5 Munição Shotgun (<span id="shotgunAmmoPrice">25</span> moedas)</span>
                     <button id="buyShotgunAmmo">COMPRAR</button>
                 </div>
                 <div class="shop-item">
-                    <span>Kit Médico (8 moedas)</span>
+                    <span>Kit Médico (<span id="medkitPrice">8</span> moedas)</span>
                     <button id="buyMedkit">COMPRAR</button>
                 </div>
                 <div class="shop-item">
-                    <span>2 Granadas (40 moedas)</span>
+                    <span>2 Granadas (<span id="grenadesPrice">40</span> moedas)</span>
                     <button id="buyGrenades">COMPRAR</button>
                 </div>
             </div>
             <div class="shop-column">
                 <div class="shop-column-title">STATUS</div>
                 <div class="shop-item">
-                    <span>+25% Vida (20 moedas)</span>
+                    <span>+25% Vida (<span id="healthPrice">20</span> moedas)</span>
                     <button id="buyHealth">COMPRAR</button>
                 </div>
                 <div class="shop-item">
-                    <span>+10% Dano (15 moedas)</span>
+                    <span>+10% Dano (<span id="damagePrice">15</span> moedas)</span>
                     <button id="buyDamage">COMPRAR</button>
                 </div>
                 <div class="shop-item">
-                    <span>+10% Velocidade (18 moedas)</span>
+                    <span>+10% Velocidade (<span id="speedPrice">18</span> moedas)</span>
                     <button id="buySpeed">COMPRAR</button>
                 </div>
             </div>
@@ -475,7 +508,18 @@
             bossSpawned: false,
             bossAlive: false,
             pistolCooldown: 0,
-            shotgunCooldown: 0
+            shotgunCooldown: 0,
+            laserRifleCooldown: 0,
+            hasLaserRifle: false,
+            shopPrices: {
+                ammo: 12,
+                shotgunAmmo: 25,
+                medkit: 8,
+                grenades: 40,
+                health: 20,
+                damage: 15,
+                speed: 18
+            }
         };
 
         // Sprites
@@ -499,12 +543,14 @@
                 shotgunAmmo: createItemSprite('🔸', '#ffaa55'),
                 medkit: createItemSprite('🩹', '#55ff55'),
                 grenade: createItemSprite('🧨', '#ff55ff'),
-                coin: createItemSprite('🪙', '#ffcc00')
+                coin: createItemSprite('🪙', '#ffcc00'),
+                laserRifle: createItemSprite('🔋', '#00ff00')
             },
             weapons: {
                 pistol: createWeaponSprite('#777', '#ffcc55'),
                 shotgun: createShotgunSprite(),
-                knife: createKnifeSprite()
+                knife: createKnifeSprite(),
+                laserRifle: createLaserRifleSprite()
             },
             terrain: {
                 grass: createTerrainSprite('#3a5c3a'),
@@ -690,6 +736,32 @@
             return canvas;
         }
 
+        function createLaserRifleSprite() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 80;
+            canvas.height = 25;
+            const ctx = canvas.getContext('2d');
+            
+            // Coronha
+            ctx.fillStyle = '#333';
+            ctx.fillRect(0, 5, 25, 15);
+            
+            // Empunhadura
+            ctx.fillStyle = '#555';
+            ctx.fillRect(25, 5, 30, 15);
+            
+            // Cano
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(55, 7, 25, 5);
+            
+            // Detalhes futuristas
+            ctx.fillStyle = '#00aa00';
+            ctx.fillRect(50, 5, 5, 15);
+            ctx.fillRect(60, 5, 5, 15);
+            
+            return canvas;
+        }
+
         function createTerrainSprite(color) {
             const canvas = document.createElement('canvas');
             canvas.width = 64;
@@ -839,6 +911,17 @@
                             return;
                         }
                     }
+                } else if (item.type === 'laserRifle') {
+                    gameState.hasLaserRifle = true;
+                    gameState.items.splice(index, 1);
+                    // Adiciona ao inventário com 10 balas
+                    for (let i = 0; i < gameState.inventory.length; i++) {
+                        if (gameState.inventory[i].type === 'empty') {
+                            gameState.inventory[i] = { type: 'laserRifle', ammo: 10 };
+                            updateInventoryUI();
+                            return;
+                        }
+                    }
                 }
 
                 // Outros itens
@@ -906,6 +989,12 @@
                         15,
                         -sprites.weapons.shotgun.height / 2
                     );
+                } else if (weaponType === 'laserRifle') {
+                    ctx.drawImage(
+                        sprites.weapons.laserRifle,
+                        15,
+                        -sprites.weapons.laserRifle.height / 2
+                    );
                 }
                 
                 ctx.restore();
@@ -960,6 +1049,11 @@
 
             heal(amount) {
                 this.health = Math.min(this.health + amount, this.maxHealth);
+                // Efeito visual de cura
+                document.getElementById('healEffect').style.opacity = '0.7';
+                setTimeout(() => {
+                    document.getElementById('healEffect').style.opacity = '0';
+                }, 500);
             }
 
             increaseMaxHealth(amount) {
@@ -1016,6 +1110,81 @@
                 }
                 return false;
             }
+
+            fireLaserRifle(targetX, targetY) {
+                if (gameState.laserRifleCooldown > 0) return false;
+                
+                const startX = this.x + this.width / 2;
+                const startY = this.y + this.height / 2;
+                const angle = Math.atan2(targetY - startY, targetX - startX);
+                
+                // Cria o laser beam
+                const laserLength = 1000;
+                const endX = startX + Math.cos(angle) * laserLength;
+                const endY = startY + Math.sin(angle) * laserLength;
+                
+                // Desenha o laser
+                const laserBeam = document.createElement('div');
+                laserBeam.className = 'laser-beam';
+                laserBeam.style.left = `${startX}px`;
+                laserBeam.style.top = `${startY}px`;
+                laserBeam.style.width = `${laserLength}px`;
+                laserBeam.style.height = '10px';
+                laserBeam.style.transform = `rotate(${angle}rad)`;
+                laserBeam.style.transformOrigin = '0 0';
+                document.body.appendChild(laserBeam);
+                
+                // Remove após um curto período
+                setTimeout(() => {
+                    laserBeam.remove();
+                }, 100);
+                
+                // Dano aos zumbis em linha reta
+                gameState.zombies.forEach(zombie => {
+                    const zombieCenterX = zombie.x + zombie.width / 2;
+                    const zombieCenterY = zombie.y + zombie.height / 2;
+                    
+                    // Verifica colisão com linha
+                    if (pointToLineDistance(zombieCenterX, zombieCenterY, startX, startY, endX, endY) < 30) {
+                        zombie.takeDamage(200); // Dano massivo
+                    }
+                });
+                
+                // Configura cooldown
+                gameState.laserRifleCooldown = 1200; // 20 segundos (60 fps * 20)
+                
+                return true;
+            }
+        }
+
+        // Função auxiliar para calcular distância de ponto para linha
+        function pointToLineDistance(px, py, x1, y1, x2, y2) {
+            const A = px - x1;
+            const B = py - y1;
+            const C = x2 - x1;
+            const D = y2 - y1;
+
+            const dot = A * C + B * D;
+            const len_sq = C * C + D * D;
+            let param = -1;
+            if (len_sq !== 0) param = dot / len_sq;
+
+            let xx, yy;
+
+            if (param < 0) {
+                xx = x1;
+                yy = y1;
+            } else if (param > 1) {
+                xx = x2;
+                yy = y2;
+            } else {
+                xx = x1 + param * C;
+                yy = y1 + param * D;
+            }
+
+            const dx = px - xx;
+            const dy = py - yy;
+            return Math.sqrt(dx * dx + dy * dy);
         }
 
         // Classe de Projétil de Ácido
@@ -1304,8 +1473,19 @@
                     });
                     
                     // Chance de dropar item
-                    if (Math.random() < (this.type === 'boss' ? 0.8 : 0.2)) {
+                    if (Math.random() < this.getDropChance()) {
                         this.dropItem();
+                    }
+                    
+                    // Chance especial do boss dropar a arma laser
+                    if (this.type === 'boss' && Math.random() < 0.05) {
+                        gameState.items.push({
+                            type: 'laserRifle',
+                            x: this.x,
+                            y: this.y,
+                            width: 30,
+                            height: 30
+                        });
                     }
                     
                     gameState.coins += this.coinValue;
@@ -1324,12 +1504,26 @@
                 }
             }
             
+            getDropChance() {
+                switch (this.type) {
+                    case 'runner': return 0.1;
+                    case 'brute': return 0.2;
+                    case 'crawler': return 0.05;
+                    case 'toxic': return 0.15;
+                    case 'tank': return 0.3;
+                    case 'fast': return 0.25;
+                    case 'spitter': return 0.25;
+                    case 'boss': return 0.8;
+                    default: return 0.1;
+                }
+            }
+            
             dropItem() {
                 const items = [
-                    { type: 'pistolAmmo', chance: this.type === 'boss' ? 0.2 : 0.4 },
-                    { type: 'shotgunAmmo', chance: this.type === 'boss' ? 0.3 : 0.1 },
-                    { type: 'medkit', chance: this.type === 'boss' ? 0.4 : 0.2 },
-                    { type: 'grenade', chance: this.type === 'boss' ? 0.3 : 0.05 }
+                    { type: 'pistolAmmo', chance: this.getCommonItemChance() },
+                    { type: 'shotgunAmmo', chance: this.getUncommonItemChance() },
+                    { type: 'medkit', chance: this.getRareItemChance() },
+                    { type: 'grenade', chance: this.getLegendaryItemChance() }
                 ];
                 
                 let selectedItem = null;
@@ -1351,6 +1545,62 @@
                         width: 20,
                         height: 20
                     });
+                }
+            }
+            
+            getCommonItemChance() {
+                switch (this.type) {
+                    case 'runner': return 0.7;
+                    case 'brute': return 0.5;
+                    case 'crawler': return 0.8;
+                    case 'toxic': return 0.6;
+                    case 'tank': return 0.3;
+                    case 'fast': return 0.4;
+                    case 'spitter': return 0.4;
+                    case 'boss': return 0.1;
+                    default: return 0.7;
+                }
+            }
+            
+            getUncommonItemChance() {
+                switch (this.type) {
+                    case 'runner': return 0.2;
+                    case 'brute': return 0.3;
+                    case 'crawler': return 0.1;
+                    case 'toxic': return 0.2;
+                    case 'tank': return 0.3;
+                    case 'fast': return 0.3;
+                    case 'spitter': return 0.3;
+                    case 'boss': return 0.2;
+                    default: return 0.2;
+                }
+            }
+            
+            getRareItemChance() {
+                switch (this.type) {
+                    case 'runner': return 0.1;
+                    case 'brute': return 0.15;
+                    case 'crawler': return 0.05;
+                    case 'toxic': return 0.15;
+                    case 'tank': return 0.25;
+                    case 'fast': return 0.2;
+                    case 'spitter': return 0.2;
+                    case 'boss': return 0.3;
+                    default: return 0.1;
+                }
+            }
+            
+            getLegendaryItemChance() {
+                switch (this.type) {
+                    case 'runner': return 0.0;
+                    case 'brute': return 0.05;
+                    case 'crawler': return 0.0;
+                    case 'toxic': return 0.05;
+                    case 'tank': return 0.15;
+                    case 'fast': return 0.1;
+                    case 'spitter': return 0.1;
+                    case 'boss': return 0.4;
+                    default: return 0.0;
                 }
             }
         }
@@ -1523,6 +1773,19 @@
             gameState.bossAlive = false;
             gameState.pistolCooldown = 0;
             gameState.shotgunCooldown = 0;
+            gameState.laserRifleCooldown = 0;
+            gameState.hasLaserRifle = false;
+            
+            // Reset shop prices
+            gameState.shopPrices = {
+                ammo: 12,
+                shotgunAmmo: 25,
+                medkit: 8,
+                grenades: 40,
+                health: 20,
+                damage: 15,
+                speed: 18
+            };
             
             // Inicia com faca e sem outras armas
             gameState.inventory = [
@@ -1535,6 +1798,7 @@
             gameState.selectedSlot = 0;
             updateInventoryUI();
             updateCoinUI();
+            updateShopPricesUI();
             
             // Geração de obstáculos
             gameState.obstacles = [];
@@ -1585,6 +1849,7 @@
                     case 'medkit': sprite = sprites.items.medkit; break;
                     case 'grenade': sprite = sprites.items.grenade; break;
                     case 'coin': sprite = sprites.items.coin; break;
+                    case 'laserRifle': sprite = sprites.items.laserRifle; break;
                 }
                 
                 // Efeito de flutuação
@@ -1681,18 +1946,20 @@
                             x: grenade.x,
                             y: grenade.y,
                             radius: 0,
-                            maxRadius: 150, // Raio maior
+                            maxRadius: 100, // Raio menor da explosão visual
                             timer: 30
                         });
                         
-                        // Dano aos zumbis - dano total em todo o raio
+                        // Dano aos zumbis - raio maior de dano
                         gameState.zombies.forEach(zombie => {
                             const dx = zombie.x + zombie.width/2 - grenade.x;
                             const dy = zombie.y + zombie.height/2 - grenade.y;
                             const distance = Math.sqrt(dx * dx + dy * dy);
                             
-                            if (distance < 150) { // Área de dano maior
-                                zombie.takeDamage(150);
+                            if (distance < 200) { // Área de dano maior
+                                // Dano diminui com a distância
+                                const damage = 200 * (1 - distance/200);
+                                zombie.takeDamage(damage);
                             }
                         });
                         
@@ -1793,6 +2060,9 @@
             if (gameState.attackCooldown > 0) {
                 gameState.attackCooldown--;
             }
+            if (gameState.laserRifleCooldown > 0) {
+                gameState.laserRifleCooldown--;
+            }
             
             // Atualiza UI
             document.getElementById('zombieCount').textContent = gameState.zombies.length;
@@ -1813,7 +2083,48 @@
                 document.getElementById('timeLeft').textContent = `TEMPO: ${timeLeft}s`;
             }
             
+            // Atualiza indicadores de cooldown
+            updateCooldownIndicators();
+            
             requestAnimationFrame(gameLoop);
+        }
+
+        function updateCooldownIndicators() {
+            // Remove todos os indicadores existentes
+            document.querySelectorAll('.cooldown-indicator').forEach(el => el.remove());
+            
+            // Pistola
+            if (gameState.pistolCooldown > 0) {
+                const slot = document.querySelectorAll('.inventory-slot')[1];
+                const indicator = document.createElement('div');
+                indicator.className = 'cooldown-indicator';
+                indicator.textContent = Math.ceil(gameState.pistolCooldown / 60);
+                slot.appendChild(indicator);
+            }
+            
+            // Shotgun
+            if (gameState.shotgunCooldown > 0) {
+                const slot = document.querySelectorAll('.inventory-slot')[2];
+                const indicator = document.createElement('div');
+                indicator.className = 'cooldown-indicator';
+                indicator.textContent = Math.ceil(gameState.shotgunCooldown / 60);
+                slot.appendChild(indicator);
+            }
+            
+            // Laser Rifle (se tiver)
+            if (gameState.hasLaserRifle && gameState.laserRifleCooldown > 0) {
+                // Encontra o slot do laser rifle
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i].type === 'laserRifle') {
+                        const slot = document.querySelectorAll('.inventory-slot')[i];
+                        const indicator = document.createElement('div');
+                        indicator.className = 'cooldown-indicator';
+                        indicator.textContent = Math.ceil(gameState.laserRifleCooldown / 60);
+                        slot.appendChild(indicator);
+                        break;
+                    }
+                }
+            }
         }
 
         // Spawn de zumbis
@@ -1971,14 +2282,26 @@
             document.getElementById('shop').style.display = 'none';
         }
         
+        function updateShopPricesUI() {
+            document.getElementById('ammoPrice').textContent = Math.floor(gameState.shopPrices.ammo);
+            document.getElementById('shotgunAmmoPrice').textContent = Math.floor(gameState.shopPrices.shotgunAmmo);
+            document.getElementById('medkitPrice').textContent = Math.floor(gameState.shopPrices.medkit);
+            document.getElementById('grenadesPrice').textContent = Math.floor(gameState.shopPrices.grenades);
+            document.getElementById('healthPrice').textContent = Math.floor(gameState.shopPrices.health);
+            document.getElementById('damagePrice').textContent = Math.floor(gameState.shopPrices.damage);
+            document.getElementById('speedPrice').textContent = Math.floor(gameState.shopPrices.speed);
+        }
+        
         function buyAmmo() {
-            if (gameState.coins >= 12) {
+            if (gameState.coins >= gameState.shopPrices.ammo) {
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === 'pistol') {
                         gameState.inventory[i].ammo += 12;
-                        gameState.coins -= 12;
+                        gameState.coins -= gameState.shopPrices.ammo;
+                        gameState.shopPrices.ammo = Math.floor(gameState.shopPrices.ammo * 1.2); // Aumenta o preço
                         updateInventoryUI();
                         updateCoinUI();
+                        updateShopPricesUI();
                         break;
                     }
                 }
@@ -1986,13 +2309,15 @@
         }
         
         function buyShotgunAmmo() {
-            if (gameState.coins >= 25) {
+            if (gameState.coins >= gameState.shopPrices.shotgunAmmo) {
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === 'shotgun') {
                         gameState.inventory[i].ammo += 5;
-                        gameState.coins -= 25;
+                        gameState.coins -= gameState.shopPrices.shotgunAmmo;
+                        gameState.shopPrices.shotgunAmmo = Math.floor(gameState.shopPrices.shotgunAmmo * 1.2); // Aumenta o preço
                         updateInventoryUI();
                         updateCoinUI();
+                        updateShopPricesUI();
                         break;
                     }
                 }
@@ -2000,37 +2325,45 @@
         }
         
         function buyHealth() {
-            if (gameState.coins >= 20) {
+            if (gameState.coins >= gameState.shopPrices.health) {
                 gameState.player.increaseMaxHealth(25);
-                gameState.coins -= 20;
+                gameState.coins -= gameState.shopPrices.health;
+                gameState.shopPrices.health = Math.floor(gameState.shopPrices.health * 1.2); // Aumenta o preço
                 updateCoinUI();
+                updateShopPricesUI();
             }
         }
         
         function buyDamage() {
-            if (gameState.coins >= 15) {
+            if (gameState.coins >= gameState.shopPrices.damage) {
                 gameState.player.increaseDamage(0.1);
-                gameState.coins -= 15;
+                gameState.coins -= gameState.shopPrices.damage;
+                gameState.shopPrices.damage = Math.floor(gameState.shopPrices.damage * 1.2); // Aumenta o preço
                 updateCoinUI();
+                updateShopPricesUI();
             }
         }
         
         function buySpeed() {
-            if (gameState.coins >= 18) {
+            if (gameState.coins >= gameState.shopPrices.speed) {
                 gameState.player.increaseSpeed(0.35);
-                gameState.coins -= 18;
+                gameState.coins -= gameState.shopPrices.speed;
+                gameState.shopPrices.speed = Math.floor(gameState.shopPrices.speed * 1.2); // Aumenta o preço
                 updateCoinUI();
+                updateShopPricesUI();
             }
         }
         
         function buyMedkit() {
-            if (gameState.coins >= 8) {
+            if (gameState.coins >= gameState.shopPrices.medkit) {
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === 'medkit') {
                         gameState.inventory[i].ammo += 1;
-                        gameState.coins -= 8;
+                        gameState.coins -= gameState.shopPrices.medkit;
+                        gameState.shopPrices.medkit = Math.floor(gameState.shopPrices.medkit * 1.2); // Aumenta o preço
                         updateInventoryUI();
                         updateCoinUI();
+                        updateShopPricesUI();
                         break;
                     }
                 }
@@ -2038,13 +2371,15 @@
         }
         
         function buyGrenades() {
-            if (gameState.coins >= 40) {
+            if (gameState.coins >= gameState.shopPrices.grenades) {
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === 'grenade') {
                         gameState.inventory[i].ammo += 2;
-                        gameState.coins -= 40;
+                        gameState.coins -= gameState.shopPrices.grenades;
+                        gameState.shopPrices.grenades = Math.floor(gameState.shopPrices.grenades * 1.2); // Aumenta o preço
                         updateInventoryUI();
                         updateCoinUI();
+                        updateShopPricesUI();
                         break;
                     }
                 }
@@ -2054,6 +2389,12 @@
         // Atualiza UI do inventário
         function updateInventoryUI() {
             document.querySelectorAll('.inventory-slot').forEach((slot, index) => {
+                // Verifica se é o laser rifle (não mostra na UI até ser desbloqueado)
+                if (gameState.inventory[index].type === 'laserRifle' && !gameState.hasLaserRifle) {
+                    slot.innerHTML = '❓<div class="slot-ammo">?</div>';
+                    return;
+                }
+                
                 slot.innerHTML = getWeaponIcon(gameState.inventory[index].type);
                 
                 if (gameState.inventory[index].ammo !== null) {
@@ -2083,6 +2424,7 @@
                 case 'grenade': return '🧨';
                 case 'pistolAmmo': return '🔹';
                 case 'shotgunAmmo': return '🔸';
+                case 'laserRifle': return '🔋';
                 default: return '❓';
             }
         }
@@ -2184,6 +2526,11 @@
                 gameState.player.useMedkit();
             } else if (weapon.type === 'grenade') {
                 gameState.player.throwGrenade(mouseX, mouseY);
+            } else if (weapon.type === 'laserRifle' && weapon.ammo > 0) {
+                if (gameState.player.fireLaserRifle(mouseX, mouseY)) {
+                    weapon.ammo--;
+                    updateInventoryUI();
+                }
             }
         });
         
