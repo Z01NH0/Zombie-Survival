@@ -233,13 +233,29 @@
             border-radius: 10px;
             z-index: 200;
             display: none;
-            width: 400px;
+            width: 500px;
         }
         
         #shop h2 {
             color: #ffcc55;
             margin-bottom: 15px;
             text-align: center;
+        }
+        
+        .shop-columns {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .shop-column {
+            flex: 1;
+        }
+        
+        .shop-column-title {
+            color: #ffcc55;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 14px;
         }
         
         .shop-item {
@@ -250,6 +266,7 @@
             padding: 10px;
             background: rgba(50, 50, 50, 0.5);
             border-radius: 5px;
+            font-size: 12px;
         }
         
         .shop-item button {
@@ -347,33 +364,41 @@
     
     <div id="shop">
         <h2>LOJA DE MELHORIAS</h2>
-        <div class="shop-item">
-            <span>+12 Munição Pistola (12 moedas)</span>
-            <button id="buyAmmo">COMPRAR</button>
-        </div>
-        <div class="shop-item">
-            <span>+5 Munição Shotgun (25 moedas)</span>
-            <button id="buyShotgunAmmo">COMPRAR</button>
-        </div>
-        <div class="shop-item">
-            <span>+25% Vida (20 moedas)</span>
-            <button id="buyHealth">COMPRAR</button>
-        </div>
-        <div class="shop-item">
-            <span>+10% Dano (15 moedas)</span>
-            <button id="buyDamage">COMPRAR</button>
-        </div>
-        <div class="shop-item">
-            <span>+10% Velocidade (18 moedas)</span>
-            <button id="buySpeed">COMPRAR</button>
-        </div>
-        <div class="shop-item">
-            <span>Kit Médico (8 moedas)</span>
-            <button id="buyMedkit">COMPRAR</button>
-        </div>
-        <div class="shop-item">
-            <span>2 Granadas (40 moedas)</span>
-            <button id="buyGrenades">COMPRAR</button>
+        <div class="shop-columns">
+            <div class="shop-column">
+                <div class="shop-column-title">ARSENAL</div>
+                <div class="shop-item">
+                    <span>+12 Munição Pistola (12 moedas)</span>
+                    <button id="buyAmmo">COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span>+5 Munição Shotgun (25 moedas)</span>
+                    <button id="buyShotgunAmmo">COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span>Kit Médico (8 moedas)</span>
+                    <button id="buyMedkit">COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span>2 Granadas (40 moedas)</span>
+                    <button id="buyGrenades">COMPRAR</button>
+                </div>
+            </div>
+            <div class="shop-column">
+                <div class="shop-column-title">STATUS</div>
+                <div class="shop-item">
+                    <span>+25% Vida (20 moedas)</span>
+                    <button id="buyHealth">COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span>+10% Dano (15 moedas)</span>
+                    <button id="buyDamage">COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span>+10% Velocidade (18 moedas)</span>
+                    <button id="buySpeed">COMPRAR</button>
+                </div>
+            </div>
         </div>
         <button id="closeShop" style="width: 100%; margin-top: 15px;">FECHAR LOJA</button>
     </div>
@@ -448,7 +473,9 @@
             shopOpen: false,
             itemSpawnTimer: 0,
             bossSpawned: false,
-            bossAlive: false
+            bossAlive: false,
+            pistolCooldown: 0,
+            shotgunCooldown: 0
         };
 
         // Sprites
@@ -936,16 +963,16 @@
             }
 
             increaseMaxHealth(amount) {
-                this.maxHealth += amount;
-                this.health += amount;
+                this.maxHealth = Math.floor(this.maxHealth * 1.1);
+                this.health = Math.floor(this.health * 1.1);
             }
 
             increaseDamage(multiplier) {
-                this.damageMultiplier += multiplier;
+                this.damageMultiplier *= 1.1;
             }
 
             increaseSpeed(amount) {
-                this.speed += amount;
+                this.speed *= 1.1;
             }
 
             useMedkit() {
@@ -979,7 +1006,8 @@
                         exploded: false,
                         distanceTraveled: 0,
                         maxDistance: 500, // Distância máxima
-                        flashTimer: 0
+                        flashTimer: 0,
+                        stuckZombie: null
                     });
                     
                     gameState.inventory[4].ammo--;
@@ -1493,6 +1521,8 @@
             gameState.itemSpawnTimer = 0;
             gameState.bossSpawned = false;
             gameState.bossAlive = false;
+            gameState.pistolCooldown = 0;
+            gameState.shotgunCooldown = 0;
             
             // Inicia com faca e sem outras armas
             gameState.inventory = [
@@ -1609,8 +1639,29 @@
                 ctx.arc(grenade.x, grenade.y, 5, 0, Math.PI * 2);
                 ctx.fill();
                 
+                // Verifica colisão com zumbis
+                if (!grenade.exploded && !grenade.stuckZombie) {
+                    for (const zombie of gameState.zombies) {
+                        if (
+                            grenade.x > zombie.x && grenade.x < zombie.x + zombie.width &&
+                            grenade.y > zombie.y && grenade.y < zombie.y + zombie.height
+                        ) {
+                            grenade.stuckZombie = zombie;
+                            grenade.exploded = true;
+                            grenade.flashTimer = 0; // Explode imediatamente
+                            break;
+                        }
+                    }
+                }
+                
+                // Se grudou em um zumbi, segue ele
+                if (grenade.stuckZombie) {
+                    grenade.x = grenade.stuckZombie.x + grenade.stuckZombie.width / 2;
+                    grenade.y = grenade.stuckZombie.y + grenade.stuckZombie.height / 2;
+                }
+                
                 // Atualiza posição
-                if (!grenade.exploded) {
+                if (!grenade.exploded && !grenade.stuckZombie) {
                     grenade.x += grenade.vx;
                     grenade.y += grenade.vy;
                     grenade.distanceTraveled += Math.sqrt(grenade.vx * grenade.vx + grenade.vy * grenade.vy);
@@ -1620,7 +1671,7 @@
                         grenade.exploded = true;
                         grenade.flashTimer = 90; // 1.5 segundos de piscar
                     }
-                } else {
+                } else if (grenade.exploded) {
                     // Contagem regressiva para explosão
                     grenade.flashTimer--;
                     
@@ -1630,7 +1681,7 @@
                             x: grenade.x,
                             y: grenade.y,
                             radius: 0,
-                            maxRadius: 120, // Raio um pouco menor
+                            maxRadius: 150, // Raio maior
                             timer: 30
                         });
                         
@@ -1640,8 +1691,8 @@
                             const dy = zombie.y + zombie.height/2 - grenade.y;
                             const distance = Math.sqrt(dx * dx + dy * dy);
                             
-                            if (distance < 120) {
-                                zombie.takeDamage(150); // Dano total em todo o raio
+                            if (distance < 150) { // Área de dano maior
+                                zombie.takeDamage(150);
                             }
                         });
                         
@@ -1732,7 +1783,13 @@
                 }
             });
             
-            // Atualiza cooldown do ataque
+            // Atualiza cooldowns
+            if (gameState.pistolCooldown > 0) {
+                gameState.pistolCooldown--;
+            }
+            if (gameState.shotgunCooldown > 0) {
+                gameState.shotgunCooldown--;
+            }
             if (gameState.attackCooldown > 0) {
                 gameState.attackCooldown--;
             }
@@ -2089,31 +2146,39 @@
             
             if (weapon.type === 'knife') {
                 gameState.player.meleeAttack();
-            } else if (weapon.type === 'pistol' && weapon.ammo > 0 && gameState.attackCooldown <= 0) {
+            } else if (weapon.type === 'pistol' && weapon.ammo > 0 && gameState.pistolCooldown <= 0) {
                 const player = gameState.player;
+                // Calcula a posição do cano da pistola
+                const barrelX = player.x + player.width / 2 + Math.cos(player.angle) * 35;
+                const barrelY = player.y + player.height / 2 + Math.sin(player.angle) * 35;
+                
                 gameState.bullets.push(new Bullet(
-                    player.x + player.width / 2,
-                    player.y + player.height / 2,
+                    barrelX,
+                    barrelY,
                     player.angle,
                     'pistol'
                 ));
                 weapon.ammo--;
-                gameState.attackCooldown = 10;
+                gameState.pistolCooldown = 30; // 0.5 segundos (60 fps * 0.5)
                 updateInventoryUI();
-            } else if (weapon.type === 'shotgun' && weapon.ammo > 0 && gameState.attackCooldown <= 0) {
+            } else if (weapon.type === 'shotgun' && weapon.ammo > 0 && gameState.shotgunCooldown <= 0) {
                 const player = gameState.player;
+                // Calcula a posição do cano da shotgun
+                const barrelX = player.x + player.width / 2 + Math.cos(player.angle) * 40;
+                const barrelY = player.y + player.height / 2 + Math.sin(player.angle) * 40;
+                
                 // Atira 5 projéteis em leque
                 for (let i = 0; i < 5; i++) {
                     const spread = (i - 2) * Math.PI / 16; // Leque mais amplo
                     gameState.bullets.push(new Bullet(
-                        player.x + player.width / 2,
-                        player.y + player.height / 2,
+                        barrelX,
+                        barrelY,
                         player.angle + spread,
                         'shotgun'
                     ));
                 }
                 weapon.ammo--;
-                gameState.attackCooldown = 30;
+                gameState.shotgunCooldown = 60; // 1 segundo (60 fps * 1)
                 updateInventoryUI();
             } else if (weapon.type === 'medkit') {
                 gameState.player.useMedkit();
