@@ -523,8 +523,8 @@
             mapTiles: 25,
             itemSpawnChance: 0.05,
             itemSpawnInterval: 2000,
-            baseZombiesPerNight: 5,
-            zombieIncreasePerDay: 2
+            baseZombiesPerNight: 15,
+            zombieIncreasePerDay: 12
         };
         
         const canvas = document.getElementById('gameCanvas');
@@ -552,7 +552,7 @@
                 { type: 'shotgun', ammo: 0 },
                 { type: 'medkit', ammo: 0 },
                 { type: 'grenade', ammo: 0 },
-                { type: 'empty', ammo: null } // Novo slot para arma laser
+                { type: 'empty', ammo: null } 
             ],
             selectedSlot: 0,
             map: [],
@@ -1277,10 +1277,10 @@
             }
 
             fireLaserRifle() {
-                const startX = this.x + this.width / 2;
-                const startY = this.y + this.height / 2;
+                const startX = this.x + this.width / 2 + Math.cos(this.angle) * 110;
+                const startY = this.y + this.height / 2 + Math.sin(this.angle) * 110;
                 
-                // Calcula o final do laser (até a borda da tela)
+                
                 const endX = startX + Math.cos(this.angle) * 2000;
                 const endY = startY + Math.sin(this.angle) * 2000;
                 
@@ -1293,7 +1293,7 @@
                     angle: this.angle,
                     timer: 42, // 0.7 segundos (60 fps * 0.7)
                     damageTimer: 0,
-                    width: 20 // Laser bem grosso
+                    width: 50 // Laser bem grosso
                 });
                 
                 // Configura cooldown
@@ -1669,7 +1669,7 @@
                     }
                     
                     // Chance especial do boss dropar a arma laser
-                    if (this.type === 'boss' && Math.random() < 0.05) {
+                    if (this.type === 'boss' && Math.random() < 0.1) {
                         gameState.items.push({
                             type: 'laserRifle',
                             x: this.x,
@@ -1685,7 +1685,7 @@
                     if (this.type === 'boss') {
                         gameState.bossSpawned = false;
                         gameState.bossAlive = false;
-                        // Quando o boss morre, termina a noite imediatamente
+                        
                         endNight();
                     }
                     
@@ -1972,7 +1972,7 @@
             gameState.pistolCooldown = 0;
             gameState.shotgunCooldown = 0;
             gameState.laserRifleCooldown = 0;
-            gameState.hasLaserRifle = true;
+            gameState.hasLaserRifle = false;
             
             // Reset shop prices
             gameState.shopPrices = {
@@ -1988,12 +1988,11 @@
             // Inicia com faca e sem outras armas
             gameState.inventory = [
                 { type: 'knife', ammo: null },
-              { type: 'laserRifle', ammo: 50 },
                 { type: 'pistol', ammo: 0 },
                 { type: 'shotgun', ammo: 0 },
                 { type: 'medkit', ammo: 0 },
                 { type: 'grenade', ammo: 0 },
-                { type: 'empty', ammo: null } // Slot para arma laser
+                { type: 'empty', ammo: null } 
             ];
             gameState.selectedSlot = 0;
             updateInventoryUI();
