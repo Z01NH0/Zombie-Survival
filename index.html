@@ -502,7 +502,7 @@
         <button id="startButton">INICIAR SOBREVIVÊNCIA</button>
         <div id="controls">
             WASD: MOVER | SHIFT: CORRER | 1-6: TROCAR ARMA<br>
-            CLIQUE: ATACAR | R: RECARREGAR 
+            CLIQUE: ATACAR  
         </div>
     </div>
     
@@ -516,15 +516,15 @@
         const config = {
             width: 1600,
             height: 900,
-            playerSpeed: 3.5,
+            playerSpeed: 3,
             zombieSpawnRate: 1500,
             nightDuration: 45000,
-            dayDuration: 15000,
+            dayDuration: 20000,
             mapTiles: 25,
             itemSpawnChance: 0.05,
             itemSpawnInterval: 2000,
-            baseZombiesPerNight: 15,
-            zombieIncreasePerDay: 12
+            baseZombiesPerNight: 5,
+            zombieIncreasePerDay: 4
         };
         
         const canvas = document.getElementById('gameCanvas');
@@ -572,8 +572,8 @@
             shotgunCooldown: 0,
             laserRifleCooldown: 0,
             hasLaserRifle: false,
-            laserBeams: [], // Array para armazenar os lasers ativos
-            laserChargeEffects: [], // Array para armazenar efeitos de carregamento
+            laserBeams: [], 
+            laserChargeEffects: [], 
             shopPrices: {
                 ammo: 12,
                 shotgunAmmo: 25,
