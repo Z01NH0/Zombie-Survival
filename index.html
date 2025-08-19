@@ -2006,7 +2006,7 @@
                             x: grenade.x,
                             y: grenade.y,
                             radius: 0,
-                            maxRadius: 150, // Raio maior da explosão visual
+                            maxRadius: 70, // Raio maior da explosão visual
                             timer: 30
                         });
                         
@@ -2016,7 +2016,7 @@
                             const dy = zombie.y + zombie.height/2 - grenade.y;
                             const distance = Math.sqrt(dx * dx + dy * dy);
                             
-                            if (distance < 250) { // Área de dano maior
+                            if (distance < 500) { // Área de dano maior
                                 // Dano diminui com a distância
                                 const damage = 300 * (1 - distance/250); // Dano aumentado
                                 zombie.takeDamage(damage);
