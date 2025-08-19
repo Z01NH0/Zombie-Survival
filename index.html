@@ -364,6 +364,63 @@
             pointer-events: none;
             border-radius: 5px;
         }
+        
+        /* Novos estilos para a mensagem de arma secreta */
+        #secretWeaponMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: #ffcc00;
+            text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px solid #ffcc00;
+            z-index: 300;
+            display: none;
+            animation: pulse 1s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { transform: translate(-50%, -50%) scale(1); }
+            to { transform: translate(-50%, -50%) scale(1.1); }
+        }
+        
+        /* Efeitos para a mensagem */
+        .secret-weapon-effect {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffcc00, transparent);
+            pointer-events: none;
+            z-index: 299;
+            animation: floatAround 3s linear infinite;
+        }
+        
+        @keyframes floatAround {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) rotate(360deg); opacity: 0; }
+        }
+        
+        /* Efeito de carregamento da arma laser */
+        .laser-charge-effect {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #00ff00, #00aa00);
+            pointer-events: none;
+            z-index: 110;
+            animation: laserCharge 0.5s infinite alternate;
+        }
+        
+        @keyframes laserCharge {
+            from { transform: scale(1); opacity: 0.7; }
+            to { transform: scale(1.5); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -393,7 +450,10 @@
         <div class="inventory-slot">💥<div class="slot-ammo">0</div></div>
         <div class="inventory-slot">🩹<div class="slot-ammo">0</div></div>
         <div class="inventory-slot">🧨<div class="slot-ammo">0</div></div>
+        <div class="inventory-slot">❓<div class="slot-ammo">?</div></div>
     </div>
+    
+    <div id="secretWeaponMessage">⭐VOCÊ DESBLOQUEOU A ARMA SECRETA⭐</div>
     
     <div id="shop">
         <h2>LOJA DE MELHORIAS</h2>
@@ -441,7 +501,7 @@
         <p class="screen-description">O apocalipse zumbi chegou. Sobreviva o máximo que puder em um mundo hostil. Durante o dia, compre melhorias na loja. À noite, enfrente hordas de zumbis cada vez maiores.</p>
         <button id="startButton">INICIAR SOBREVIVÊNCIA</button>
         <div id="controls">
-            WASD: MOVER | SHIFT: CORRER | 1-5: TROCAR ARMA<br>
+            WASD: MOVER | SHIFT: CORRER | 1-6: TROCAR ARMA<br>
             CLIQUE: ATACAR | R: RECARREGAR 
         </div>
     </div>
@@ -491,7 +551,8 @@
                 { type: 'pistol', ammo: 0 },
                 { type: 'shotgun', ammo: 0 },
                 { type: 'medkit', ammo: 0 },
-                { type: 'grenade', ammo: 0 }
+                { type: 'grenade', ammo: 0 },
+                { type: 'empty', ammo: null } // Novo slot para arma laser
             ],
             selectedSlot: 0,
             map: [],
@@ -511,6 +572,8 @@
             shotgunCooldown: 0,
             laserRifleCooldown: 0,
             hasLaserRifle: false,
+            laserBeams: [], // Array para armazenar os lasers ativos
+            laserChargeEffects: [], // Array para armazenar efeitos de carregamento
             shopPrices: {
                 ammo: 12,
                 shotgunAmmo: 25,
@@ -844,6 +907,8 @@
                 this.knifeAngle = 0;
                 this.isAttacking = false;
                 this.damageMultiplier = 1;
+                this.laserRifleCharging = false;
+                this.laserRifleChargeTime = 0;
             }
 
             update() {
@@ -880,6 +945,31 @@
                     if (this.knifeAngle >= Math.PI) {
                         this.knifeAngle = 0;
                         this.isAttacking = false;
+                    }
+                }
+
+                // Carregamento da arma laser
+                if (this.laserRifleCharging) {
+                    this.laserRifleChargeTime++;
+                    
+                    // Cria efeitos de carregamento
+                    if (this.laserRifleChargeTime % 10 === 0) {
+                        const barrelX = this.x + this.width / 2 + Math.cos(this.angle) * 45;
+                        const barrelY = this.y + this.height / 2 + Math.sin(this.angle) * 45;
+                        
+                        gameState.laserChargeEffects.push({
+                            x: barrelX,
+                            y: barrelY,
+                            timer: 30,
+                            size: 5 + Math.random() * 10
+                        });
+                    }
+                    
+                    // Quando termina o carregamento, dispara o laser
+                    if (this.laserRifleChargeTime >= 300) { // 5 segundos (60 fps * 5)
+                        this.laserRifleCharging = false;
+                        this.laserRifleChargeTime = 0;
+                        this.fireLaserRifle();
                     }
                 }
 
@@ -955,14 +1045,13 @@
                 } else if (item.type === 'laserRifle') {
                     gameState.hasLaserRifle = true;
                     gameState.items.splice(index, 1);
-                    // Adiciona ao inventário com 10 balas
-                    for (let i = 0; i < gameState.inventory.length; i++) {
-                        if (gameState.inventory[i].type === 'empty') {
-                            gameState.inventory[i] = { type: 'laserRifle', ammo: 10 };
-                            updateInventoryUI();
-                            return;
-                        }
-                    }
+                    // Adiciona ao inventário
+                    gameState.inventory[5] = { type: 'laserRifle', ammo: 10 };
+                    updateInventoryUI();
+                    
+                    // Mostra mensagem de arma secreta
+                    showSecretWeaponMessage();
+                    return;
                 }
 
                 // Outros itens
@@ -1038,6 +1127,14 @@
                         15,
                         -sprites.weapons.laserRifle.height / 2
                     );
+                    
+                    // Efeito de carregamento
+                    if (this.laserRifleCharging) {
+                        ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+                        ctx.beginPath();
+                        ctx.arc(60, 0, 10 + (this.laserRifleChargeTime / 10), 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 } else if (weaponType === 'medkit' && weaponAmmo > 0) {
                     ctx.drawImage(
                         sprites.weapons.medkit,
@@ -1171,50 +1268,67 @@
                 return false;
             }
 
-            fireLaserRifle(targetX, targetY) {
-                if (gameState.laserRifleCooldown > 0) return false;
+            startLaserRifleCharge() {
+                if (this.laserRifleCharging || gameState.laserRifleCooldown > 0) return false;
                 
+                this.laserRifleCharging = true;
+                this.laserRifleChargeTime = 0;
+                return true;
+            }
+
+            fireLaserRifle() {
                 const startX = this.x + this.width / 2;
                 const startY = this.y + this.height / 2;
-                const angle = Math.atan2(targetY - startY, targetX - startX);
+                
+                // Calcula o final do laser (até a borda da tela)
+                const endX = startX + Math.cos(this.angle) * 2000;
+                const endY = startY + Math.sin(this.angle) * 2000;
                 
                 // Cria o laser beam
-                const laserLength = 1000;
-                const endX = startX + Math.cos(angle) * laserLength;
-                const endY = startY + Math.sin(angle) * laserLength;
-                
-                // Desenha o laser
-                const laserBeam = document.createElement('div');
-                laserBeam.className = 'laser-beam';
-                laserBeam.style.left = `${startX}px`;
-                laserBeam.style.top = `${startY}px`;
-                laserBeam.style.width = `${laserLength}px`;
-                laserBeam.style.height = '10px';
-                laserBeam.style.transform = `rotate(${angle}rad)`;
-                laserBeam.style.transformOrigin = '0 0';
-                document.body.appendChild(laserBeam);
-                
-                // Remove após um curto período
-                setTimeout(() => {
-                    laserBeam.remove();
-                }, 100);
-                
-                // Dano aos zumbis em linha reta
-                gameState.zombies.forEach(zombie => {
-                    const zombieCenterX = zombie.x + zombie.width / 2;
-                    const zombieCenterY = zombie.y + zombie.height / 2;
-                    
-                    // Verifica colisão com linha
-                    if (pointToLineDistance(zombieCenterX, zombieCenterY, startX, startY, endX, endY) < 30) {
-                        zombie.takeDamage(200); // Dano massivo
-                    }
+                gameState.laserBeams.push({
+                    startX: startX,
+                    startY: startY,
+                    endX: endX,
+                    endY: endY,
+                    angle: this.angle,
+                    timer: 42, // 0.7 segundos (60 fps * 0.7)
+                    damageTimer: 0,
+                    width: 20 // Laser bem grosso
                 });
                 
                 // Configura cooldown
-                gameState.laserRifleCooldown = 1200; // 20 segundos (60 fps * 20)
+                gameState.laserRifleCooldown = 300; // 5 segundos (60 fps * 5)
                 
                 return true;
             }
+        }
+
+        // Função para mostrar mensagem de arma secreta
+        function showSecretWeaponMessage() {
+            const message = document.getElementById('secretWeaponMessage');
+            message.style.display = 'block';
+            
+            // Cria efeitos visuais
+            for (let i = 0; i < 20; i++) {
+                const effect = document.createElement('div');
+                effect.className = 'secret-weapon-effect';
+                effect.style.left = `${Math.random() * 100}%`;
+                effect.style.top = `${Math.random() * 100}%`;
+                effect.style.setProperty('--tx', `${(Math.random() - 0.5) * 200}px`);
+                effect.style.setProperty('--ty', `${(Math.random() - 0.5) * 200}px`);
+                effect.style.animationDelay = `${Math.random() * 2}s`;
+                document.body.appendChild(effect);
+                
+                // Remove o efeito após a animação
+                setTimeout(() => {
+                    effect.remove();
+                }, 3000);
+            }
+            
+            // Remove a mensagem após 3 segundos
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
         }
 
         // Função auxiliar para calcular distância de ponto para linha
@@ -1319,6 +1433,7 @@
                 this.lastAcidShot = 0;
                 this.specialAbilityCooldown = 0;
                 this.lastBossAttack = 0;
+                this.laserDamageTimer = 0;
             }
             
             getMaxHealth() {
@@ -1465,6 +1580,14 @@
                 if (this.attackCooldown > 0) this.attackCooldown--;
                 if (this.specialAbilityCooldown > 0) this.specialAbilityCooldown--;
 
+                // Dano contínuo do laser
+                if (this.laserDamageTimer > 0) {
+                    this.laserDamageTimer--;
+                    if (this.laserDamageTimer % 6 === 0) { // 0.1 segundos (60 fps / 6)
+                        this.takeDamage(100);
+                    }
+                }
+
                 // Limites do mapa
                 this.x = Math.max(0, Math.min(config.width - this.width, this.x));
                 this.y = Math.max(0, Math.min(config.height - this.height, this.y));
@@ -1505,6 +1628,14 @@
                     ctx.fillRect(this.x, this.y - 12, this.width, 5);
                     ctx.fillStyle = this.type === 'boss' ? '#f0f' : '#f00';
                     ctx.fillRect(this.x, this.y - 12, this.width * (this.health / this.getMaxHealth()), 5);
+                }
+                
+                // Efeito de dano do laser
+                if (this.laserDamageTimer > 0) {
+                    ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.width/2, this.y + this.height/2, this.width/2, 0, Math.PI * 2);
+                    ctx.fill();
                 }
             }
 
@@ -1663,6 +1794,11 @@
                     default: return 0.0;
                 }
             }
+            
+            // Aplicar dano contínuo do laser
+            applyLaserDamage() {
+                this.laserDamageTimer = 42; // 0.7 segundos (60 fps * 0.7)
+            }
         }
 
         // Classe de Projétil
@@ -1818,6 +1954,8 @@
             gameState.grenades = [];
             gameState.explosions = [];
             gameState.items = [];
+            gameState.laserBeams = [];
+            gameState.laserChargeEffects = [];
             gameState.day = 1;
             gameState.gameTime = 0;
             gameState.gameOver = false;
@@ -1834,7 +1972,7 @@
             gameState.pistolCooldown = 0;
             gameState.shotgunCooldown = 0;
             gameState.laserRifleCooldown = 0;
-            gameState.hasLaserRifle = false;
+            gameState.hasLaserRifle = true;
             
             // Reset shop prices
             gameState.shopPrices = {
@@ -1850,10 +1988,12 @@
             // Inicia com faca e sem outras armas
             gameState.inventory = [
                 { type: 'knife', ammo: null },
+              { type: 'laserRifle', ammo: 50 },
                 { type: 'pistol', ammo: 0 },
                 { type: 'shotgun', ammo: 0 },
                 { type: 'medkit', ammo: 0 },
-                { type: 'grenade', ammo: 0 }
+                { type: 'grenade', ammo: 0 },
+                { type: 'empty', ammo: null } // Slot para arma laser
             ];
             gameState.selectedSlot = 0;
             updateInventoryUI();
@@ -1927,6 +2067,68 @@
             // Atualiza e desenha partículas
             updateParticles();
             drawParticles();
+            
+            // Atualiza e desenha efeitos de carregamento do laser
+            for (let i = gameState.laserChargeEffects.length - 1; i >= 0; i--) {
+                const effect = gameState.laserChargeEffects[i];
+                
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+                ctx.beginPath();
+                ctx.arc(effect.x, effect.y, effect.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                effect.timer--;
+                if (effect.timer <= 0) {
+                    gameState.laserChargeEffects.splice(i, 1);
+                }
+            }
+            
+            // Atualiza e desenha lasers
+            for (let i = gameState.laserBeams.length - 1; i >= 0; i--) {
+                const laser = gameState.laserBeams[i];
+                
+                // Desenha o laser
+                const gradient = ctx.createLinearGradient(
+                    laser.startX, laser.startY, 
+                    laser.endX, laser.endY
+                );
+                gradient.addColorStop(0, 'rgba(0, 255, 0, 0.9)');
+                gradient.addColorStop(0.5, 'rgba(0, 255, 0, 0.7)');
+                gradient.addColorStop(1, 'rgba(0, 255, 0, 0.5)');
+                
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = laser.width;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(laser.startX, laser.startY);
+                ctx.lineTo(laser.endX, laser.endY);
+                ctx.stroke();
+                
+                // Efeito de brilho ao redor do laser
+                ctx.strokeStyle = 'rgba(0, 255, 0, 0.3)';
+                ctx.lineWidth = laser.width + 10;
+                ctx.beginPath();
+                ctx.moveTo(laser.startX, laser.startY);
+                ctx.lineTo(laser.endX, laser.endY);
+                ctx.stroke();
+                
+                // Verifica colisão com zumbis
+                gameState.zombies.forEach(zombie => {
+                    const zombieCenterX = zombie.x + zombie.width / 2;
+                    const zombieCenterY = zombie.y + zombie.height / 2;
+                    
+                    // Verifica se o zumbi está na linha do laser
+                    if (pointToLineDistance(zombieCenterX, zombieCenterY, laser.startX, laser.startY, laser.endX, laser.endY) < 30) {
+                        zombie.applyLaserDamage();
+                    }
+                });
+                
+                // Atualiza temporizador
+                laser.timer--;
+                if (laser.timer <= 0) {
+                    gameState.laserBeams.splice(i, 1);
+                }
+            }
             
             // Atualiza e desenha projéteis do boss
             for (let i = gameState.bossProjectiles.length - 1; i >= 0; i--) {
@@ -2158,7 +2360,7 @@
                 const slot = document.querySelectorAll('.inventory-slot')[1];
                 const indicator = document.createElement('div');
                 indicator.className = 'cooldown-indicator';
-                indicator.textContent = Math.ceil(gameState.pistolCooldown / 60);
+                indicator.textContent = (gameState.pistolCooldown / 60).toFixed(2);
                 slot.appendChild(indicator);
             }
             
@@ -2167,23 +2369,17 @@
                 const slot = document.querySelectorAll('.inventory-slot')[2];
                 const indicator = document.createElement('div');
                 indicator.className = 'cooldown-indicator';
-                indicator.textContent = Math.ceil(gameState.shotgunCooldown / 60);
+                indicator.textContent = (gameState.shotgunCooldown / 60).toFixed(2);
                 slot.appendChild(indicator);
             }
             
-            // Laser Rifle (se tiver)
-            if (gameState.hasLaserRifle && gameState.laserRifleCooldown > 0) {
-                // Encontra o slot do laser rifle
-                for (let i = 0; i < gameState.inventory.length; i++) {
-                    if (gameState.inventory[i].type === 'laserRifle') {
-                        const slot = document.querySelectorAll('.inventory-slot')[i];
-                        const indicator = document.createElement('div');
-                        indicator.className = 'cooldown-indicator';
-                        indicator.textContent = Math.ceil(gameState.laserRifleCooldown / 60);
-                        slot.appendChild(indicator);
-                        break;
-                    }
-                }
+            // Laser Rifle
+            if (gameState.laserRifleCooldown > 0) {
+                const slot = document.querySelectorAll('.inventory-slot')[5];
+                const indicator = document.createElement('div');
+                indicator.className = 'cooldown-indicator';
+                indicator.textContent = (gameState.laserRifleCooldown / 60).toFixed(2);
+                slot.appendChild(indicator);
             }
         }
 
@@ -2485,6 +2681,7 @@
                 case 'pistolAmmo': return '🔹';
                 case 'shotgunAmmo': return '🔸';
                 case 'laserRifle': return '🔋';
+                case 'empty': return '❓';
                 default: return '❓';
             }
         }
@@ -2504,6 +2701,7 @@
                 case '3': gameState.selectedSlot = 2; updateInventoryUI(); break;
                 case '4': gameState.selectedSlot = 3; updateInventoryUI(); break;
                 case '5': gameState.selectedSlot = 4; updateInventoryUI(); break;
+                case '6': gameState.selectedSlot = 5; updateInventoryUI(); break;
                 case 'r': reloadWeapon(); break;
                 case 'e': 
                     if (!gameState.isNight && !gameState.shopOpen) {
@@ -2587,7 +2785,7 @@
             } else if (weapon.type === 'grenade') {
                 gameState.player.throwGrenade(mouseX, mouseY);
             } else if (weapon.type === 'laserRifle' && weapon.ammo > 0) {
-                if (gameState.player.fireLaserRifle(mouseX, mouseY)) {
+                if (gameState.player.startLaserRifleCharge()) {
                     weapon.ammo--;
                     updateInventoryUI();
                 }
