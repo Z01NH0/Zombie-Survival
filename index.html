@@ -257,7 +257,7 @@
             border-radius: 10px;
             z-index: 200;
             display: none;
-            width: 500px;
+            width: 600px;
         }
         
         #shop h2 {
@@ -276,10 +276,26 @@
         }
         
         .shop-column-title {
-            color: #ffcc55;
             margin-bottom: 10px;
             text-align: center;
             font-size: 14px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .shop-column.arsenal .shop-column-title {
+            background: #ff5555;
+            color: #fff;
+        }
+        
+        .shop-column.status .shop-column-title {
+            background: #5555ff;
+            color: #fff;
+        }
+        
+        .shop-column.potions .shop-column-title {
+            background: #55ff55;
+            color: #fff;
         }
         
         .shop-item {
@@ -297,6 +313,26 @@
             padding: 5px 10px;
             font-size: 12px;
             margin: 0;
+        }
+        
+        .potion-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-right: 5px;
+            border-radius: 50%;
+        }
+        
+        .potion-strength {
+            background: #ff0000;
+        }
+        
+        .potion-luck {
+            background: #ffcc00;
+        }
+        
+        .potion-ammo {
+            background: #aaaaaa;
         }
         
         #coins {
@@ -421,6 +457,38 @@
             from { transform: scale(1); opacity: 0.7; }
             to { transform: scale(1.5); opacity: 1; }
         }
+        
+        /* Indicadores de poções ativas */
+        #active-potions {
+            position: absolute;
+            top: 130px;
+            left: 10px;
+            z-index: 100;
+            font-size: 12px;
+            color: #ff5555;
+            text-shadow: 2px 2px 0 #000;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .potion-indicator {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 2px solid #fff;
+        }
+        
+        .potion-indicator .days-left {
+            position: absolute;
+            bottom: -15px;
+            font-size: 10px;
+            color: #ffcc55;
+            text-shadow: 1px 1px 0 #000;
+        }
     </style>
 </head>
 <body>
@@ -439,6 +507,8 @@
         <div>DIA: <span id="day">1</span></div>
     </div>
     
+    <div id="active-potions"></div>
+    
     <div id="dayTime">☀️ DIA</div>
     <div id="timeLeft">TEMPO: 15s</div>
     <div id="bossMessage">MATE-O PARA PROSSEGUIR</div>
@@ -446,10 +516,10 @@
     
     <div id="inventory">
         <div class="inventory-slot active">🔪<div class="slot-ammo">-</div></div>
-        <div class="inventory-slot">🔫<div class="slot-ammo">0</div></div>
-        <div class="inventory-slot">💥<div class="slot-ammo">0</div></div>
-        <div class="inventory-slot">🩹<div class="slot-ammo">0</div></div>
-        <div class="inventory-slot">🧨<div class="slot-ammo">0</div></div>
+        <div class="inventory-slot">🔫<div class="slot-ammo">0/100</div></div>
+        <div class="inventory-slot">💥<div class="slot-ammo">0/25</div></div>
+        <div class="inventory-slot">🩹<div class="slot-ammo">0/10</div></div>
+        <div class="inventory-slot">🧨<div class="slot-ammo">0/5</div></div>
         <div class="inventory-slot">❓<div class="slot-ammo">?</div></div>
     </div>
     
@@ -458,38 +528,53 @@
     <div id="shop">
         <h2>LOJA DE MELHORIAS</h2>
         <div class="shop-columns">
-            <div class="shop-column">
+            <div class="shop-column arsenal">
                 <div class="shop-column-title">ARSENAL</div>
                 <div class="shop-item">
-                    <span>+12 Munição Pistola (<span id="ammoPrice">12</span> moedas)</span>
-                    <button id="buyAmmo">COMPRAR</button>
+                    <span>Munição Pistola</span>
+                    <button id="buyAmmo">🪙12 COMPRAR</button>
                 </div>
                 <div class="shop-item">
-                    <span>+5 Munição Shotgun (<span id="shotgunAmmoPrice">25</span> moedas)</span>
-                    <button id="buyShotgunAmmo">COMPRAR</button>
+                    <span>Munição Shotgun</span>
+                    <button id="buyShotgunAmmo">🪙25 COMPRAR</button>
                 </div>
                 <div class="shop-item">
-                    <span>Kit Médico (<span id="medkitPrice">8</span> moedas)</span>
-                    <button id="buyMedkit">COMPRAR</button>
+                    <span>Kit Médico</span>
+                    <button id="buyMedkit">🪙8 COMPRAR</button>
                 </div>
                 <div class="shop-item">
-                    <span>2 Granadas (<span id="grenadesPrice">40</span> moedas)</span>
-                    <button id="buyGrenades">COMPRAR</button>
+                    <span>Granadas</span>
+                    <button id="buyGrenades">🪙40 COMPRAR</button>
                 </div>
             </div>
-            <div class="shop-column">
+            <div class="shop-column status">
                 <div class="shop-column-title">STATUS</div>
                 <div class="shop-item">
-                    <span>+10% Vida (<span id="healthPrice">20</span> moedas)</span>
-                    <button id="buyHealth">COMPRAR</button>
+                    <span>+10% Vida</span>
+                    <button id="buyHealth">🪙20 COMPRAR</button>
                 </div>
                 <div class="shop-item">
-                    <span>+10% Dano (<span id="damagePrice">15</span> moedas)</span>
-                    <button id="buyDamage">COMPRAR</button>
+                    <span>+10% Dano</span>
+                    <button id="buyDamage">🪙15 COMPRAR</button>
                 </div>
                 <div class="shop-item">
-                    <span>+10% Stamina (<span id="speedPrice">18</span> moedas)</span>
-                    <button id="buySpeed">COMPRAR</button>
+                    <span>+10% Stamina</span>
+                    <button id="buySpeed">🪙18 COMPRAR</button>
+                </div>
+            </div>
+            <div class="shop-column potions">
+                <div class="shop-column-title">POÇÕES</div>
+                <div class="shop-item">
+                    <span><div class="potion-icon potion-strength"></div> Poção de Força</span>
+                    <button id="buyStrengthPotion">🪙120 COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span><div class="potion-icon potion-luck"></div> Poção de Sorte</span>
+                    <button id="buyLuckPotion">🪙200 COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span><div class="potion-icon potion-ammo"></div> Poção de Munição</span>
+                    <button id="buyAmmoPotion">🪙150 COMPRAR</button>
                 </div>
             </div>
         </div>
@@ -547,12 +632,12 @@
             gameTime: 0,
             gameOver: false,
             inventory: [
-                { type: 'knife', ammo: null },
-                { type: 'pistol', ammo: 0 },
-                { type: 'shotgun', ammo: 0 },
-                { type: 'medkit', ammo: 0 },
-                { type: 'grenade', ammo: 0 },
-                { type: 'empty', ammo: null } 
+                { type: 'knife', ammo: null, maxAmmo: null },
+                { type: 'pistol', ammo: 0, maxAmmo: 100 },
+                { type: 'shotgun', ammo: 0, maxAmmo: 25 },
+                { type: 'medkit', ammo: 0, maxAmmo: 10 },
+                { type: 'grenade', ammo: 0, maxAmmo: 5 },
+                { type: 'empty', ammo: null, maxAmmo: null } 
             ],
             selectedSlot: 0,
             map: [],
@@ -574,6 +659,11 @@
             hasLaserRifle: false,
             laserBeams: [], 
             laserChargeEffects: [], 
+            activePotions: {
+                strength: { active: false, daysLeft: 0 },
+                luck: { active: false, daysLeft: 0 },
+                infiniteAmmo: { active: false, daysLeft: 0 }
+            },
             shopPrices: {
                 ammo: 12,
                 shotgunAmmo: 25,
@@ -581,7 +671,10 @@
                 grenades: 40,
                 health: 20,
                 damage: 15,
-                speed: 18
+                speed: 18,
+                strengthPotion: 120,
+                luckPotion: 200,
+                ammoPotion: 150
             }
         };
 
@@ -909,6 +1002,8 @@
                 this.damageMultiplier = 1;
                 this.laserRifleCharging = false;
                 this.laserRifleChargeTime = 0;
+                this.baseDamageMultiplier = 1;
+                this.baseMaxHealth = 100;
             }
 
             update() {
@@ -1027,7 +1122,11 @@
                 if (item.type === 'pistolAmmo') {
                     for (let i = 0; i < gameState.inventory.length; i++) {
                         if (gameState.inventory[i].type === 'pistol') {
-                            gameState.inventory[i].ammo += 12;
+                            const maxAmmo = gameState.inventory[i].maxAmmo;
+                            const currentAmmo = gameState.inventory[i].ammo;
+                            const ammoToAdd = Math.min(12, maxAmmo - currentAmmo);
+                            
+                            gameState.inventory[i].ammo += ammoToAdd;
                             gameState.items.splice(index, 1);
                             updateInventoryUI();
                             return;
@@ -1036,7 +1135,11 @@
                 } else if (item.type === 'shotgunAmmo') {
                     for (let i = 0; i < gameState.inventory.length; i++) {
                         if (gameState.inventory[i].type === 'shotgun') {
-                            gameState.inventory[i].ammo += 5;
+                            const maxAmmo = gameState.inventory[i].maxAmmo;
+                            const currentAmmo = gameState.inventory[i].ammo;
+                            const ammoToAdd = Math.min(5, maxAmmo - currentAmmo);
+                            
+                            gameState.inventory[i].ammo += ammoToAdd;
                             gameState.items.splice(index, 1);
                             updateInventoryUI();
                             return;
@@ -1046,7 +1149,7 @@
                     gameState.hasLaserRifle = true;
                     gameState.items.splice(index, 1);
                     // Adiciona ao inventário
-                    gameState.inventory[5] = { type: 'laserRifle', ammo: 10 };
+                    gameState.inventory[5] = { type: 'laserRifle', ammo: 10, maxAmmo: null };
                     updateInventoryUI();
                     
                     // Mostra mensagem de arma secreta
@@ -1058,13 +1161,22 @@
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === item.type) {
                         if (gameState.inventory[i].ammo !== null) {
-                            gameState.inventory[i].ammo += 1;
-                            gameState.items.splice(index, 1);
-                            updateInventoryUI();
+                            const maxAmmo = gameState.inventory[i].maxAmmo;
+                            const currentAmmo = gameState.inventory[i].ammo;
+                            
+                            if (currentAmmo < maxAmmo) {
+                                gameState.inventory[i].ammo += 1;
+                                gameState.items.splice(index, 1);
+                                updateInventoryUI();
+                            }
                             return;
                         }
                     } else if (gameState.inventory[i].type === 'empty') {
-                        gameState.inventory[i] = { type: item.type, ammo: 1 };
+                        gameState.inventory[i] = { 
+                            type: item.type, 
+                            ammo: 1, 
+                            maxAmmo: getMaxAmmoForItem(item.type) 
+                        };
                         gameState.items.splice(index, 1);
                         updateInventoryUI();
                         return;
@@ -1220,6 +1332,7 @@
 
             increaseDamage(multiplier) {
                 this.damageMultiplier *= 1.1;
+                this.baseDamageMultiplier = this.damageMultiplier;
             }
 
             increaseSpeed(amount) {
@@ -1261,7 +1374,9 @@
                         stuckZombie: null
                     });
                     
-                    gameState.inventory[4].ammo--;
+                    if (!gameState.activePotions.infiniteAmmo.active) {
+                        gameState.inventory[4].ammo--;
+                    }
                     updateInventoryUI();
                     return true;
                 }
@@ -1300,6 +1415,18 @@
                 gameState.laserRifleCooldown = 300; // 5 segundos (60 fps * 5)
                 
                 return true;
+            }
+            
+            applyStrengthPotion() {
+                this.damageMultiplier = this.baseDamageMultiplier * 1.5;
+                this.maxHealth = this.baseMaxHealth * 1.5;
+                this.health = Math.min(this.health * 1.5, this.maxHealth);
+            }
+            
+            removeStrengthPotion() {
+                this.damageMultiplier = this.baseDamageMultiplier;
+                this.maxHealth = this.baseMaxHealth;
+                this.health = Math.min(this.health, this.maxHealth);
             }
         }
 
@@ -1663,8 +1790,13 @@
                         value: this.coinValue
                     });
                     
-                    // Chance de dropar item
-                    if (Math.random() < this.getDropChance()) {
+                    // Chance de dropar item (com bônus de poção de sorte)
+                    let dropChance = this.getDropChance();
+                    if (gameState.activePotions.luck.active) {
+                        dropChance *= 3; // Triplica a chance de drop
+                    }
+                    
+                    if (Math.random() < dropChance) {
                         this.dropItem();
                     }
                     
@@ -1982,22 +2114,33 @@
                 grenades: 40,
                 health: 20,
                 damage: 15,
-                speed: 18
+                speed: 18,
+                strengthPotion: 120,
+                luckPotion: 200,
+                ammoPotion: 150
+            };
+            
+            // Reset poções ativas
+            gameState.activePotions = {
+                strength: { active: false, daysLeft: 0 },
+                luck: { active: false, daysLeft: 0 },
+                infiniteAmmo: { active: false, daysLeft: 0 }
             };
             
             // Inicia com faca e sem outras armas
             gameState.inventory = [
-                { type: 'knife', ammo: null },
-                { type: 'pistol', ammo: 0 },
-                { type: 'shotgun', ammo: 0 },
-                { type: 'medkit', ammo: 0 },
-                { type: 'grenade', ammo: 0 },
-                { type: 'empty', ammo: null } 
+                { type: 'knife', ammo: null, maxAmmo: null },
+                { type: 'pistol', ammo: 0, maxAmmo: 100 },
+                { type: 'shotgun', ammo: 0, maxAmmo: 25 },
+                { type: 'medkit', ammo: 0, maxAmmo: 10 },
+                { type: 'grenade', ammo: 0, maxAmmo: 5 },
+                { type: 'empty', ammo: null, maxAmmo: null } 
             ];
             gameState.selectedSlot = 0;
             updateInventoryUI();
             updateCoinUI();
             updateShopPricesUI();
+            updateActivePotionsUI();
             
             // Geração de obstáculos
             gameState.obstacles = [];
@@ -2192,7 +2335,7 @@
                     grenade.y += grenade.vy;
                     grenade.distanceTraveled += Math.sqrt(grenade.vx * grenade.vx + grenade.vy * grenade.vy);
                     
-                    // Verifica se chegou no limite de distância
+                    // Verifica si chegou no limite de distância
                     if (grenade.distanceTraveled >= grenade.maxDistance) {
                         grenade.exploded = true;
                         grenade.flashTimer = 90; // 1.5 segundos de piscar
@@ -2456,8 +2599,42 @@
             gameState.zombiesSpawned = 0;
             document.getElementById('nightOverlay').style.display = 'none';
             
+            // Atualiza poções ativas
+            updateActivePotions();
+            
             // Abre a loja automaticamente
             openShop();
+        }
+
+        // Atualiza poções ativas
+        function updateActivePotions() {
+            // Verifica poção de força
+            if (gameState.activePotions.strength.active) {
+                gameState.activePotions.strength.daysLeft--;
+                if (gameState.activePotions.strength.daysLeft <= 0) {
+                    gameState.activePotions.strength.active = false;
+                    gameState.player.removeStrengthPotion();
+                }
+            }
+            
+            // Verifica poção de sorte
+            if (gameState.activePotions.luck.active) {
+                gameState.activePotions.luck.daysLeft--;
+                if (gameState.activePotions.luck.daysLeft <= 0) {
+                    gameState.activePotions.luck.active = false;
+                }
+            }
+            
+            // Verifica poção de munição infinita
+            if (gameState.activePotions.infiniteAmmo.active) {
+                gameState.activePotions.infiniteAmmo.daysLeft--;
+                if (gameState.activePotions.infiniteAmmo.daysLeft <= 0) {
+                    gameState.activePotions.infiniteAmmo.active = false;
+                }
+            }
+            
+            updateActivePotionsUI();
+            updateShopButtons();
         }
 
         // Ciclo dia/noite
@@ -2478,6 +2655,9 @@
                     gameState.zombiesToSpawn = config.baseZombiesPerNight + (gameState.day - 1) * config.zombieIncreasePerDay;
                     gameState.zombiesSpawned = 0;
                     document.getElementById('nightOverlay').style.display = 'none';
+                    
+                    // Atualiza poções ativas
+                    updateActivePotions();
                     
                     // Abre a loja automaticamente
                     openShop();
@@ -2530,6 +2710,7 @@
             if (gameState.isNight) return;
             gameState.shopOpen = true;
             document.getElementById('shop').style.display = 'block';
+            updateShopButtons();
         }
         
         function closeShop() {
@@ -2538,25 +2719,50 @@
         }
         
         function updateShopPricesUI() {
-            document.getElementById('ammoPrice').textContent = Math.floor(gameState.shopPrices.ammo);
-            document.getElementById('shotgunAmmoPrice').textContent = Math.floor(gameState.shopPrices.shotgunAmmo);
-            document.getElementById('medkitPrice').textContent = Math.floor(gameState.shopPrices.medkit);
-            document.getElementById('grenadesPrice').textContent = Math.floor(gameState.shopPrices.grenades);
-            document.getElementById('healthPrice').textContent = Math.floor(gameState.shopPrices.health);
-            document.getElementById('damagePrice').textContent = Math.floor(gameState.shopPrices.damage);
-            document.getElementById('speedPrice').textContent = Math.floor(gameState.shopPrices.speed);
+            document.getElementById('buyAmmo').textContent = `🪙${Math.floor(gameState.shopPrices.ammo)} COMPRAR`;
+            document.getElementById('buyShotgunAmmo').textContent = `🪙${Math.floor(gameState.shopPrices.shotgunAmmo)} COMPRAR`;
+            document.getElementById('buyMedkit').textContent = `🪙${Math.floor(gameState.shopPrices.medkit)} COMPRAR`;
+            document.getElementById('buyGrenades').textContent = `🪙${Math.floor(gameState.shopPrices.grenades)} COMPRAR`;
+            document.getElementById('buyHealth').textContent = `🪙${Math.floor(gameState.shopPrices.health)} COMPRAR`;
+            document.getElementById('buyDamage').textContent = `🪙${Math.floor(gameState.shopPrices.damage)} COMPRAR`;
+            document.getElementById('buySpeed').textContent = `🪙${Math.floor(gameState.shopPrices.speed)} COMPRAR`;
+            document.getElementById('buyStrengthPotion').textContent = `🪙${Math.floor(gameState.shopPrices.strengthPotion)} COMPRAR`;
+            document.getElementById('buyLuckPotion').textContent = `🪙${Math.floor(gameState.shopPrices.luckPotion)} COMPRAR`;
+            document.getElementById('buyAmmoPotion').textContent = `🪙${Math.floor(gameState.shopPrices.ammoPotion)} COMPRAR`;
+        }
+        
+        function updateShopButtons() {
+            // Atualiza botões de poções
+            document.getElementById('buyStrengthPotion').disabled = gameState.activePotions.strength.active;
+            document.getElementById('buyLuckPotion').disabled = gameState.activePotions.luck.active;
+            document.getElementById('buyAmmoPotion').disabled = gameState.activePotions.infiniteAmmo.active;
+            
+            // Atualiza outros botões baseado em moedas
+            document.getElementById('buyAmmo').disabled = gameState.coins < gameState.shopPrices.ammo;
+            document.getElementById('buyShotgunAmmo').disabled = gameState.coins < gameState.shopPrices.shotgunAmmo;
+            document.getElementById('buyMedkit').disabled = gameState.coins < gameState.shopPrices.medkit;
+            document.getElementById('buyGrenades').disabled = gameState.coins < gameState.shopPrices.grenades;
+            document.getElementById('buyHealth').disabled = gameState.coins < gameState.shopPrices.health;
+            document.getElementById('buyDamage').disabled = gameState.coins < gameState.shopPrices.damage;
+            document.getElementById('buySpeed').disabled = gameState.coins < gameState.shopPrices.speed;
+            document.getElementById('buyStrengthPotion').disabled = gameState.coins < gameState.shopPrices.strengthPotion || gameState.activePotions.strength.active;
+            document.getElementById('buyLuckPotion').disabled = gameState.coins < gameState.shopPrices.luckPotion || gameState.activePotions.luck.active;
+            document.getElementById('buyAmmoPotion').disabled = gameState.coins < gameState.shopPrices.ammoPotion || gameState.activePotions.infiniteAmmo.active;
         }
         
         function buyAmmo() {
             if (gameState.coins >= gameState.shopPrices.ammo) {
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === 'pistol') {
-                        gameState.inventory[i].ammo += 12;
+                        const maxAmmo = gameState.inventory[i].maxAmmo;
+                        const currentAmmo = gameState.inventory[i].ammo;
+                        const ammoToAdd = Math.min(12, maxAmmo - currentAmmo);
+                        
+                        gameState.inventory[i].ammo += ammoToAdd;
                         gameState.coins -= gameState.shopPrices.ammo;
-                        // Não aumenta o preço para itens do arsenal
                         updateInventoryUI();
                         updateCoinUI();
-                        updateShopPricesUI();
+                        updateShopButtons();
                         break;
                     }
                 }
@@ -2567,12 +2773,15 @@
             if (gameState.coins >= gameState.shopPrices.shotgunAmmo) {
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === 'shotgun') {
-                        gameState.inventory[i].ammo += 5;
+                        const maxAmmo = gameState.inventory[i].maxAmmo;
+                        const currentAmmo = gameState.inventory[i].ammo;
+                        const ammoToAdd = Math.min(5, maxAmmo - currentAmmo);
+                        
+                        gameState.inventory[i].ammo += ammoToAdd;
                         gameState.coins -= gameState.shopPrices.shotgunAmmo;
-                        // Não aumenta o preço para itens do arsenal
                         updateInventoryUI();
                         updateCoinUI();
-                        updateShopPricesUI();
+                        updateShopButtons();
                         break;
                     }
                 }
@@ -2586,6 +2795,7 @@
                 gameState.shopPrices.health = Math.floor(gameState.shopPrices.health * 1.2); // Aumenta o preço apenas para status
                 updateCoinUI();
                 updateShopPricesUI();
+                updateShopButtons();
             }
         }
         
@@ -2596,6 +2806,7 @@
                 gameState.shopPrices.damage = Math.floor(gameState.shopPrices.damage * 1.2); // Aumenta o preço apenas para status
                 updateCoinUI();
                 updateShopPricesUI();
+                updateShopButtons();
             }
         }
         
@@ -2606,6 +2817,7 @@
                 gameState.shopPrices.speed = Math.floor(gameState.shopPrices.speed * 1.2); // Aumenta o preço apenas para status
                 updateCoinUI();
                 updateShopPricesUI();
+                updateShopButtons();
             }
         }
         
@@ -2613,12 +2825,16 @@
             if (gameState.coins >= gameState.shopPrices.medkit) {
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === 'medkit') {
-                        gameState.inventory[i].ammo += 1;
-                        gameState.coins -= gameState.shopPrices.medkit;
-                        // Não aumenta o preço para itens do arsenal
-                        updateInventoryUI();
-                        updateCoinUI();
-                        updateShopPricesUI();
+                        const maxAmmo = gameState.inventory[i].maxAmmo;
+                        const currentAmmo = gameState.inventory[i].ammo;
+                        
+                        if (currentAmmo < maxAmmo) {
+                            gameState.inventory[i].ammo += 1;
+                            gameState.coins -= gameState.shopPrices.medkit;
+                            updateInventoryUI();
+                            updateCoinUI();
+                            updateShopButtons();
+                        }
                         break;
                     }
                 }
@@ -2629,15 +2845,53 @@
             if (gameState.coins >= gameState.shopPrices.grenades) {
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === 'grenade') {
-                        gameState.inventory[i].ammo += 2;
-                        gameState.coins -= gameState.shopPrices.grenades;
-                        // Não aumenta o preço para itens do arsenal
-                        updateInventoryUI();
-                        updateCoinUI();
-                        updateShopPricesUI();
+                        const maxAmmo = gameState.inventory[i].maxAmmo;
+                        const currentAmmo = gameState.inventory[i].ammo;
+                        
+                        if (currentAmmo < maxAmmo) {
+                            gameState.inventory[i].ammo += 2;
+                            gameState.coins -= gameState.shopPrices.grenades;
+                            updateInventoryUI();
+                            updateCoinUI();
+                            updateShopButtons();
+                        }
                         break;
                     }
                 }
+            }
+        }
+        
+        function buyStrengthPotion() {
+            if (gameState.coins >= gameState.shopPrices.strengthPotion && !gameState.activePotions.strength.active) {
+                gameState.coins -= gameState.shopPrices.strengthPotion;
+                gameState.activePotions.strength.active = true;
+                gameState.activePotions.strength.daysLeft = 3;
+                gameState.player.applyStrengthPotion();
+                updateCoinUI();
+                updateActivePotionsUI();
+                updateShopButtons();
+            }
+        }
+        
+        function buyLuckPotion() {
+            if (gameState.coins >= gameState.shopPrices.luckPotion && !gameState.activePotions.luck.active) {
+                gameState.coins -= gameState.shopPrices.luckPotion;
+                gameState.activePotions.luck.active = true;
+                gameState.activePotions.luck.daysLeft = 1;
+                updateCoinUI();
+                updateActivePotionsUI();
+                updateShopButtons();
+            }
+        }
+        
+        function buyAmmoPotion() {
+            if (gameState.coins >= gameState.shopPrices.ammoPotion && !gameState.activePotions.infiniteAmmo.active) {
+                gameState.coins -= gameState.shopPrices.ammoPotion;
+                gameState.activePotions.infiniteAmmo.active = true;
+                gameState.activePotions.infiniteAmmo.daysLeft = 2;
+                updateCoinUI();
+                updateActivePotionsUI();
+                updateShopButtons();
             }
         }
 
@@ -2653,7 +2907,12 @@
                 slot.innerHTML = getWeaponIcon(gameState.inventory[index].type);
                 
                 if (gameState.inventory[index].ammo !== null) {
-                    slot.innerHTML += `<div class="slot-ammo">${gameState.inventory[index].ammo}</div>`;
+                    const maxAmmo = gameState.inventory[index].maxAmmo;
+                    if (maxAmmo !== null) {
+                        slot.innerHTML += `<div class="slot-ammo">${gameState.inventory[index].ammo}/${maxAmmo}</div>`;
+                    } else {
+                        slot.innerHTML += `<div class="slot-ammo">${gameState.inventory[index].ammo}</div>`;
+                    }
                 } else {
                     slot.innerHTML += '<div class="slot-ammo">-</div>';
                 }
@@ -2670,6 +2929,35 @@
             document.getElementById('coinCount').textContent = gameState.coins;
         }
         
+        function updateActivePotionsUI() {
+            const container = document.getElementById('active-potions');
+            container.innerHTML = '';
+            
+            if (gameState.activePotions.strength.active) {
+                const indicator = document.createElement('div');
+                indicator.className = 'potion-indicator';
+                indicator.style.background = '#ff0000';
+                indicator.innerHTML = '<div class="days-left">' + gameState.activePotions.strength.daysLeft + ' dias</div>';
+                container.appendChild(indicator);
+            }
+            
+            if (gameState.activePotions.luck.active) {
+                const indicator = document.createElement('div');
+                indicator.className = 'potion-indicator';
+                indicator.style.background = '#ffcc00';
+                indicator.innerHTML = '<div class="days-left">' + gameState.activePotions.luck.daysLeft + ' dias</div>';
+                container.appendChild(indicator);
+            }
+            
+            if (gameState.activePotions.infiniteAmmo.active) {
+                const indicator = document.createElement('div');
+                indicator.className = 'potion-indicator';
+                indicator.style.background = '#aaaaaa';
+                indicator.innerHTML = '<div class="days-left">' + gameState.activePotions.infiniteAmmo.daysLeft + ' dias</div>';
+                container.appendChild(indicator);
+            }
+        }
+        
         function getWeaponIcon(type) {
             switch (type) {
                 case 'knife': return '🔪';
@@ -2682,6 +2970,16 @@
                 case 'laserRifle': return '🔋';
                 case 'empty': return '❓';
                 default: return '❓';
+            }
+        }
+        
+        function getMaxAmmoForItem(type) {
+            switch (type) {
+                case 'pistol': return 100;
+                case 'shotgun': return 25;
+                case 'medkit': return 10;
+                case 'grenade': return 5;
+                default: return null;
             }
         }
 
@@ -2757,7 +3055,10 @@
                     player.angle,
                     'pistol'
                 ));
-                weapon.ammo--;
+                
+                if (!gameState.activePotions.infiniteAmmo.active) {
+                    weapon.ammo--;
+                }
                 gameState.pistolCooldown = 30; // 0.5 segundos (60 fps * 0.5)
                 updateInventoryUI();
             } else if (weapon.type === 'shotgun' && weapon.ammo > 0 && gameState.shotgunCooldown <= 0) {
@@ -2776,7 +3077,10 @@
                         'shotgun'
                     ));
                 }
-                weapon.ammo--;
+                
+                if (!gameState.activePotions.infiniteAmmo.active) {
+                    weapon.ammo--;
+                }
                 gameState.shotgunCooldown = 60; // 1 segundo (60 fps * 1)
                 updateInventoryUI();
             } else if (weapon.type === 'medkit') {
@@ -2798,14 +3102,16 @@
                 // Verifica se tem munição no inventário
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === 'pistolAmmo' && gameState.inventory[i].ammo > 0) {
-                        const ammoNeeded = 12 - weapon.ammo;
+                        const maxAmmo = weapon.maxAmmo;
+                        const currentAmmo = weapon.ammo;
+                        const ammoNeeded = maxAmmo - currentAmmo;
                         const ammoTaken = Math.min(ammoNeeded, gameState.inventory[i].ammo);
                         
                         weapon.ammo += ammoTaken;
                         gameState.inventory[i].ammo -= ammoTaken;
                         
                         if (gameState.inventory[i].ammo <= 0) {
-                            gameState.inventory[i] = { type: 'empty', ammo: null };
+                            gameState.inventory[i] = { type: 'empty', ammo: null, maxAmmo: null };
                         }
                         
                         updateInventoryUI();
@@ -2816,14 +3122,16 @@
                 // Verifica se tem munição no inventário
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === 'shotgunAmmo' && gameState.inventory[i].ammo > 0) {
-                        const ammoNeeded = 5 - weapon.ammo;
+                        const maxAmmo = weapon.maxAmmo;
+                        const currentAmmo = weapon.ammo;
+                        const ammoNeeded = maxAmmo - currentAmmo;
                         const ammoTaken = Math.min(ammoNeeded, gameState.inventory[i].ammo);
                         
                         weapon.ammo += ammoTaken;
                         gameState.inventory[i].ammo -= ammoTaken;
                         
                         if (gameState.inventory[i].ammo <= 0) {
-                            gameState.inventory[i] = { type: 'empty', ammo: null };
+                            gameState.inventory[i] = { type: 'empty', ammo: null, maxAmmo: null };
                         }
                         
                         updateInventoryUI();
@@ -2859,6 +3167,9 @@
         document.getElementById('buySpeed').addEventListener('click', buySpeed);
         document.getElementById('buyMedkit').addEventListener('click', buyMedkit);
         document.getElementById('buyGrenades').addEventListener('click', buyGrenades);
+        document.getElementById('buyStrengthPotion').addEventListener('click', buyStrengthPotion);
+        document.getElementById('buyLuckPotion').addEventListener('click', buyLuckPotion);
+        document.getElementById('buyAmmoPotion').addEventListener('click', buyAmmoPotion);
         document.getElementById('closeShop').addEventListener('click', closeShop);
 
         // Efeito de sangue
