@@ -168,6 +168,13 @@
             color: #ffcc55;
             font-size: 64px;
             margin-bottom: 10px;
+            text-shadow: 0 0 10px #ffcc55, 0 0 20px #ffcc55, 0 0 30px #ffcc55;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #ffcc55, 0 0 20px #ffcc55, 0 0 30px #ffcc55; }
+            to { text-shadow: 0 0 20px #ffcc55, 0 0 30px #ffcc55, 0 0 40px #ffcc55; }
         }
         
         .screen-description {
@@ -208,6 +215,10 @@
             color: #777;
             font-size: 12px;
             line-height: 2;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #444;
         }
         
         #bloodOverlay {
@@ -335,6 +346,10 @@
             background: #aaaaaa;
         }
         
+        .potion-cooldown {
+            background: #00aaff;
+        }
+        
         #coins {
             position: absolute;
             top: 10px;
@@ -379,6 +394,16 @@
             pointer-events: none;
         }
         
+        .boss-vomit {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ff0000 0%, #880000 100%);
+            border-radius: 50%;
+            z-index: 110;
+            pointer-events: none;
+        }
+        
         #bossMessage {
             position: absolute;
             top: 50px;
@@ -401,7 +426,6 @@
             border-radius: 5px;
         }
         
-        /* Novos estilos para a mensagem de arma secreta */
         #secretWeaponMessage {
             position: absolute;
             top: 50%;
@@ -424,7 +448,6 @@
             to { transform: translate(-50%, -50%) scale(1.1); }
         }
         
-        /* Efeitos para a mensagem */
         .secret-weapon-effect {
             position: absolute;
             width: 20px;
@@ -441,7 +464,6 @@
             100% { transform: translate(var(--tx), var(--ty)) rotate(360deg); opacity: 0; }
         }
         
-        /* Efeito de carregamento da arma laser */
         .laser-charge-effect {
             position: absolute;
             width: 15px;
@@ -458,7 +480,6 @@
             to { transform: scale(1.5); opacity: 1; }
         }
         
-        /* Indicadores de poções ativas */
         #active-potions {
             position: absolute;
             top: 130px;
@@ -489,6 +510,135 @@
             color: #ffcc55;
             text-shadow: 1px 1px 0 #000;
         }
+        
+        .zombie-death-effect {
+            position: absolute;
+            pointer-events: none;
+            z-index: 105;
+        }
+        
+        .boss-death-effect {
+            position: absolute;
+            pointer-events: none;
+            z-index: 106;
+        }
+        
+        .sniper-bullet {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffff00;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 0, 0.7);
+            z-index: 110;
+        }
+        
+        .vomit-trail {
+            position: absolute;
+            background: rgba(255, 0, 0, 0.3);
+            border-radius: 5px;
+            z-index: 109;
+            pointer-events: none;
+        }
+        
+        .poison-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 152;
+            background: radial-gradient(circle, rgba(0,255,0,0.3) 0%, rgba(0,255,0,0) 70%);
+            transition: opacity 0.5s;
+        }
+        
+        .start-screen-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #1a0000, #00001a, #001a00, #1a1a00);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            z-index: -1;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .zombie-silhouette {
+            position: absolute;
+            width: 100px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50% 50% 40% 40%;
+            filter: blur(2px);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .silhouette1 {
+            top: 20%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+        
+        .silhouette2 {
+            top: 60%;
+            left: 80%;
+            animation-delay: 1s;
+        }
+        
+        .silhouette3 {
+            top: 30%;
+            left: 75%;
+            animation-delay: 2s;
+        }
+        
+        .silhouette4 {
+            top: 70%;
+            left: 10%;
+            animation-delay: 1.5s;
+        }
+        
+        .blood-splatter {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,0,0,0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(5px);
+            z-index: -1;
+        }
+        
+        .splatter1 {
+            top: 20%;
+            left: 20%;
+            transform: rotate(45deg);
+        }
+        
+        .splatter2 {
+            top: 60%;
+            left: 70%;
+            transform: rotate(-20deg);
+        }
+        
+        .splatter3 {
+            top: 40%;
+            left: 40%;
+            transform: rotate(10deg);
+        }
     </style>
 </head>
 <body>
@@ -496,6 +646,7 @@
     
     <div id="bloodOverlay"></div>
     <div id="healEffect"></div>
+    <div id="poisonEffect" class="poison-effect"></div>
     <div id="nightOverlay" class="night-overlay" style="display: none;"></div>
     
     <div id="ui">
@@ -544,7 +695,7 @@
                 </div>
                 <div class="shop-item">
                     <span>Granadas</span>
-                    <button id="buyGrenades">🪙40 COMPRAR</button>
+                    <button id="buyGrenades">🪙50 COMPRAR</button>
                 </div>
             </div>
             <div class="shop-column status">
@@ -565,7 +716,7 @@
             <div class="shop-column potions">
                 <div class="shop-column-title">POÇÕES</div>
                 <div class="shop-item">
-                    <span><div class="potion-icon potion-strength"></div> Poção de Força</span>
+                    <span><div class="potion-icon potion-strength"></div> Poção de Defesa</span>
                     <button id="buyStrengthPotion">🪙120 COMPRAR</button>
                 </div>
                 <div class="shop-item">
@@ -576,18 +727,31 @@
                     <span><div class="potion-icon potion-ammo"></div> Poção de Munição Inf.</span>
                     <button id="buyAmmoPotion">🪙250 COMPRAR</button>
                 </div>
+                <div class="shop-item">
+                    <span><div class="potion-icon potion-cooldown"></div> Poção de Cooldown</span>
+                    <button id="buyCooldownPotion">🪙150 COMPRAR</button>
+                </div>
             </div>
         </div>
         <button id="closeShop" style="width: 100%; margin-top: 15px;">FECHAR LOJA</button>
     </div>
     
     <div id="startScreen">
-        <h1>ZOMBIE SURVIVAL</h1>
-        <p class="screen-description">O apocalipse zumbi chegou. Sobreviva o máximo que puder em um mundo hostil. Durante o dia, compre melhorias na loja. À noite, enfrente hordas de zumbis cada vez maiores.</p>
+        <div class="start-screen-bg"></div>
+        <div class="zombie-silhouette silhouette1"></div>
+        <div class="zombie-silhouette silhouette2"></div>
+        <div class="zombie-silhouette silhouette3"></div>
+        <div class="zombie-silhouette silhouette4"></div>
+        <div class="blood-splatter splatter1"></div>
+        <div class="blood-splatter splatter2"></div>
+        <div class="blood-splatter splatter3"></div>
+        
+        <h1>ZOMBIE APOCALYPSE</h1>
+        <p class="screen-description">Sobreviva o máximo que puder em um mundo infestado de zumbis. Durante o dia, compre melhorias. À noite, enfrente hordas de mortos-vivos cada vez mais perigosos.</p>
         <button id="startButton">INICIAR SOBREVIVÊNCIA</button>
         <div id="controls">
-            WASD: MOVER | SHIFT: CORRER | 1-6: TROCAR ARMA<br>
-            CLIQUE: ATACAR  
+            WASD: MOVER | SHIFT: CORRER | 1-6: TROCAR ARMA <br>
+            CLIQUE: ATACAR | E: ABRIR/FECHAR LOJA
         </div>
     </div>
     
@@ -623,6 +787,7 @@
             bullets: [],
             acidBullets: [],
             bossProjectiles: [],
+            bossVomits: [],
             grenades: [],
             explosions: [],
             obstacles: [],
@@ -647,6 +812,7 @@
             isAttacking: false,
             coins: 0,
             playerDamageMultiplier: 1,
+            playerDefenseMultiplier: 1,
             zombiesToSpawn: 0,
             zombiesSpawned: 0,
             shopOpen: false,
@@ -656,13 +822,17 @@
             pistolCooldown: 0,
             shotgunCooldown: 0,
             laserRifleCooldown: 0,
+            medkitCooldown: 0,
+            grenadeCooldown: 0,
             hasLaserRifle: false,
             laserBeams: [], 
             laserChargeEffects: [], 
+            sniperBullets: [],
             activePotions: {
                 strength: { active: false, daysLeft: 0 },
                 luck: { active: false, daysLeft: 0 },
-                infiniteAmmo: { active: false, daysLeft: 0 }
+                infiniteAmmo: { active: false, daysLeft: 0 },
+                cooldown: { active: false, daysLeft: 0 }
             },
             shopPrices: {
                 ammo: 12,
@@ -674,48 +844,12 @@
                 speed: 18,
                 strengthPotion: 120,
                 luckPotion: 200,
-                ammoPotion: 250
-            }
-        };
-
-        // Sprites
-        const sprites = {
-            player: createPlayerSprite(),
-            zombies: {
-                normal: createZombieSprite('#8fbb6b'),
-                runner: createZombieSprite('#c78f6b'),
-                brute: createZombieSprite('#6b8fbb'),
-                crawler: createZombieSprite('#6b8f6b'),
-                toxic: createZombieSprite('#8fbb8f'),
-                tank: createZombieSprite('#ff8800'),
-                fast: createZombieSprite('#aa55ff'),
-                spitter: createZombieSprite('#55aaff'),
-                boss: createBossSprite()
+                ammoPotion: 250,
+                cooldownPotion: 150
             },
-            items: {
-                pistol: createItemSprite('🔫', '#ff5555'),
-                shotgun: createItemSprite('💥', '#ffaa00'),
-                pistolAmmo: createItemSprite('🔹', '#55aaff'),
-                shotgunAmmo: createItemSprite('🔸', '#ffaa55'),
-                medkit: createItemSprite('🩹', '#55ff55'),
-                grenade: createItemSprite('🧨', '#ff55ff'),
-                coin: createItemSprite('🪙', '#ffcc00'),
-                laserRifle: createItemSprite('🔋', '#00ff00')
-            },
-            weapons: {
-                pistol: createWeaponSprite('#777', '#ffcc55'),
-                shotgun: createShotgunSprite(),
-                knife: createKnifeSprite(),
-                laserRifle: createLaserRifleSprite(),
-                medkit: createMedkitSprite(),
-                grenade: createGrenadeSprite()
-            },
-            terrain: {
-                grass: createTerrainSprite('#3a5c3a'),
-                road: createTerrainSprite('#555555'),
-                water: createTerrainSprite('#3a5c8f'),
-                building: createTerrainSprite('#8f3a3a')
-            }
+            deathEffects: [],
+            bossVomitCharging: false,
+            bossVomitChargeTime: 0
         };
 
         function createPlayerSprite() {
@@ -724,11 +858,9 @@
             canvas.height = 50;
             const ctx = canvas.getContext('2d');
             
-            // Corpo
             ctx.fillStyle = '#55aaff';
             ctx.fillRect(10, 10, 30, 40);
             
-            // Cabeça
             ctx.fillStyle = '#ffccaa';
             ctx.beginPath();
             ctx.arc(25, 15, 10, 0, Math.PI * 2);
@@ -743,17 +875,14 @@
             canvas.height = 40;
             const ctx = canvas.getContext('2d');
             
-            // Corpo
             ctx.fillStyle = color;
             ctx.fillRect(5, 10, 30, 30);
             
-            // Cabeça
             ctx.fillStyle = '#8fbb6b';
             ctx.beginPath();
             ctx.arc(20, 15, 10, 0, Math.PI * 2);
             ctx.fill();
             
-            // Ferimentos
             ctx.fillStyle = '#a00';
             ctx.beginPath();
             ctx.arc(15, 12, 2, 0, Math.PI * 2);
@@ -769,7 +898,6 @@
             canvas.height = 80;
             const ctx = canvas.getContext('2d');
             
-            // Corpo
             const gradient = ctx.createLinearGradient(0, 0, 80, 80);
             gradient.addColorStop(0, '#ff0000');
             gradient.addColorStop(0.5, '#880000');
@@ -777,20 +905,17 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(10, 20, 60, 60);
             
-            // Cabeça
             ctx.fillStyle = '#ff5555';
             ctx.beginPath();
             ctx.arc(40, 20, 20, 0, Math.PI * 2);
             ctx.fill();
             
-            // Olhos
             ctx.fillStyle = '#000';
             ctx.beginPath();
             ctx.arc(30, 15, 5, 0, Math.PI * 2);
             ctx.arc(50, 15, 5, 0, Math.PI * 2);
             ctx.fill();
             
-            // Chifres
             ctx.fillStyle = '#880000';
             ctx.beginPath();
             ctx.moveTo(25, 5);
@@ -807,19 +932,43 @@
             return canvas;
         }
 
+        function createSniperZombieSprite() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 40;
+            canvas.height = 40;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#5555ff';
+            ctx.fillRect(5, 10, 30, 30);
+            
+            ctx.fillStyle = '#8fbb6b';
+            ctx.beginPath();
+            ctx.arc(20, 15, 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#a00';
+            ctx.beginPath();
+            ctx.arc(15, 12, 2, 0, Math.PI * 2);
+            ctx.arc(25, 12, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#333';
+            ctx.fillRect(25, 5, 15, 5);
+            
+            return canvas;
+        }
+
         function createItemSprite(emoji, bgColor) {
             const canvas = document.createElement('canvas');
             canvas.width = 30;
             canvas.height = 30;
             const ctx = canvas.getContext('2d');
             
-            // Fundo
             ctx.fillStyle = bgColor;
             ctx.beginPath();
             ctx.arc(15, 15, 15, 0, Math.PI * 2);
             ctx.fill();
             
-            // Emoji
             ctx.font = '20px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -835,15 +984,12 @@
             canvas.height = 20;
             const ctx = canvas.getContext('2d');
             
-            // Coronha
             ctx.fillStyle = '#5a3a1a';
             ctx.fillRect(0, 5, 15, 10);
             
-            // Empunhadura
             ctx.fillStyle = handleColor;
             ctx.fillRect(15, 5, 20, 10);
             
-            // Cano
             ctx.fillStyle = barrelColor;
             ctx.fillRect(35, 7, 25, 6);
             
@@ -856,15 +1002,12 @@
             canvas.height = 25;
             const ctx = canvas.getContext('2d');
             
-            // Coronha
             ctx.fillStyle = '#5a3a1a';
             ctx.fillRect(0, 5, 20, 15);
             
-            // Empunhadura
             ctx.fillStyle = '#777';
             ctx.fillRect(20, 5, 25, 15);
             
-            // Cano duplo
             ctx.fillStyle = '#ffaa00';
             ctx.fillRect(45, 5, 25, 6);
             ctx.fillRect(45, 14, 25, 6);
@@ -878,7 +1021,6 @@
             canvas.height = 20;
             const ctx = canvas.getContext('2d');
             
-            // Lâmina (agora apontando para a direita)
             ctx.fillStyle = '#aaa';
             ctx.beginPath();
             ctx.moveTo(20, 0);
@@ -887,7 +1029,6 @@
             ctx.closePath();
             ctx.fill();
             
-            // Cabo
             ctx.fillStyle = '#5a3a1a';
             ctx.fillRect(0, 5, 20, 10);
             
@@ -900,19 +1041,15 @@
             canvas.height = 25;
             const ctx = canvas.getContext('2d');
             
-            // Coronha
             ctx.fillStyle = '#333';
             ctx.fillRect(0, 5, 25, 15);
             
-            // Empunhadura
             ctx.fillStyle = '#555';
             ctx.fillRect(25, 5, 30, 15);
             
-            // Cano
             ctx.fillStyle = '#00ff00';
             ctx.fillRect(55, 7, 25, 5);
             
-            // Detalhes futuristas
             ctx.fillStyle = '#00aa00';
             ctx.fillRect(50, 5, 5, 15);
             ctx.fillRect(60, 5, 5, 15);
@@ -926,11 +1063,9 @@
             canvas.height = 30;
             const ctx = canvas.getContext('2d');
             
-            // Bolsa médica
             ctx.fillStyle = '#ff0000';
             ctx.fillRect(5, 5, 30, 20);
             
-            // Cruz branca
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(15, 8, 10, 4);
             ctx.fillRect(18, 5, 4, 15);
@@ -944,13 +1079,11 @@
             canvas.height = 30;
             const ctx = canvas.getContext('2d');
             
-            // Corpo da granada
             ctx.fillStyle = '#8B4513';
             ctx.beginPath();
             ctx.arc(15, 15, 10, 0, Math.PI * 2);
             ctx.fill();
             
-            // Detalhes
             ctx.fillStyle = '#FF4500';
             ctx.fillRect(15, 5, 3, 20);
             ctx.fillRect(5, 15, 20, 3);
@@ -967,7 +1100,6 @@
             ctx.fillStyle = color;
             ctx.fillRect(0, 0, 64, 64);
             
-            // Adiciona textura
             if (color !== '#555555') {
                 ctx.strokeStyle = color === '#3a5c8f' ? '#2a4c7f' : '#2a4a2a';
                 for (let i = 0; i < 10; i++) {
@@ -981,7 +1113,6 @@
             return canvas;
         }
 
-        // Classe do Jogador
         class Player {
             constructor(x, y) {
                 this.x = x;
@@ -1000,23 +1131,25 @@
                 this.knifeAngle = 0;
                 this.isAttacking = false;
                 this.damageMultiplier = 1;
+                this.defenseMultiplier = 1;
                 this.laserRifleCharging = false;
                 this.laserRifleChargeTime = 0;
                 this.baseDamageMultiplier = 1;
+                this.baseDefenseMultiplier = 1;
                 this.baseMaxHealth = 100;
+                this.poisoned = false;
+                this.poisonTimer = 0;
+                this.poisonDamage = 0;
             }
 
             update() {
-                // Movimentação
                 const speedMultiplier = this.isRunning ? (this.stamina > 0 ? 1.8 : 1) : 1;
                 this.x += this.direction.x * this.speed * speedMultiplier;
                 this.y += this.direction.y * this.speed * speedMultiplier;
 
-                // Limites do mapa
                 this.x = Math.max(0, Math.min(config.width - this.width, this.x));
                 this.y = Math.max(0, Math.min(config.height - this.height, this.y));
 
-                // Stamina
                 if (this.isRunning) {
                     this.stamina -= 0.3;
                     if (this.stamina <= 0) {
@@ -1028,13 +1161,11 @@
                     if (this.stamina > this.maxStamina) this.stamina = this.maxStamina;
                 }
 
-                // Atualiza UI
                 document.getElementById('health').textContent = Math.floor(this.health);
                 document.getElementById('healthBarFill').style.width = `${(this.health / this.maxHealth) * 100}%`;
                 document.getElementById('stamina').textContent = Math.floor(this.stamina);
                 document.getElementById('staminaBarFill').style.width = `${(this.stamina / this.maxStamina) * 100}%`;
 
-                // Animação da faca
                 if (this.isAttacking) {
                     this.knifeAngle += 0.3;
                     if (this.knifeAngle >= Math.PI) {
@@ -1043,14 +1174,12 @@
                     }
                 }
 
-                // Carregamento da arma laser
                 if (this.laserRifleCharging) {
                     this.laserRifleChargeTime++;
                     
-                    // Cria efeitos de carregamento
                     if (this.laserRifleChargeTime % 10 === 0) {
-                        const barrelX = this.x + this.width / 2 + Math.cos(this.angle) * 45;
-                        const barrelY = this.y + this.height / 2 + Math.sin(this.angle) * 45;
+                        const barrelX = this.x + this.width / 2 + Math.cos(this.angle) * 80;
+                        const barrelY = this.y + this.height / 2 + Math.sin(this.angle) * 80;
                         
                         gameState.laserChargeEffects.push({
                             x: barrelX,
@@ -1060,15 +1189,23 @@
                         });
                     }
                     
-                    // Quando termina o carregamento, dispara o laser
-                    if (this.laserRifleChargeTime >= 300) { // 5 segundos (60 fps * 5)
+                    if (this.laserRifleChargeTime >= 180) {
                         this.laserRifleCharging = false;
                         this.laserRifleChargeTime = 0;
                         this.fireLaserRifle();
                     }
                 }
 
-                // Verifica colisão com itens
+                if (this.poisoned) {
+                    this.poisonTimer--;
+                    if (this.poisonTimer <= 0) {
+                        this.poisoned = false;
+                        document.getElementById('poisonEffect').style.opacity = '0';
+                    } else if (this.poisonTimer % 60 === 0) {
+                        this.takeDamage(this.poisonDamage, true);
+                    }
+                }
+
                 for (let i = gameState.items.length - 1; i >= 0; i--) {
                     const item = gameState.items[i];
                     if (
@@ -1081,7 +1218,6 @@
                     }
                 }
 
-                // Verifica colisão com ácido
                 for (let i = gameState.acidBullets.length - 1; i >= 0; i--) {
                     const acid = gameState.acidBullets[i];
                     if (
@@ -1095,7 +1231,6 @@
                     }
                 }
                 
-                // Verifica colisão com projéteis do boss
                 for (let i = gameState.bossProjectiles.length - 1; i >= 0; i--) {
                     const projectile = gameState.bossProjectiles[i];
                     if (
@@ -1108,6 +1243,48 @@
                         gameState.bossProjectiles.splice(i, 1);
                     }
                 }
+                
+                for (let i = gameState.bossVomits.length - 1; i >= 0; i--) {
+                    const vomit = gameState.bossVomits[i];
+                    if (
+                        this.x < vomit.x + vomit.width &&
+                        this.x + this.width > vomit.x &&
+                        this.y < vomit.y + vomit.height &&
+                        this.y + this.height > vomit.y
+                    ) {
+                        this.takeDamage(20);
+                        this.applyPoison(2, 180);
+                        gameState.bossVomits.splice(i, 1);
+                        
+                        createParticle(
+                            vomit.x, vomit.y,
+                            (Math.random() - 0.5) * 4,
+                            (Math.random() - 0.5) * 4,
+                            '#ff0000',
+                            60
+                        );
+                    }
+                }
+                
+                for (let i = gameState.sniperBullets.length - 1; i >= 0; i--) {
+                    const bullet = gameState.sniperBullets[i];
+                    if (
+                        this.x < bullet.x + bullet.width &&
+                        this.x + this.width > bullet.x &&
+                        this.y < bullet.y + bullet.height &&
+                        this.y + this.height > bullet.y
+                    ) {
+                        this.takeDamage(15);
+                        gameState.sniperBullets.splice(i, 1);
+                    }
+                }
+            }
+
+            applyPoison(damagePerSecond, duration) {
+                this.poisoned = true;
+                this.poisonTimer = duration;
+                this.poisonDamage = damagePerSecond;
+                document.getElementById('poisonEffect').style.opacity = '0.5';
             }
 
             pickupItem(item, index) {
@@ -1118,7 +1295,6 @@
                     return;
                 }
 
-                // Munição vai direto para a arma correspondente
                 if (item.type === 'pistolAmmo') {
                     for (let i = 0; i < gameState.inventory.length; i++) {
                         if (gameState.inventory[i].type === 'pistol') {
@@ -1145,19 +1321,25 @@
                             return;
                         }
                     }
+                } else if (item.type === 'laserAmmo') {
+                    for (let i = 0; i < gameState.inventory.length; i++) {
+                        if (gameState.inventory[i].type === 'laserRifle') {
+                            gameState.inventory[i].ammo += 25;
+                            gameState.items.splice(index, 1);
+                            updateInventoryUI();
+                            return;
+                        }
+                    }
                 } else if (item.type === 'laserRifle') {
                     gameState.hasLaserRifle = true;
                     gameState.items.splice(index, 1);
-                    // Adiciona ao inventário
                     gameState.inventory[5] = { type: 'laserRifle', ammo: 10, maxAmmo: null };
                     updateInventoryUI();
                     
-                    // Mostra mensagem de arma secreta
                     showSecretWeaponMessage();
                     return;
                 }
 
-                // Outros itens
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === item.type) {
                         if (gameState.inventory[i].ammo !== null) {
@@ -1185,7 +1367,6 @@
             }
 
             draw() {
-                // Desenha sombra
                 ctx.fillStyle = 'rgba(0,0,0,0.5)';
                 ctx.beginPath();
                 ctx.ellipse(
@@ -1197,7 +1378,6 @@
                 );
                 ctx.fill();
                 
-                // Desenha jogador
                 ctx.save();
                 ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
                 ctx.rotate(this.angle);
@@ -1240,7 +1420,6 @@
                         -sprites.weapons.laserRifle.height / 2
                     );
                     
-                    // Efeito de carregamento
                     if (this.laserRifleCharging) {
                         ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
                         ctx.beginPath();
@@ -1264,7 +1443,11 @@
                 ctx.restore();
             }
 
-            takeDamage(amount) {
+            takeDamage(amount, ignoreDefense = false) {
+                if (!ignoreDefense) {
+                    amount = amount * (1 - this.defenseMultiplier * 0.5);
+                }
+                
                 this.health -= amount;
                 gameState.bloodEffect = 1;
                 document.getElementById('bloodOverlay').style.opacity = '0.7';
@@ -1287,7 +1470,6 @@
                 this.knifeAngle = 0;
                 gameState.attackCooldown = 30;
                 
-                // Verifica acerto nos zumbis
                 const attackRange = 70;
                 const attackAngle = this.angle;
                 const attackArc = Math.PI / 2;
@@ -1313,7 +1495,6 @@
 
             heal(amount) {
                 this.health = Math.min(this.health + amount, this.maxHealth);
-                // Efeito visual de cura
                 document.getElementById('healEffect').style.opacity = '0.7';
                 setTimeout(() => {
                     document.getElementById('healEffect').style.opacity = '0';
@@ -1335,14 +1516,22 @@
                 this.baseDamageMultiplier = this.damageMultiplier;
             }
 
+            increaseDefense(multiplier) {
+                this.defenseMultiplier += 0.5;
+                this.baseDefenseMultiplier = this.defenseMultiplier;
+            }
+
             increaseSpeed(amount) {
                 this.speed *= 1.1;
             }
 
             useMedkit() {
-                if (gameState.inventory[3].ammo > 0) {
+                if (gameState.inventory[3].ammo > 0 && gameState.medkitCooldown <= 0) {
                     this.heal(this.maxHealth * 0.15);
-                    gameState.inventory[3].ammo--;
+                    if (!gameState.activePotions.infiniteAmmo.active) {
+                        gameState.inventory[3].ammo--;
+                    }
+                    gameState.medkitCooldown = 150;
                     updateInventoryUI();
                     return true;
                 }
@@ -1350,26 +1539,24 @@
             }
 
             throwGrenade(targetX, targetY) {
-                if (gameState.inventory[4].ammo > 0) {
+                if (gameState.inventory[4].ammo > 0 && gameState.grenadeCooldown <= 0) {
                     const startX = this.x + this.width / 2;
                     const startY = this.y + this.height / 2;
                     
-                    // Calcula o ângulo
                     const angle = Math.atan2(
                         targetY - startY,
                         targetX - startX
                     );
                     
-                    // Cria granada que vai em linha reta
                     gameState.grenades.push({
                         x: startX,
                         y: startY,
-                        vx: Math.cos(angle) * 8, // Velocidade fixa
+                        vx: Math.cos(angle) * 8,
                         vy: Math.sin(angle) * 8,
-                        timer: 90, // 1.5 segundos
+                        timer: 90,
                         exploded: false,
                         distanceTraveled: 0,
-                        maxDistance: 500, // Distância máxima
+                        maxDistance: 500,
                         flashTimer: 0,
                         stuckZombie: null
                     });
@@ -1377,6 +1564,7 @@
                     if (!gameState.activePotions.infiniteAmmo.active) {
                         gameState.inventory[4].ammo--;
                     }
+                    gameState.grenadeCooldown = 300;
                     updateInventoryUI();
                     return true;
                 }
@@ -1392,50 +1580,47 @@
             }
 
             fireLaserRifle() {
-                const startX = this.x + this.width / 2 + Math.cos(this.angle) * 110;
-                const startY = this.y + this.height / 2 + Math.sin(this.angle) * 110;
-                
+                const startX = this.x + this.width / 2 + Math.cos(this.angle) * 140;
+                const startY = this.y + this.height / 2 + Math.sin(this.angle) * 140;
                 
                 const endX = startX + Math.cos(this.angle) * 2000;
                 const endY = startY + Math.sin(this.angle) * 2000;
                 
-                // Cria o laser beam
                 gameState.laserBeams.push({
                     startX: startX,
                     startY: startY,
                     endX: endX,
                     endY: endY,
                     angle: this.angle,
-                    timer: 42, // 0.7 segundos (60 fps * 0.7)
+                    timer: 80,
                     damageTimer: 0,
-                    width: 50 // Laser bem grosso
+                    width: 90
                 });
                 
-                // Configura cooldown
-                gameState.laserRifleCooldown = 300; // 5 segundos (60 fps * 5)
+                gameState.laserRifleCooldown = 600;
                 
                 return true;
             }
             
             applyStrengthPotion() {
-                this.damageMultiplier = this.baseDamageMultiplier * 1.5;
-                this.maxHealth = this.baseMaxHealth * 1.5;
-                this.health = Math.min(this.health * 1.5, this.maxHealth);
+                this.defenseMultiplier = this.baseDefenseMultiplier + 0.5;
             }
             
             removeStrengthPotion() {
-                this.damageMultiplier = this.baseDamageMultiplier;
-                this.maxHealth = this.baseMaxHealth;
-                this.health = Math.min(this.health, this.maxHealth);
+                this.defenseMultiplier = this.baseDefenseMultiplier;
+            }
+            
+            applyCooldownPotion() {
+            }
+            
+            removeCooldownPotion() {
             }
         }
 
-        // Função para mostrar mensagem de arma secreta
         function showSecretWeaponMessage() {
             const message = document.getElementById('secretWeaponMessage');
             message.style.display = 'block';
             
-            // Cria efeitos visuais
             for (let i = 0; i < 20; i++) {
                 const effect = document.createElement('div');
                 effect.className = 'secret-weapon-effect';
@@ -1446,19 +1631,16 @@
                 effect.style.animationDelay = `${Math.random() * 2}s`;
                 document.body.appendChild(effect);
                 
-                // Remove o efeito após a animação
                 setTimeout(() => {
                     effect.remove();
                 }, 3000);
             }
             
-            // Remove a mensagem após 3 segundos
             setTimeout(() => {
                 message.style.display = 'none';
             }, 3000);
         }
 
-        // Função auxiliar para calcular distância de ponto para linha
         function pointToLineDistance(px, py, x1, y1, x2, y2) {
             const A = px - x1;
             const B = py - y1;
@@ -1488,14 +1670,13 @@
             return Math.sqrt(dx * dx + dy * dy);
         }
 
-        // Classe de Projétil de Ácido
         class AcidBullet {
             constructor(x, y, angle) {
                 this.x = x;
                 this.y = y;
                 this.width = 20;
                 this.height = 20;
-                this.speed = 5;
+                this.speed = 8;
                 this.angle = angle;
                 this.lifetime = 100;
             }
@@ -1514,7 +1695,6 @@
             }
         }
 
-        // Classe de Projétil do Boss
         class BossProjectile {
             constructor(x, y, angle) {
                 this.x = x;
@@ -1540,460 +1720,74 @@
             }
         }
 
-        // Tipos de zumbis
-        class Zombie {
-            constructor(x, y, type = 'normal') {
+        class BossVomit {
+            constructor(x, y, angle) {
                 this.x = x;
                 this.y = y;
-                this.width = type === 'boss' ? 80 : 40;
-                this.height = type === 'boss' ? 80 : 40;
-                this.type = type;
-                this.health = this.getMaxHealth();
-                this.speed = this.getSpeed();
-                this.detectionRange = this.getDetectionRange();
-                this.attackCooldown = 0;
-                this.damage = this.getDamage();
-                this.color = this.getColor();
-                this.randomAngle = Math.random() * Math.PI * 2;
-                this.lastSoundTime = 0;
-                this.coinValue = this.getCoinValue();
-                this.lastAcidShot = 0;
-                this.specialAbilityCooldown = 0;
-                this.lastBossAttack = 0;
-                this.laserDamageTimer = 0;
-            }
-            
-            getMaxHealth() {
-                switch (this.type) {
-                    case 'runner': return 80;
-                    case 'brute': return 150;
-                    case 'crawler': return 60;
-                    case 'toxic': return 90;
-                    case 'tank': return 250;
-                    case 'fast': return 80;
-                    case 'spitter': return 100;
-                    case 'boss': return 500 + (gameState.day * 100);
-                    default: return 100;
-                }
-            }
-            
-            getSpeed() {
-                const nightBonus = gameState.isNight ? 1.2 : 1;
-                switch (this.type) {
-                    case 'runner': return 2.5 * nightBonus;
-                    case 'brute': return 1.2 * nightBonus;
-                    case 'crawler': return 1.5 * nightBonus;
-                    case 'toxic': return 1.8 * nightBonus;
-                    case 'tank': return 1.0 * nightBonus;
-                    case 'fast': return 3.0 * nightBonus;
-                    case 'spitter': return 1.8 * nightBonus;
-                    case 'boss': return 1.5 * nightBonus;
-                    default: return 1.8 * nightBonus;
-                }
-            }
-            
-            getDetectionRange() {
-                switch (this.type) {
-                    case 'runner': return 250;
-                    case 'brute': return 350;
-                    case 'crawler': return 200;
-                    case 'toxic': return 300;
-                    case 'tank': return 400;
-                    case 'fast': return 300;
-                    case 'spitter': return 350;
-                    case 'boss': return 500;
-                    default: return 300;
-                }
-            }
-            
-            getDamage() {
-                switch (this.type) {
-                    case 'runner': return 8;
-                    case 'brute': return 15;
-                    case 'crawler': return 5;
-                    case 'toxic': return 12;
-                    case 'tank': return 20;
-                    case 'fast': return 6;
-                    case 'spitter': return 5;
-                    case 'boss': return 30;
-                    default: return 10;
-                }
-            }
-            
-            getColor() {
-                switch (this.type) {
-                    case 'runner': return '#c78f6b';
-                    case 'brute': return '#6b8fbb';
-                    case 'crawler': return '#6b8f6b';
-                    case 'toxic': return '#8fbb8f';
-                    case 'tank': return '#ff8800';
-                    case 'fast': return '#aa55ff';
-                    case 'spitter': return '#55aaff';
-                    case 'boss': return '#ff0000';
-                    default: return '#8fbb6b';
-                }
-            }
-
-            getCoinValue() {
-                switch (this.type) {
-                    case 'runner': return 3;
-                    case 'brute': return 5;
-                    case 'crawler': return 2;
-                    case 'toxic': return 4;
-                    case 'tank': return 15;
-                    case 'fast': return 10;
-                    case 'spitter': return 13;
-                    case 'boss': return 100;
-                    default: return 2;
-                }
-            }
-
-            update() {
-                const player = gameState.player;
-                const dx = player.x - this.x;
-                const dy = player.y - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                // IA: Perseguição ou movimento aleatório
-                if (distance < this.detectionRange) {
-                    // Persegue o jogador
-                    const angle = Math.atan2(dy, dx);
-                    this.x += Math.cos(angle) * this.speed;
-                    this.y += Math.sin(angle) * this.speed;
-                    
-                    // Ataque se estiver perto
-                    if (distance < (this.type === 'boss' ? 60 : 40) && this.attackCooldown <= 0) {
-                        player.takeDamage(this.damage);
-                        this.attackCooldown = this.type === 'boss' ? 30 : 60;
-                    }
-                    
-                    // Zumbis cuspidores atiram ácido
-                    if (this.type === 'spitter' && Date.now() - this.lastAcidShot > 4000 && distance < 300) {
-                        this.lastAcidShot = Date.now();
-                        gameState.acidBullets.push(new AcidBullet(
-                            this.x + this.width / 2,
-                            this.y + this.height / 2,
-                            angle
-                        ));
-                    }
-                    
-                    // Habilidade especial do boss
-                    if (this.type === 'boss') {
-                        // Ataque de projéteis
-                        if (Date.now() - this.lastBossAttack > 3000 && distance < 500) {
-                            this.lastBossAttack = Date.now();
-                            
-                            // Dispara 3 projéteis em direções diferentes
-                            for (let i = 0; i < 3; i++) {
-                                const spread = (i - 1) * Math.PI / 8;
-                                gameState.bossProjectiles.push(new BossProjectile(
-                                    this.x + this.width/2,
-                                    this.y + this.height/2,
-                                    angle + spread
-                                ));
-                            }
-                        }
-                    }
-                } else {
-                    // Movimento aleatório
-                    if (Math.random() < 0.02) {
-                        this.randomAngle = Math.random() * Math.PI * 2;
-                    }
-                    this.x += Math.cos(this.randomAngle) * this.speed * 0.5;
-                    this.y += Math.sin(this.randomAngle) * this.speed * 0.5;
-                }
-
-                // Cooldown do ataque
-                if (this.attackCooldown > 0) this.attackCooldown--;
-                if (this.specialAbilityCooldown > 0) this.specialAbilityCooldown--;
-
-                // Dano contínuo do laser
-                if (this.laserDamageTimer > 0) {
-                    this.laserDamageTimer--;
-                    if (this.laserDamageTimer % 6 === 0) { // 0.1 segundos (60 fps / 6)
-                        this.takeDamage(100);
-                    }
-                }
-
-                // Limites do mapa
-                this.x = Math.max(0, Math.min(config.width - this.width, this.x));
-                this.y = Math.max(0, Math.min(config.height - this.height, this.y));
-            }
-
-            draw() {
-                // Desenha sombra
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                ctx.beginPath();
-                ctx.ellipse(
-                    this.x + this.width / 2,
-                    this.y + this.height - 5,
-                    this.width / 2,
-                    this.width / 6,
-                    0, 0, Math.PI * 2
-                );
-                ctx.fill();
-                
-                // Desenha zumbi
-                let sprite;
-                switch (this.type) {
-                    case 'runner': sprite = sprites.zombies.runner; break;
-                    case 'brute': sprite = sprites.zombies.brute; break;
-                    case 'crawler': sprite = sprites.zombies.crawler; break;
-                    case 'toxic': sprite = sprites.zombies.toxic; break;
-                    case 'tank': sprite = sprites.zombies.tank; break;
-                    case 'fast': sprite = sprites.zombies.fast; break;
-                    case 'spitter': sprite = sprites.zombies.spitter; break;
-                    case 'boss': sprite = sprites.zombies.boss; break;
-                    default: sprite = sprites.zombies.normal;
-                }
-                
-                ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
-                
-                // Barra de vida
-                if (this.health < this.getMaxHealth()) {
-                    ctx.fillStyle = '#300';
-                    ctx.fillRect(this.x, this.y - 12, this.width, 5);
-                    ctx.fillStyle = this.type === 'boss' ? '#f0f' : '#f00';
-                    ctx.fillRect(this.x, this.y - 12, this.width * (this.health / this.getMaxHealth()), 5);
-                }
-                
-                // Efeito de dano do laser
-                if (this.laserDamageTimer > 0) {
-                    ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
-                    ctx.beginPath();
-                    ctx.arc(this.x + this.width/2, this.y + this.height/2, this.width/2, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-
-            takeDamage(amount) {
-                // Boss tem 50% de resistência a projéteis
-                if (this.type === 'boss') {
-                    // Verifica se o dano vem de projéteis (pistola, shotgun ou granada)
-                    const isProjectileDamage = gameState.bullets.length > 0 || 
-                                             (gameState.grenades.length > 0 && gameState.grenades.some(g => !g.exploded));
-                    
-                    if (isProjectileDamage) {
-                        amount *= 0.5; // Reduz o dano pela metade
-                    }
-                }
-                
-                this.health -= amount;
-                if (this.health <= 0) {
-                    // Drop de moedas
-                    gameState.items.push({
-                        type: 'coin',
-                        x: this.x,
-                        y: this.y,
-                        width: 20,
-                        height: 20,
-                        value: this.coinValue
-                    });
-                    
-                    // Chance de dropar item (com bônus de poção de sorte)
-                    let dropChance = this.getDropChance();
-                    if (gameState.activePotions.luck.active) {
-                        dropChance *= 3; // Triplica a chance de drop
-                    }
-                    
-                    if (Math.random() < dropChance) {
-                        this.dropItem();
-                    }
-                    
-                    // Chance especial do boss dropar a arma laser
-                    if (this.type === 'boss' && Math.random() < 0.2) {
-                        gameState.items.push({
-                            type: 'laserRifle',
-                            x: this.x,
-                            y: this.y,
-                            width: 30,
-                            height: 30
-                        });
-                    }
-                    
-                    gameState.coins += this.coinValue;
-                    updateCoinUI();
-                    
-                    if (this.type === 'boss') {
-                        gameState.bossSpawned = false;
-                        gameState.bossAlive = false;
-                        
-                        endNight();
-                    }
-                    
-                    const index = gameState.zombies.indexOf(this);
-                    if (index !== -1) gameState.zombies.splice(index, 1);
-                    gameState.zombiesSpawned--;
-                }
-            }
-            
-            getDropChance() {
-                switch (this.type) {
-                    case 'runner': return 0.1;
-                    case 'brute': return 0.2;
-                    case 'crawler': return 0.05;
-                    case 'toxic': return 0.15;
-                    case 'tank': return 0.3;
-                    case 'fast': return 0.25;
-                    case 'spitter': return 0.25;
-                    case 'boss': return 0.8;
-                    default: return 0.1;
-                }
-            }
-            
-            dropItem() {
-                const items = [
-                    { type: 'pistolAmmo', chance: this.getCommonItemChance() },
-                    { type: 'shotgunAmmo', chance: this.getUncommonItemChance() },
-                    { type: 'medkit', chance: this.getRareItemChance() },
-                    { type: 'grenade', chance: this.getLegendaryItemChance() }
-                ];
-                
-                let selectedItem = null;
-                let roll = Math.random();
-                
-                for (const item of items) {
-                    if (roll < item.chance) {
-                        selectedItem = item.type;
-                        break;
-                    }
-                    roll -= item.chance;
-                }
-                
-                if (selectedItem) {
-                    gameState.items.push({
-                        type: selectedItem,
-                        x: this.x,
-                        y: this.y,
-                        width: 20,
-                        height: 20
-                    });
-                }
-            }
-            
-            getCommonItemChance() {
-                switch (this.type) {
-                    case 'runner': return 0.7;
-                    case 'brute': return 0.5;
-                    case 'crawler': return 0.8;
-                    case 'toxic': return 0.6;
-                    case 'tank': return 0.3;
-                    case 'fast': return 0.4;
-                    case 'spitter': return 0.4;
-                    case 'boss': return 0.1;
-                    default: return 0.7;
-                }
-            }
-            
-            getUncommonItemChance() {
-                switch (this.type) {
-                    case 'runner': return 0.2;
-                    case 'brute': return 0.3;
-                    case 'crawler': return 0.1;
-                    case 'toxic': return 0.2;
-                    case 'tank': return 0.3;
-                    case 'fast': return 0.3;
-                    case 'spitter': return 0.3;
-                    case 'boss': return 0.2;
-                    default: return 0.2;
-                }
-            }
-            
-            getRareItemChance() {
-                switch (this.type) {
-                    case 'runner': return 0.1;
-                    case 'brute': return 0.15;
-                    case 'crawler': return 0.05;
-                    case 'toxic': return 0.15;
-                    case 'tank': return 0.25;
-                    case 'fast': return 0.2;
-                    case 'spitter': return 0.2;
-                    case 'boss': return 0.3;
-                    default: return 0.1;
-                }
-            }
-            
-            getLegendaryItemChance() {
-                switch (this.type) {
-                    case 'runner': return 0.0;
-                    case 'brute': return 0.05;
-                    case 'crawler': return 0.0;
-                    case 'toxic': return 0.05;
-                    case 'tank': return 0.15;
-                    case 'fast': return 0.1;
-                    case 'spitter': return 0.1;
-                    case 'boss': return 0.4;
-                    default: return 0.0;
-                }
-            }
-            
-            // Aplicar dano contínuo do laser
-            applyLaserDamage() {
-                this.laserDamageTimer = 42; // 0.7 segundos (60 fps * 0.7)
-            }
-        }
-
-        // Classe de Projétil
-        class Bullet {
-            constructor(x, y, angle, type = 'pistol') {
-                this.x = x;
-                this.y = y;
-                this.speed = type === 'pistol' ? 15 : 12;
+                this.width = 30;
+                this.height = 30;
+                this.speed = 6;
                 this.angle = angle;
-                this.damage = type === 'pistol' ? 35 * gameState.player.damageMultiplier : 28 * gameState.player.damageMultiplier; // Shotgun faz 20% menos dano por projétil
-                this.lifetime = type === 'pistol' ? 70 : 50;
-                this.type = type;
-                this.spread = type === 'pistol' ? 0 : Math.PI / 16;
+                this.lifetime = 120;
             }
 
             update() {
                 this.x += Math.cos(this.angle) * this.speed;
                 this.y += Math.sin(this.angle) * this.speed;
                 this.lifetime--;
-
-                // Verifica colisão com zumbis
-                gameState.zombies.forEach(zombie => {
-                    if (
-                        this.x > zombie.x && this.x < zombie.x + zombie.width &&
-                        this.y > zombie.y && this.y < zombie.y + zombie.height
-                    ) {
-                        zombie.takeDamage(this.damage);
-                        this.lifetime = 0;
-                    }
+                
+                gameState.bossVomits.push({
+                    x: this.x,
+                    y: this.y,
+                    width: 10,
+                    height: 10,
+                    timer: 10
                 });
-
-                // Verifica colisão com obstáculos
-                for (const obstacle of gameState.obstacles) {
-                    if (
-                        this.x > obstacle.x && this.x < obstacle.x + obstacle.width &&
-                        this.y > obstacle.y && this.y < obstacle.y + obstacle.height
-                    ) {
-                        this.lifetime = 0;
-                        break;
-                    }
-                }
             }
 
             draw() {
-                ctx.fillStyle = this.type === 'pistol' ? '#ffcc55' : '#ffaa00';
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.type === 'pistol' ? 3 : 5, 0, Math.PI * 2);
+                ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class SniperBullet {
+            constructor(x, y, angle) {
+                this.x = x;
+                this.y = y;
+                this.width = 8;
+                this.height = 8;
+                this.speed = 12;
+                this.angle = angle;
+                this.lifetime = 200;
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                this.lifetime--;
+            }
+
+            draw() {
+                ctx.fillStyle = '#ffff00';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Rastro
-                ctx.strokeStyle = this.type === 'pistol' ? 'rgba(255, 200, 0, 0.5)' : 'rgba(255, 170, 0, 0.5)';
-                ctx.lineWidth = this.type === 'pistol' ? 1 : 2;
+                ctx.strokeStyle = 'rgba(255, 255, 0, 0.5)';
+                ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(
-                    this.x - Math.cos(this.angle) * 10,
-                    this.y - Math.sin(this.angle) * 10
+                    this.x - Math.cos(this.angle) * 15,
+                    this.y - Math.sin(this.angle) * 15
                 );
                 ctx.lineTo(this.x, this.y);
                 ctx.stroke();
             }
         }
 
-        // Sistema de partículas
         const particles = [];
         
         function createParticle(x, y, vx, vy, color, lifetime) {
@@ -2023,16 +1817,13 @@
             });
         }
 
-        // Geração procedural de mapa
         function generateMap() {
             const tileSize = Math.max(config.width, config.height) / config.mapTiles;
             const map = [];
             
-            // Gera um mapa baseado em ruído
             for (let y = 0; y < config.mapTiles; y++) {
                 map[y] = [];
                 for (let x = 0; x < config.mapTiles; x++) {
-                    // Usa um ruído simples para determinar o tipo de terreno
                     const noise = Math.random();
                     
                     if (noise < 0.1) {
@@ -2076,18 +1867,20 @@
             }
         }
 
-        // Inicialização do jogo
         function initGame() {
             gameState.player = new Player(config.width / 2, config.height / 2);
             gameState.zombies = [];
             gameState.bullets = [];
             gameState.acidBullets = [];
             gameState.bossProjectiles = [];
+            gameState.bossVomits = [];
             gameState.grenades = [];
             gameState.explosions = [];
             gameState.items = [];
             gameState.laserBeams = [];
             gameState.laserChargeEffects = [];
+            gameState.sniperBullets = [];
+            gameState.deathEffects = [];
             gameState.day = 1;
             gameState.gameTime = 0;
             gameState.gameOver = false;
@@ -2095,6 +1888,7 @@
             gameState.map = generateMap();
             gameState.coins = 0;
             gameState.playerDamageMultiplier = 1;
+            gameState.playerDefenseMultiplier = 1;
             gameState.zombiesToSpawn = config.baseZombiesPerNight;
             gameState.zombiesSpawned = 0;
             gameState.shopOpen = false;
@@ -2104,30 +1898,33 @@
             gameState.pistolCooldown = 0;
             gameState.shotgunCooldown = 0;
             gameState.laserRifleCooldown = 0;
+            gameState.medkitCooldown = 0;
+            gameState.grenadeCooldown = 0;
             gameState.hasLaserRifle = false;
+            gameState.bossVomitCharging = false;
+            gameState.bossVomitChargeTime = 0;
             
-            // Reset shop prices
             gameState.shopPrices = {
                 ammo: 12,
                 shotgunAmmo: 25,
                 medkit: 8,
-                grenades: 40,
+                grenades: 50,
                 health: 20,
                 damage: 15,
                 speed: 18,
                 strengthPotion: 120,
                 luckPotion: 200,
-                ammoPotion: 250
+                ammoPotion: 250,
+                cooldownPotion: 150
             };
             
-            // Reset poções ativas
             gameState.activePotions = {
                 strength: { active: false, daysLeft: 0 },
                 luck: { active: false, daysLeft: 0 },
-                infiniteAmmo: { active: false, daysLeft: 0 }
+                infiniteAmmo: { active: false, daysLeft: 0 },
+                cooldown: { active: false, daysLeft: 0 }
             };
             
-            // Inicia com faca e sem outras armas
             gameState.inventory = [
                 { type: 'knife', ammo: null, maxAmmo: null },
                 { type: 'pistol', ammo: 0, maxAmmo: 100 },
@@ -2142,7 +1939,6 @@
             updateShopPricesUI();
             updateActivePotionsUI();
             
-            // Geração de obstáculos
             gameState.obstacles = [];
             for (let i = 0; i < 20; i++) {
                 gameState.obstacles.push({
@@ -2154,33 +1950,27 @@
                 });
             }
             
-            // Inicia o loop do jogo
             gameLoop();
             dayNightCycle();
             itemSpawnLoop();
         }
 
-        // Loop principal do jogo
         function gameLoop() {
             if (gameState.gameOver) return;
             
             ctx.clearRect(0, 0, config.width, config.height);
             
-            // Desenha mapa
             drawMap();
             
-            // Desenha obstáculos
             ctx.fillStyle = 'rgba(50, 50, 50, 1)';
             gameState.obstacles.forEach(obstacle => {
                 ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
                 
-                // Detalhes dos obstáculos
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
             });
             
-            // Desenha itens no chão
             gameState.items.forEach(item => {
                 let sprite;
                 switch (item.type) {
@@ -2192,9 +1982,23 @@
                     case 'grenade': sprite = sprites.items.grenade; break;
                     case 'coin': sprite = sprites.items.coin; break;
                     case 'laserRifle': sprite = sprites.items.laserRifle; break;
+                    case 'laserAmmo': 
+                        sprite = document.createElement('canvas');
+                        sprite.width = 30;
+                        sprite.height = 30;
+                        const ictx = sprite.getContext('2d');
+                        ictx.fillStyle = '#00ff00';
+                        ictx.beginPath();
+                        ictx.arc(15, 15, 15, 0, Math.PI * 2);
+                        ictx.fill();
+                        ictx.font = '20px Arial';
+                        ictx.textAlign = 'center';
+                        ictx.textBaseline = 'middle';
+                        ictx.fillStyle = '#fff';
+                        ictx.fillText('🔋', 15, 15);
+                        break;
                 }
                 
-                // Efeito de flutuação
                 const floatY = Math.sin(Date.now() / 500) * 3;
                 
                 ctx.drawImage(
@@ -2206,11 +2010,9 @@
                 );
             });
             
-            // Atualiza e desenha partículas
             updateParticles();
             drawParticles();
             
-            // Atualiza e desenha efeitos de carregamento do laser
             for (let i = gameState.laserChargeEffects.length - 1; i >= 0; i--) {
                 const effect = gameState.laserChargeEffects[i];
                 
@@ -2225,11 +2027,9 @@
                 }
             }
             
-            // Atualiza e desenha lasers
             for (let i = gameState.laserBeams.length - 1; i >= 0; i--) {
                 const laser = gameState.laserBeams[i];
                 
-                // Desenha o laser
                 const gradient = ctx.createLinearGradient(
                     laser.startX, laser.startY, 
                     laser.endX, laser.endY
@@ -2246,7 +2046,6 @@
                 ctx.lineTo(laser.endX, laser.endY);
                 ctx.stroke();
                 
-                // Efeito de brilho ao redor do laser
                 ctx.strokeStyle = 'rgba(0, 255, 0, 0.3)';
                 ctx.lineWidth = laser.width + 10;
                 ctx.beginPath();
@@ -2254,36 +2053,30 @@
                 ctx.lineTo(laser.endX, laser.endY);
                 ctx.stroke();
                 
-                // Verifica colisão com zumbis
                 gameState.zombies.forEach(zombie => {
                     const zombieCenterX = zombie.x + zombie.width / 2;
                     const zombieCenterY = zombie.y + zombie.height / 2;
                     
-                    // Verifica se o zumbi está na linha do laser
                     if (pointToLineDistance(zombieCenterX, zombieCenterY, laser.startX, laser.startY, laser.endX, laser.endY) < 30) {
                         zombie.applyLaserDamage();
                     }
                 });
                 
-                // Atualiza temporizador
                 laser.timer--;
                 if (laser.timer <= 0) {
                     gameState.laserBeams.splice(i, 1);
                 }
             }
             
-            // Atualiza e desenha projéteis do boss
             for (let i = gameState.bossProjectiles.length - 1; i >= 0; i--) {
                 const projectile = gameState.bossProjectiles[i];
                 projectile.update();
                 
-                // Desenha projétil
                 ctx.fillStyle = 'rgba(255, 0, 255, 0.8)';
                 ctx.beginPath();
                 ctx.arc(projectile.x, projectile.y, 10, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Remove projéteis fora do mapa ou sem vida útil
                 if (projectile.lifetime <= 0 ||
                     projectile.x < 0 || projectile.x > config.width ||
                     projectile.y < 0 || projectile.y > config.height) {
@@ -2291,11 +2084,35 @@
                 }
             }
             
-            // Atualiza e desenha granadas
+            for (let i = gameState.bossVomits.length - 1; i >= 0; i--) {
+                const vomit = gameState.bossVomits[i];
+                
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.6)';
+                ctx.beginPath();
+                ctx.arc(vomit.x, vomit.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                vomit.timer--;
+                if (vomit.timer <= 0) {
+                    gameState.bossVomits.splice(i, 1);
+                }
+            }
+            
+            for (let i = gameState.sniperBullets.length - 1; i >= 0; i--) {
+                const bullet = gameState.sniperBullets[i];
+                bullet.update();
+                bullet.draw();
+                
+                if (bullet.lifetime <= 0 ||
+                    bullet.x < 0 || bullet.x > config.width ||
+                    bullet.y < 0 || bullet.y > config.height) {
+                    gameState.sniperBullets.splice(i, 1);
+                }
+            }
+            
             for (let i = gameState.grenades.length - 1; i >= 0; i--) {
                 const grenade = gameState.grenades[i];
                 
-                // Desenha granada
                 const flashIntensity = grenade.flashTimer > 0 ? 
                     (grenade.flashTimer % 10 < 5 ? 1 : 0.5) : 1;
                 
@@ -2308,7 +2125,6 @@
                 ctx.arc(grenade.x, grenade.y, 5, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Verifica colisão com zumbis
                 if (!grenade.exploded && !grenade.stuckZombie) {
                     for (const zombie of gameState.zombies) {
                         if (
@@ -2317,52 +2133,45 @@
                         ) {
                             grenade.stuckZombie = zombie;
                             grenade.exploded = true;
-                            grenade.flashTimer = 0; // Explode imediatamente
+                            grenade.flashTimer = 0;
                             break;
                         }
                     }
                 }
                 
-                // Se grudou em um zumbi, segue ele
                 if (grenade.stuckZombie) {
                     grenade.x = grenade.stuckZombie.x + grenade.stuckZombie.width / 2;
                     grenade.y = grenade.stuckZombie.y + grenade.stuckZombie.height / 2;
                 }
                 
-                // Atualiza posição
                 if (!grenade.exploded && !grenade.stuckZombie) {
                     grenade.x += grenade.vx;
                     grenade.y += grenade.vy;
                     grenade.distanceTraveled += Math.sqrt(grenade.vx * grenade.vx + grenade.vy * grenade.vy);
                     
-                    // Verifica si chegou no limite de distância
                     if (grenade.distanceTraveled >= grenade.maxDistance) {
                         grenade.exploded = true;
-                        grenade.flashTimer = 90; // 1.5 segundos de piscar
+                        grenade.flashTimer = 90;
                     }
                 } else if (grenade.exploded) {
-                    // Contagem regressiva para explosão
                     grenade.flashTimer--;
                     
                     if (grenade.flashTimer <= 0) {
-                        // Cria explosão
                         gameState.explosions.push({
                             x: grenade.x,
                             y: grenade.y,
                             radius: 0,
-                            maxRadius: 70, // Raio maior da explosão visual
+                            maxRadius: 70,
                             timer: 30
                         });
                         
-                        // Dano aos zumbis - raio maior de dano
                         gameState.zombies.forEach(zombie => {
                             const dx = zombie.x + zombie.width/2 - grenade.x;
                             const dy = zombie.y + zombie.height/2 - grenade.y;
                             const distance = Math.sqrt(dx * dx + dy * dy);
                             
-                            if (distance < 500) { // Área de dano maior
-                                // Dano diminui com a distância
-                                const damage = 300 * (1 - distance/250); // Dano aumentado
+                            if (distance < 500) {
+                                const damage = 300 * (1 - distance/250);
                                 zombie.takeDamage(damage);
                             }
                         });
@@ -2372,11 +2181,9 @@
                 }
             }
             
-            // Atualiza e desenha explosões
             for (let i = gameState.explosions.length - 1; i >= 0; i--) {
                 const explosion = gameState.explosions[i];
                 
-                // Desenha explosão
                 const gradient = ctx.createRadialGradient(
                     explosion.x, explosion.y, 0,
                     explosion.x, explosion.y, explosion.radius
@@ -2389,17 +2196,56 @@
                 ctx.arc(explosion.x, explosion.y, explosion.radius, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Expande a explosão
-                explosion.radius += explosion.maxRadius / 6; // Mais rápido
+                explosion.radius += explosion.maxRadius / 6;
                 explosion.timer--;
                 
-                // Remove explosão acabada
                 if (explosion.timer <= 0) {
                     gameState.explosions.splice(i, 1);
                 }
             }
             
-            // Atualiza e desenha projéteis de ácido
+            for (let i = gameState.deathEffects.length - 1; i >= 0; i--) {
+                const effect = gameState.deathEffects[i];
+                
+                ctx.globalAlpha = effect.alpha;
+                ctx.fillStyle = effect.color;
+                
+                if (effect.type === 'blood') {
+                    for (let j = 0; j < effect.particles; j++) {
+                        const angle = (j / effect.particles) * Math.PI * 2;
+                        const distance = effect.radius * (effect.timer / effect.maxTimer);
+                        const x = effect.x + Math.cos(angle) * distance;
+                        const y = effect.y + Math.sin(angle) * distance;
+                        
+                        ctx.beginPath();
+                        ctx.arc(x, y, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else if (effect.type === 'boss') {
+                    ctx.beginPath();
+                    ctx.arc(effect.x, effect.y, effect.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    for (let j = 0; j < 8; j++) {
+                        const angle = (j / 8) * Math.PI * 2;
+                        const x = effect.x + Math.cos(angle) * effect.radius * 1.5;
+                        const y = effect.y + Math.sin(angle) * effect.radius * 1.5;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(effect.x, effect.y);
+                        ctx.lineTo(x, y);
+                        ctx.stroke();
+                    }
+                }
+                
+                ctx.globalAlpha = 1;
+                
+                effect.timer--;
+                if (effect.timer <= 0) {
+                    gameState.deathEffects.splice(i, 1);
+                }
+            }
+            
             gameState.acidBullets.forEach((acid, index) => {
                 acid.update();
                 acid.draw();
@@ -2409,29 +2255,24 @@
                 }
             });
             
-            // Atualiza e desenha jogador
             gameState.player.update();
             gameState.player.draw();
             
-            // Atualiza e desenha zumbis
             gameState.zombies.forEach(zombie => {
                 zombie.update();
                 zombie.draw();
             });
             
-            // Spawn de zumbis durante a noite
             if (gameState.isNight && gameState.zombiesSpawned < gameState.zombiesToSpawn && !gameState.bossAlive) {
                 spawnZombie();
             }
             
-            // Spawn do boss a cada 5 dias
             if (gameState.isNight && gameState.day % 5 === 0 && !gameState.bossSpawned && gameState.zombiesSpawned >= Math.floor(gameState.zombiesToSpawn * 0.7)) {
                 spawnBoss();
                 gameState.bossSpawned = true;
                 gameState.bossAlive = true;
             }
             
-            // Remove todos os zumbis quando o dia começa
             if (!gameState.isNight && gameState.zombies.length > 0) {
                 gameState.zombies = [];
                 gameState.zombiesSpawned = 0;
@@ -2439,12 +2280,10 @@
                 gameState.bossAlive = false;
             }
             
-            // Atualiza e desenha projéteis
             gameState.bullets.forEach((bullet, index) => {
                 bullet.update();
                 bullet.draw();
                 
-                // Remove projéteis fora do mapa ou sem vida útil
                 if (
                     bullet.lifetime <= 0 ||
                     bullet.x < 0 || bullet.x > config.width ||
@@ -2454,7 +2293,6 @@
                 }
             });
             
-            // Atualiza cooldowns
             if (gameState.pistolCooldown > 0) {
                 gameState.pistolCooldown--;
             }
@@ -2467,14 +2305,18 @@
             if (gameState.laserRifleCooldown > 0) {
                 gameState.laserRifleCooldown--;
             }
+            if (gameState.medkitCooldown > 0) {
+                gameState.medkitCooldown--;
+            }
+            if (gameState.grenadeCooldown > 0) {
+                gameState.grenadeCooldown--;
+            }
             
-            // Atualiza UI
             document.getElementById('zombieCount').textContent = gameState.zombies.length;
             document.getElementById('day').textContent = gameState.day;
             document.getElementById('dayTime').textContent = gameState.isNight ? '🌙 NOITE' : '☀️ DIA';
             document.getElementById('dayTime').style.color = gameState.isNight ? '#ff5555' : '#ffcc55';
             
-            // Atualiza contador de tempo ou mensagem do boss
             if (gameState.bossAlive) {
                 document.getElementById('timeLeft').style.display = 'none';
                 document.getElementById('bossMessage').style.display = 'block';
@@ -2487,61 +2329,71 @@
                 document.getElementById('timeLeft').textContent = `TEMPO: ${timeLeft}s`;
             }
             
-            // Atualiza indicadores de cooldown
             updateCooldownIndicators();
             
             requestAnimationFrame(gameLoop);
         }
 
         function updateCooldownIndicators() {
-            // Remove todos os indicadores existentes
             document.querySelectorAll('.cooldown-indicator').forEach(el => el.remove());
             
-            // Pistola
+            const cooldownMultiplier = gameState.activePotions.cooldown.active ? 0.4 : 1;
+            
             if (gameState.pistolCooldown > 0) {
                 const slot = document.querySelectorAll('.inventory-slot')[1];
                 const indicator = document.createElement('div');
                 indicator.className = 'cooldown-indicator';
-                indicator.textContent = (gameState.pistolCooldown / 60).toFixed(2);
+                indicator.textContent = (gameState.pistolCooldown / 60 * cooldownMultiplier).toFixed(1);
                 slot.appendChild(indicator);
             }
             
-            // Shotgun
             if (gameState.shotgunCooldown > 0) {
                 const slot = document.querySelectorAll('.inventory-slot')[2];
                 const indicator = document.createElement('div');
                 indicator.className = 'cooldown-indicator';
-                indicator.textContent = (gameState.shotgunCooldown / 60).toFixed(2);
+                indicator.textContent = (gameState.shotgunCooldown / 60 * cooldownMultiplier).toFixed(1);
                 slot.appendChild(indicator);
             }
             
-            // Laser Rifle
             if (gameState.laserRifleCooldown > 0) {
                 const slot = document.querySelectorAll('.inventory-slot')[5];
                 const indicator = document.createElement('div');
                 indicator.className = 'cooldown-indicator';
-                indicator.textContent = (gameState.laserRifleCooldown / 60).toFixed(2);
+                indicator.textContent = (gameState.laserRifleCooldown / 60 * cooldownMultiplier).toFixed(1);
+                slot.appendChild(indicator);
+            }
+            
+            if (gameState.medkitCooldown > 0) {
+                const slot = document.querySelectorAll('.inventory-slot')[3];
+                const indicator = document.createElement('div');
+                indicator.className = 'cooldown-indicator';
+                indicator.textContent = (gameState.medkitCooldown / 60 * cooldownMultiplier).toFixed(1);
+                slot.appendChild(indicator);
+            }
+            
+            if (gameState.grenadeCooldown > 0) {
+                const slot = document.querySelectorAll('.inventory-slot')[4];
+                const indicator = document.createElement('div');
+                indicator.className = 'cooldown-indicator';
+                indicator.textContent = (gameState.grenadeCooldown / 60 * cooldownMultiplier).toFixed(1);
                 slot.appendChild(indicator);
             }
         }
 
-        // Spawn de zumbis
         function spawnZombie() {
             const side = Math.floor(Math.random() * 4);
             let x, y;
             
             switch (side) {
-                case 0: x = -50; y = Math.random() * config.height; break; // Esquerda
-                case 1: x = config.width + 50; y = Math.random() * config.height; break; // Direita
-                case 2: x = Math.random() * config.width; y = -50; break; // Topo
-                case 3: x = Math.random() * config.width; y = config.height + 50; break; // Base
+                case 0: x = -50; y = Math.random() * config.height; break;
+                case 1: x = config.width + 50; y = Math.random() * config.height; break;
+                case 2: x = Math.random() * config.width; y = -50; break;
+                case 3: x = Math.random() * config.width; y = config.height + 50; break;
             }
             
-            // Escolhe tipo de zumbi baseado no dia
             let zombieTypes = ['normal', 'normal', 'normal', 'runner', 'brute', 'crawler', 'toxic'];
             let weights = [0.5, 0.5, 0.5, 0.3, 0.2, 0.3, 0.2];
             
-            // Adiciona tipos especiais conforme os dias avançam
             if (gameState.day >= 3) {
                 zombieTypes.push('tank');
                 weights.push(0.1);
@@ -2553,9 +2405,10 @@
             if (gameState.day >= 7) {
                 zombieTypes.push('spitter');
                 weights.push(0.15);
+                zombieTypes.push('sniper');
+                weights.push(0.1);
             }
             
-            // Normaliza os pesos
             const sum = weights.reduce((a, b) => a + b, 0);
             weights = weights.map(w => w / sum);
             
@@ -2574,23 +2427,22 @@
             gameState.zombiesSpawned++;
         }
 
-        // Spawn do boss
         function spawnBoss() {
             const side = Math.floor(Math.random() * 4);
             let x, y;
             
             switch (side) {
-                case 0: x = -80; y = Math.random() * config.height; break; // Esquerda
-                case 1: x = config.width + 80; y = Math.random() * config.height; break; // Direita
-                case 2: x = Math.random() * config.width; y = -80; break; // Topo
-                case 3: x = Math.random() * config.width; y = config.height + 80; break; // Base
+                case 0: x = -80; y = Math.random() * config.height; break;
+                case 1: x = config.width + 80; y = Math.random() * config.height; break;
+                case 2: x = Math.random() * config.width; y = -80; break;
+                case 3: x = Math.random() * config.width; y = config.height + 80; break;
             }
             
             gameState.zombies.push(new Zombie(x, y, 'boss'));
             gameState.zombiesSpawned++;
+            gameState.zombiesToSpawn = Math.floor(gameState.zombiesToSpawn * 0.7);
         }
 
-        // Termina a noite imediatamente
         function endNight() {
             gameState.isNight = false;
             gameState.gameTime = 0;
@@ -2599,16 +2451,12 @@
             gameState.zombiesSpawned = 0;
             document.getElementById('nightOverlay').style.display = 'none';
             
-            // Atualiza poções ativas
             updateActivePotions();
             
-            // Abre a loja automaticamente
             openShop();
         }
 
-        // Atualiza poções ativas
         function updateActivePotions() {
-            // Verifica poção de força
             if (gameState.activePotions.strength.active) {
                 gameState.activePotions.strength.daysLeft--;
                 if (gameState.activePotions.strength.daysLeft <= 0) {
@@ -2617,7 +2465,6 @@
                 }
             }
             
-            // Verifica poção de sorte
             if (gameState.activePotions.luck.active) {
                 gameState.activePotions.luck.daysLeft--;
                 if (gameState.activePotions.luck.daysLeft <= 0) {
@@ -2625,7 +2472,6 @@
                 }
             }
             
-            // Verifica poção de munição infinita
             if (gameState.activePotions.infiniteAmmo.active) {
                 gameState.activePotions.infiniteAmmo.daysLeft--;
                 if (gameState.activePotions.infiniteAmmo.daysLeft <= 0) {
@@ -2633,22 +2479,27 @@
                 }
             }
             
+            if (gameState.activePotions.cooldown.active) {
+                gameState.activePotions.cooldown.daysLeft--;
+                if (gameState.activePotions.cooldown.daysLeft <= 0) {
+                    gameState.activePotions.cooldown.active = false;
+                    gameState.player.removeCooldownPotion();
+                }
+            }
+            
             updateActivePotionsUI();
             updateShopButtons();
         }
 
-        // Ciclo dia/noite
         function dayNightCycle() {
             if (gameState.gameOver) return;
             
-            // Se for noite e tiver boss vivo, não conta o tempo
             if (!(gameState.isNight && gameState.bossAlive)) {
                 gameState.gameTime += 100;
             }
             
             if (gameState.isNight) {
                 if (gameState.gameTime >= config.nightDuration && !gameState.bossAlive) {
-                    // Fim da noite (só se não tiver boss vivo)
                     gameState.isNight = false;
                     gameState.gameTime = 0;
                     gameState.day++;
@@ -2656,20 +2507,16 @@
                     gameState.zombiesSpawned = 0;
                     document.getElementById('nightOverlay').style.display = 'none';
                     
-                    // Atualiza poções ativas
                     updateActivePotions();
                     
-                    // Abre a loja automaticamente
                     openShop();
                 }
             } else {
                 if (gameState.gameTime >= config.dayDuration) {
-                    // Fim do dia
                     gameState.isNight = true;
                     gameState.gameTime = 0;
                     document.getElementById('nightOverlay').style.display = 'block';
                     
-                    // Fecha a loja se estiver aberta
                     if (gameState.shopOpen) {
                         closeShop();
                     }
@@ -2679,7 +2526,6 @@
             setTimeout(dayNightCycle, 100);
         }
 
-        // Spawn de itens
         function itemSpawnLoop() {
             if (gameState.gameOver) return;
             
@@ -2705,7 +2551,6 @@
             setTimeout(itemSpawnLoop, 100);
         }
 
-        // Loja de melhorias
         function openShop() {
             if (gameState.isNight) return;
             gameState.shopOpen = true;
@@ -2729,15 +2574,15 @@
             document.getElementById('buyStrengthPotion').textContent = `🪙${Math.floor(gameState.shopPrices.strengthPotion)} COMPRAR`;
             document.getElementById('buyLuckPotion').textContent = `🪙${Math.floor(gameState.shopPrices.luckPotion)} COMPRAR`;
             document.getElementById('buyAmmoPotion').textContent = `🪙${Math.floor(gameState.shopPrices.ammoPotion)} COMPRAR`;
+            document.getElementById('buyCooldownPotion').textContent = `🪙${Math.floor(gameState.shopPrices.cooldownPotion)} COMPRAR`;
         }
         
         function updateShopButtons() {
-            // Atualiza botões de poções
             document.getElementById('buyStrengthPotion').disabled = gameState.activePotions.strength.active;
             document.getElementById('buyLuckPotion').disabled = gameState.activePotions.luck.active;
             document.getElementById('buyAmmoPotion').disabled = gameState.activePotions.infiniteAmmo.active;
+            document.getElementById('buyCooldownPotion').disabled = gameState.activePotions.cooldown.active;
             
-            // Atualiza outros botões baseado em moedas
             document.getElementById('buyAmmo').disabled = gameState.coins < gameState.shopPrices.ammo;
             document.getElementById('buyShotgunAmmo').disabled = gameState.coins < gameState.shopPrices.shotgunAmmo;
             document.getElementById('buyMedkit').disabled = gameState.coins < gameState.shopPrices.medkit;
@@ -2748,6 +2593,7 @@
             document.getElementById('buyStrengthPotion').disabled = gameState.coins < gameState.shopPrices.strengthPotion || gameState.activePotions.strength.active;
             document.getElementById('buyLuckPotion').disabled = gameState.coins < gameState.shopPrices.luckPotion || gameState.activePotions.luck.active;
             document.getElementById('buyAmmoPotion').disabled = gameState.coins < gameState.shopPrices.ammoPotion || gameState.activePotions.infiniteAmmo.active;
+            document.getElementById('buyCooldownPotion').disabled = gameState.coins < gameState.shopPrices.cooldownPotion || gameState.activePotions.cooldown.active;
         }
         
         function buyAmmo() {
@@ -2790,9 +2636,9 @@
         
         function buyHealth() {
             if (gameState.coins >= gameState.shopPrices.health) {
-                gameState.player.increaseMaxHealth(10); // Reduzido para 10%
+                gameState.player.increaseMaxHealth(10);
                 gameState.coins -= gameState.shopPrices.health;
-                gameState.shopPrices.health = Math.floor(gameState.shopPrices.health * 1.2); // Aumenta o preço apenas para status
+                gameState.shopPrices.health = Math.floor(gameState.shopPrices.health * 1.2);
                 updateCoinUI();
                 updateShopPricesUI();
                 updateShopButtons();
@@ -2803,7 +2649,7 @@
             if (gameState.coins >= gameState.shopPrices.damage) {
                 gameState.player.increaseDamage(0.1);
                 gameState.coins -= gameState.shopPrices.damage;
-                gameState.shopPrices.damage = Math.floor(gameState.shopPrices.damage * 1.2); // Aumenta o preço apenas para status
+                gameState.shopPrices.damage = Math.floor(gameState.shopPrices.damage * 1.2);
                 updateCoinUI();
                 updateShopPricesUI();
                 updateShopButtons();
@@ -2812,9 +2658,9 @@
         
         function buySpeed() {
             if (gameState.coins >= gameState.shopPrices.speed) {
-                gameState.player.increaseMaxStamina(10); // Agora aumenta stamina em 10%
+                gameState.player.increaseMaxStamina(10);
                 gameState.coins -= gameState.shopPrices.speed;
-                gameState.shopPrices.speed = Math.floor(gameState.shopPrices.speed * 1.2); // Aumenta o preço apenas para status
+                gameState.shopPrices.speed = Math.floor(gameState.shopPrices.speed * 1.2);
                 updateCoinUI();
                 updateShopPricesUI();
                 updateShopButtons();
@@ -2894,11 +2740,21 @@
                 updateShopButtons();
             }
         }
+        
+        function buyCooldownPotion() {
+            if (gameState.coins >= gameState.shopPrices.cooldownPotion && !gameState.activePotions.cooldown.active) {
+                gameState.coins -= gameState.shopPrices.cooldownPotion;
+                gameState.activePotions.cooldown.active = true;
+                gameState.activePotions.cooldown.daysLeft = 3;
+                gameState.player.applyCooldownPotion();
+                updateCoinUI();
+                updateActivePotionsUI();
+                updateShopButtons();
+            }
+        }
 
-        // Atualiza UI do inventário
         function updateInventoryUI() {
             document.querySelectorAll('.inventory-slot').forEach((slot, index) => {
-                // Verifica se é o laser rifle (não mostra na UI até ser desbloqueado)
                 if (gameState.inventory[index].type === 'laserRifle' && !gameState.hasLaserRifle) {
                     slot.innerHTML = '❓<div class="slot-ammo">?</div>';
                     return;
@@ -2956,6 +2812,14 @@
                 indicator.innerHTML = '<div class="days-left">' + gameState.activePotions.infiniteAmmo.daysLeft + ' dias</div>';
                 container.appendChild(indicator);
             }
+            
+            if (gameState.activePotions.cooldown.active) {
+                const indicator = document.createElement('div');
+                indicator.className = 'potion-indicator';
+                indicator.style.background = '#00aaff';
+                indicator.innerHTML = '<div class="days-left">' + gameState.activePotions.cooldown.daysLeft + ' dias</div>';
+                container.appendChild(indicator);
+            }
         }
         
         function getWeaponIcon(type) {
@@ -2968,6 +2832,7 @@
                 case 'pistolAmmo': return '🔹';
                 case 'shotgunAmmo': return '🔸';
                 case 'laserRifle': return '🔋';
+                case 'laserAmmo': return '🔋';
                 case 'empty': return '❓';
                 default: return '❓';
             }
@@ -2983,7 +2848,6 @@
             }
         }
 
-        // Controles
         window.addEventListener('keydown', (e) => {
             const player = gameState.player;
             
@@ -3045,7 +2909,6 @@
                 gameState.player.meleeAttack();
             } else if (weapon.type === 'pistol' && weapon.ammo > 0 && gameState.pistolCooldown <= 0) {
                 const player = gameState.player;
-                // Calcula a posição do cano da pistola
                 const barrelX = player.x + player.width / 2 + Math.cos(player.angle) * 35;
                 const barrelY = player.y + player.height / 2 + Math.sin(player.angle) * 35;
                 
@@ -3059,17 +2922,15 @@
                 if (!gameState.activePotions.infiniteAmmo.active) {
                     weapon.ammo--;
                 }
-                gameState.pistolCooldown = 30; // 0.5 segundos (60 fps * 0.5)
+                gameState.pistolCooldown = 30;
                 updateInventoryUI();
             } else if (weapon.type === 'shotgun' && weapon.ammo > 0 && gameState.shotgunCooldown <= 0) {
                 const player = gameState.player;
-                // Calcula a posição do cano da shotgun
                 const barrelX = player.x + player.width / 2 + Math.cos(player.angle) * 40;
                 const barrelY = player.y + player.height / 2 + Math.sin(player.angle) * 40;
                 
-                // Atira 5 projéteis em leque
                 for (let i = 0; i < 5; i++) {
-                    const spread = (i - 2) * Math.PI / 16; // Leque mais amplo
+                    const spread = (i - 2) * Math.PI / 16;
                     gameState.bullets.push(new Bullet(
                         barrelX,
                         barrelY,
@@ -3081,7 +2942,7 @@
                 if (!gameState.activePotions.infiniteAmmo.active) {
                     weapon.ammo--;
                 }
-                gameState.shotgunCooldown = 60; // 1 segundo (60 fps * 1)
+                gameState.shotgunCooldown = 60;
                 updateInventoryUI();
             } else if (weapon.type === 'medkit') {
                 gameState.player.useMedkit();
@@ -3099,7 +2960,6 @@
             const weapon = gameState.inventory[gameState.selectedSlot];
             
             if (weapon.type === 'pistol') {
-                // Verifica se tem munição no inventário
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === 'pistolAmmo' && gameState.inventory[i].ammo > 0) {
                         const maxAmmo = weapon.maxAmmo;
@@ -3119,7 +2979,6 @@
                     }
                 }
             } else if (weapon.type === 'shotgun') {
-                // Verifica se tem munição no inventário
                 for (let i = 0; i < gameState.inventory.length; i++) {
                     if (gameState.inventory[i].type === 'shotgunAmmo' && gameState.inventory[i].ammo > 0) {
                         const maxAmmo = weapon.maxAmmo;
@@ -3141,14 +3000,12 @@
             }
         }
 
-        // Função auxiliar para normalizar ângulos
         function normalizeAngle(angle) {
             while (angle > Math.PI) angle -= Math.PI * 2;
             while (angle < -Math.PI) angle += Math.PI * 2;
             return angle;
         }
 
-        // Botões de início/reinício
         document.getElementById('startButton').addEventListener('click', () => {
             document.getElementById('startScreen').style.display = 'none';
             initGame();
@@ -3159,7 +3016,6 @@
             initGame();
         });
 
-        // Botões da loja
         document.getElementById('buyAmmo').addEventListener('click', buyAmmo);
         document.getElementById('buyShotgunAmmo').addEventListener('click', buyShotgunAmmo);
         document.getElementById('buyHealth').addEventListener('click', buyHealth);
@@ -3170,11 +3026,607 @@
         document.getElementById('buyStrengthPotion').addEventListener('click', buyStrengthPotion);
         document.getElementById('buyLuckPotion').addEventListener('click', buyLuckPotion);
         document.getElementById('buyAmmoPotion').addEventListener('click', buyAmmoPotion);
+        document.getElementById('buyCooldownPotion').addEventListener('click', buyCooldownPotion);
         document.getElementById('closeShop').addEventListener('click', closeShop);
 
-        // Efeito de sangue
         document.getElementById('bloodOverlay').style.background = 
             'radial-gradient(circle, rgba(255,0,0,0.7) 0%, rgba(255,0,0,0) 70%)';
+
+        const sprites = {
+            player: createPlayerSprite(),
+            zombies: {
+                normal: createZombieSprite('#8fbb6b'),
+                runner: createZombieSprite('#c78f6b'),
+                brute: createZombieSprite('#6b8fbb'),
+                crawler: createZombieSprite('#6b8f6b'),
+                toxic: createZombieSprite('#8fbb8f'),
+                tank: createZombieSprite('#ff8800'),
+                fast: createZombieSprite('#aa55ff'),
+                spitter: createZombieSprite('#55aaff'),
+                sniper: createSniperZombieSprite(),
+                boss: createBossSprite()
+            },
+            items: {
+                pistol: createItemSprite('🔫', '#ff5555'),
+                shotgun: createItemSprite('💥', '#ffaa00'),
+                pistolAmmo: createItemSprite('🔹', '#55aaff'),
+                shotgunAmmo: createItemSprite('🔸', '#ffaa55'),
+                medkit: createItemSprite('🩹', '#55ff55'),
+                grenade: createItemSprite('🧨', '#ff55ff'),
+                coin: createItemSprite('🪙', '#ffcc00'),
+                laserRifle: createItemSprite('🔋', '#00ff00'),
+                laserAmmo: null
+            },
+            weapons: {
+                pistol: createWeaponSprite('#777', '#ffcc55'),
+                shotgun: createShotgunSprite(),
+                knife: createKnifeSprite(),
+                laserRifle: createLaserRifleSprite(),
+                medkit: createMedkitSprite(),
+                grenade: createGrenadeSprite()
+            },
+            terrain: {
+                grass: createTerrainSprite('#3a5c3a'),
+                road: createTerrainSprite('#555555'),
+                water: createTerrainSprite('#3a5c8f'),
+                building: createTerrainSprite('#8f3a3a')
+            }
+        };
+
+        class Zombie {
+            constructor(x, y, type = 'normal') {
+                this.x = x;
+                this.y = y;
+                this.width = type === 'boss' ? 80 : 40;
+                this.height = type === 'boss' ? 80 : 40;
+                this.type = type;
+                this.health = this.getMaxHealth();
+                this.speed = this.getSpeed();
+                this.detectionRange = this.getDetectionRange();
+                this.attackCooldown = 0;
+                this.damage = this.getDamage();
+                this.color = this.getColor();
+                this.randomAngle = Math.random() * Math.PI * 2;
+                this.lastSoundTime = 0;
+                this.coinValue = this.getCoinValue();
+                this.lastAcidShot = 0;
+                this.specialAbilityCooldown = 0;
+                this.lastBossAttack = 0;
+                this.lastSniperShot = 0;
+                this.laserDamageTimer = 0;
+                this.isSniper = type === 'sniper';
+                this.retreating = false;
+            }
+            
+            getMaxHealth() {
+                switch (this.type) {
+                    case 'runner': return 80;
+                    case 'brute': return 150;
+                    case 'crawler': return 60;
+                    case 'toxic': return 90;
+                    case 'tank': return 250;
+                    case 'fast': return 80;
+                    case 'spitter': return 100;
+                    case 'sniper': return 80;
+                    case 'boss': return 500 + (gameState.day * 100);
+                    default: return 100;
+                }
+            }
+            
+            getSpeed() {
+                const nightBonus = gameState.isNight ? 1.2 : 1;
+                switch (this.type) {
+                    case 'runner': return 2.5 * nightBonus;
+                    case 'brute': return 1.2 * nightBonus;
+                    case 'crawler': return 1.5 * nightBonus;
+                    case 'toxic': return 1.8 * nightBonus;
+                    case 'tank': return 1.0 * nightBonus;
+                    case 'fast': return 3.0 * nightBonus;
+                    case 'spitter': return 1.8 * nightBonus;
+                    case 'sniper': return 2.0 * nightBonus;
+                    case 'boss': return 1.5 * nightBonus;
+                    default: return 1.8 * nightBonus;
+                }
+            }
+            
+            getDetectionRange() {
+                switch (this.type) {
+                    case 'runner': return 250;
+                    case 'brute': return 350;
+                    case 'crawler': return 200;
+                    case 'toxic': return 300;
+                    case 'tank': return 400;
+                    case 'fast': return 300;
+                    case 'spitter': return 350;
+                    case 'sniper': return 500;
+                    case 'boss': return 500;
+                    default: return 300;
+                }
+            }
+            
+            getDamage() {
+                switch (this.type) {
+                    case 'runner': return 8;
+                    case 'brute': return 15;
+                    case 'crawler': return 5;
+                    case 'toxic': return 12;
+                    case 'tank': return 20;
+                    case 'fast': return 6;
+                    case 'spitter': return 5;
+                    case 'sniper': return 15;
+                    case 'boss': return 30;
+                    default: return 10;
+                }
+            }
+            
+            getColor() {
+                switch (this.type) {
+                    case 'runner': return '#c78f6b';
+                    case 'brute': return '#6b8fbb';
+                    case 'crawler': return '#6b8f6b';
+                    case 'toxic': return '#8fbb8f';
+                    case 'tank': return '#ff8800';
+                    case 'fast': return '#aa55ff';
+                    case 'spitter': return '#55aaff';
+                    case 'sniper': return '#5555ff';
+                    case 'boss': return '#ff0000';
+                    default: return '#8fbb6b';
+                }
+            }
+
+            getCoinValue() {
+                switch (this.type) {
+                    case 'runner': return 3;
+                    case 'brute': return 5;
+                    case 'crawler': return 2;
+                    case 'toxic': return 4;
+                    case 'tank': return 15;
+                    case 'fast': return 10;
+                    case 'spitter': return 13;
+                    case 'sniper': return 12;
+                    case 'boss': return 100;
+                    default: return 2;
+                }
+            }
+
+            update() {
+                const player = gameState.player;
+                const dx = player.x - this.x;
+                const dy = player.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (this.isSniper) {
+                    if (distance < this.detectionRange) {
+                        if (distance < 200) {
+                            this.retreating = true;
+                            const angle = Math.atan2(dy, dx);
+                            this.x -= Math.cos(angle) * this.speed;
+                            this.y -= Math.sin(angle) * this.speed;
+                        } else {
+                            this.retreating = false;
+                        }
+                        
+                        if (!this.retreating && Date.now() - this.lastSniperShot > 7000) {
+                            this.lastSniperShot = Date.now();
+                            const angle = Math.atan2(dy, dx);
+                            gameState.sniperBullets.push(new SniperBullet(
+                                this.x + this.width / 2,
+                                this.y + this.height / 2,
+                                angle
+                            ));
+                        }
+                    }
+                } else if (distance < this.detectionRange) {
+                    const angle = Math.atan2(dy, dx);
+                    this.x += Math.cos(angle) * this.speed;
+                    this.y += Math.sin(angle) * this.speed;
+                    
+                    if (distance < (this.type === 'boss' ? 60 : 40) && this.attackCooldown <= 0) {
+                        player.takeDamage(this.damage);
+                        this.attackCooldown = this.type === 'boss' ? 30 : 60;
+                    }
+                    
+                    if (this.type === 'spitter' && Date.now() - this.lastAcidShot > 4000 && distance < 300) {
+                        this.lastAcidShot = Date.now();
+                        gameState.acidBullets.push(new AcidBullet(
+                            this.x + this.width / 2,
+                            this.y + this.height / 2,
+                            angle
+                        ));
+                    }
+                    
+                    if (this.type === 'boss') {
+                        if (Date.now() - this.lastBossAttack > 3000 && distance < 500) {
+                            this.lastBossAttack = Date.now();
+                            
+                            for (let i = 0; i < 3; i++) {
+                                const spread = (i - 1) * Math.PI / 8;
+                                gameState.bossProjectiles.push(new BossProjectile(
+                                    this.x + this.width/2,
+                                    this.y + this.height/2,
+                                    angle + spread
+                                ));
+                            }
+                        }
+                        
+                        if (!gameState.bossVomitCharging && Math.random() < 0.01) {
+                            gameState.bossVomitCharging = true;
+                            gameState.bossVomitChargeTime = 0;
+                        }
+                        
+                        if (gameState.bossVomitCharging) {
+                            gameState.bossVomitChargeTime++;
+                            
+                            if (gameState.bossVomitChargeTime >= 300) {
+                                gameState.bossVomitCharging = false;
+                                gameState.bossVomits.push(new BossVomit(
+                                    this.x + this.width/2,
+                                    this.y + this.height/2,
+                                    angle
+                                ));
+                            }
+                        }
+                    }
+                } else {
+                    if (Math.random() < 0.02) {
+                        this.randomAngle = Math.random() * Math.PI * 2;
+                    }
+                    this.x += Math.cos(this.randomAngle) * this.speed * 0.5;
+                    this.y += Math.sin(this.randomAngle) * this.speed * 0.5;
+                }
+
+                if (this.attackCooldown > 0) this.attackCooldown--;
+                if (this.specialAbilityCooldown > 0) this.specialAbilityCooldown--;
+
+                if (this.laserDamageTimer > 0) {
+                    this.laserDamageTimer--;
+                    if (this.laserDamageTimer % 6 === 0) {
+                        this.takeDamage(100);
+                    }
+                }
+
+                this.x = Math.max(0, Math.min(config.width - this.width, this.x));
+                this.y = Math.max(0, Math.min(config.height - this.height, this.y));
+            }
+
+            draw() {
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.beginPath();
+                ctx.ellipse(
+                    this.x + this.width / 2,
+                    this.y + this.height - 5,
+                    this.width / 2,
+                    this.width / 6,
+                    0, 0, Math.PI * 2
+                );
+                ctx.fill();
+                
+                let sprite;
+                switch (this.type) {
+                    case 'runner': sprite = sprites.zombies.runner; break;
+                    case 'brute': sprite = sprites.zombies.brute; break;
+                    case 'crawler': sprite = sprites.zombies.crawler; break;
+                    case 'toxic': sprite = sprites.zombies.toxic; break;
+                    case 'tank': sprite = sprites.zombies.tank; break;
+                    case 'fast': sprite = sprites.zombies.fast; break;
+                    case 'spitter': sprite = sprites.zombies.spitter; break;
+                    case 'sniper': sprite = sprites.zombies.sniper; break;
+                    case 'boss': sprite = sprites.zombies.boss; break;
+                    default: sprite = sprites.zombies.normal;
+                }
+                
+                ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
+                
+                if (this.health < this.getMaxHealth()) {
+                    ctx.fillStyle = '#300';
+                    ctx.fillRect(this.x, this.y - 12, this.width, 5);
+                    ctx.fillStyle = this.type === 'boss' ? '#f0f' : '#f00';
+                    ctx.fillRect(this.x, this.y - 12, this.width * (this.health / this.getMaxHealth()), 5);
+                }
+                
+                if (this.laserDamageTimer > 0) {
+                    ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.width/2, this.y + this.height/2, this.width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                if (this.type === 'boss' && gameState.bossVomitCharging) {
+                    const chargePercent = gameState.bossVomitChargeTime / 300;
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.width/2, this.y + this.height/2 - 20, 10 * chargePercent, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            takeDamage(amount) {
+                if (this.type === 'boss') {
+                    const isProjectileDamage = gameState.bullets.length > 0 || 
+                                             (gameState.grenades.length > 0 && gameState.grenades.some(g => !g.exploded));
+                    
+                    if (isProjectileDamage) {
+                        amount *= 0.5;
+                    }
+                }
+                
+                this.health -= amount;
+                if (this.health <= 0) {
+                    gameState.items.push({
+                        type: 'coin',
+                        x: this.x,
+                        y: this.y,
+                        width: 20,
+                        height: 20,
+                        value: this.coinValue
+                    });
+                    
+                    let dropChance = this.getDropChance();
+                    if (gameState.activePotions.luck.active) {
+                        dropChance *= 3;
+                    }
+                    
+                    const numDrops = this.getNumDrops();
+                    for (let i = 0; i < numDrops; i++) {
+                        if (Math.random() < dropChance) {
+                            this.dropItem();
+                        }
+                    }
+                    
+                    if (this.type === 'boss' && Math.random() < 0.2) {
+                        gameState.items.push({
+                            type: 'laserRifle',
+                            x: this.x,
+                            y: this.y,
+                            width: 30,
+                            height: 30
+                        });
+                    }
+                    
+                    gameState.coins += this.coinValue;
+                    updateCoinUI();
+                    
+                    this.createDeathEffect();
+                    
+                    if (this.type === 'boss') {
+                        gameState.bossSpawned = false;
+                        gameState.bossAlive = false;
+                        endNight();
+                    }
+                    
+                    const index = gameState.zombies.indexOf(this);
+                    if (index !== -1) gameState.zombies.splice(index, 1);
+                    gameState.zombiesSpawned--;
+                }
+            }
+            
+            createDeathEffect() {
+                if (this.type === 'boss') {
+                    gameState.deathEffects.push({
+                        type: 'boss',
+                        x: this.x + this.width/2,
+                        y: this.y + this.height/2,
+                        radius: 40,
+                        color: '#ff0000',
+                        alpha: 0.8,
+                        timer: 60,
+                        maxTimer: 60
+                    });
+                    
+                    for (let i = 0; i < 50; i++) {
+                        createParticle(
+                            this.x + this.width/2,
+                            this.y + this.height/2,
+                            (Math.random() - 0.5) * 10,
+                            (Math.random() - 0.5) * 10,
+                            '#ff0000',
+                            90
+                        );
+                    }
+                } else {
+                    gameState.deathEffects.push({
+                        type: 'blood',
+                        x: this.x + this.width/2,
+                        y: this.y + this.height/2,
+                        radius: 30,
+                        particles: 12,
+                        color: '#ff0000',
+                        alpha: 0.7,
+                        timer: 45,
+                        maxTimer: 45
+                    });
+                    
+                    for (let i = 0; i < 15; i++) {
+                        createParticle(
+                            this.x + this.width/2,
+                            this.y + this.height/2,
+                            (Math.random() - 0.5) * 6,
+                            (Math.random() - 0.5) * 6,
+                            '#ff0000',
+                            60
+                        );
+                    }
+                }
+            }
+            
+            getDropChance() {
+                switch (this.type) {
+                    case 'runner': return 0.1;
+                    case 'brute': return 0.2;
+                    case 'crawler': return 0.05;
+                    case 'toxic': return 0.15;
+                    case 'tank': return 0.3;
+                    case 'fast': return 0.25;
+                    case 'spitter': return 0.25;
+                    case 'sniper': return 0.3;
+                    case 'boss': return 0.8;
+                    default: return 0.1;
+                }
+            }
+            
+            getNumDrops() {
+                const baseChance = this.getDropChance();
+                const rand = Math.random();
+                
+                if (rand < baseChance * 0.05) return 5;
+                if (rand < baseChance * 0.1) return 4;
+                if (rand < baseChance * 0.2) return 3;
+                if (rand < baseChance * 0.4) return 2;
+                return 1;
+            }
+            
+            dropItem() {
+                const items = [
+                    { type: 'pistolAmmo', chance: this.getCommonItemChance(), rarity: 'common' },
+                    { type: 'medkit', chance: this.getCommonItemChance(), rarity: 'common' },
+                    { type: 'shotgunAmmo', chance: this.getUncommonItemChance(), rarity: 'uncommon' },
+                    { type: 'grenade', chance: this.getEpicItemChance(), rarity: 'epic' },
+                    { type: 'laserAmmo', chance: this.getLegendaryItemChance(), rarity: 'legendary' }
+                ];
+                
+                let selectedItem = null;
+                let roll = Math.random();
+                
+                for (const item of items) {
+                    if (roll < item.chance) {
+                        selectedItem = item;
+                        break;
+                    }
+                    roll -= item.chance;
+                }
+                
+                if (selectedItem && (selectedItem.type !== 'laserAmmo' || gameState.hasLaserRifle)) {
+                    gameState.items.push({
+                        type: selectedItem.type,
+                        x: this.x + (Math.random() - 0.5) * 30,
+                        y: this.y + (Math.random() - 0.5) * 30,
+                        width: 20,
+                        height: 20,
+                        rarity: selectedItem.rarity
+                    });
+                }
+            }
+            
+            getCommonItemChance() {
+                switch (this.type) {
+                    case 'runner': return 0.7;
+                    case 'brute': return 0.5;
+                    case 'crawler': return 0.8;
+                    case 'toxic': return 0.6;
+                    case 'tank': return 0.3;
+                    case 'fast': return 0.4;
+                    case 'spitter': return 0.4;
+                    case 'sniper': return 0.5;
+                    case 'boss': return 0.1;
+                    default: return 0.7;
+                }
+            }
+            
+            getUncommonItemChance() {
+                switch (this.type) {
+                    case 'runner': return 0.2;
+                    case 'brute': return 0.3;
+                    case 'crawler': return 0.1;
+                    case 'toxic': return 0.2;
+                    case 'tank': return 0.3;
+                    case 'fast': return 0.3;
+                    case 'spitter': return 0.3;
+                    case 'sniper': return 0.3;
+                    case 'boss': return 0.2;
+                    default: return 0.2;
+                }
+            }
+            
+            getEpicItemChance() {
+                switch (this.type) {
+                    case 'runner': return 0.0;
+                    case 'brute': return 0.05;
+                    case 'crawler': return 0.0;
+                    case 'toxic': return 0.05;
+                    case 'tank': return 0.15;
+                    case 'fast': return 0.1;
+                    case 'spitter': return 0.1;
+                    case 'sniper': return 0.1;
+                    case 'boss': return 0.4;
+                    default: return 0.0;
+                }
+            }
+            
+            getLegendaryItemChance() {
+                switch (this.type) {
+                    case 'runner': return 0.0;
+                    case 'brute': return 0.0;
+                    case 'crawler': return 0.0;
+                    case 'toxic': return 0.0;
+                    case 'tank': return 0.05;
+                    case 'fast': return 0.0;
+                    case 'spitter': return 0.05;
+                    case 'sniper': return 0.05;
+                    case 'boss': return 0.3;
+                    default: return 0.0;
+                }
+            }
+            
+            applyLaserDamage() {
+                this.laserDamageTimer = 42;
+            }
+        }
+
+        class Bullet {
+            constructor(x, y, angle, type = 'pistol') {
+                this.x = x;
+                this.y = y;
+                this.speed = type === 'pistol' ? 15 : 12;
+                this.angle = angle;
+                this.damage = type === 'pistol' ? 35 * gameState.player.damageMultiplier : 28 * gameState.player.damageMultiplier;
+                this.lifetime = type === 'pistol' ? 70 : 50;
+                this.type = type;
+                this.spread = type === 'pistol' ? 0 : Math.PI / 16;
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                this.lifetime--;
+
+                gameState.zombies.forEach(zombie => {
+                    if (
+                        this.x > zombie.x && this.x < zombie.x + zombie.width &&
+                        this.y > zombie.y && this.y < zombie.y + zombie.height
+                    ) {
+                        zombie.takeDamage(this.damage);
+                        this.lifetime = 0;
+                    }
+                });
+
+                for (const obstacle of gameState.obstacles) {
+                    if (
+                        this.x > obstacle.x && this.x < obstacle.x + obstacle.width &&
+                        this.y > obstacle.y && this.y < obstacle.y + obstacle.height
+                    ) {
+                        this.lifetime = 0;
+                        break;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.type === 'pistol' ? '#ffcc55' : '#ffaa00';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.type === 'pistol' ? 3 : 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = this.type === 'pistol' ? 'rgba(255, 200, 0, 0.5)' : 'rgba(255, 170, 0, 0.5)';
+                ctx.lineWidth = this.type === 'pistol' ? 1 : 2;
+                ctx.beginPath();
+                ctx.moveTo(
+                    this.x - Math.cos(this.angle) * 10,
+                    this.y - Math.sin(this.angle) * 10
+                );
+                ctx.lineTo(this.x, this.y);
+                ctx.stroke();
+            }
+        }
     </script>
 </body>
 </html>
