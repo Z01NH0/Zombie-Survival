@@ -1701,9 +1701,9 @@
                 this.y = y;
                 this.width = 20;
                 this.height = 20;
-                this.speed = 4;
+                this.speed = 5;
                 this.angle = angle;
-                this.lifetime = 180;
+                this.lifetime = 300;
             }
 
             update() {
@@ -1728,7 +1728,7 @@
                 this.height = 30;
                 this.speed = 6;
                 this.angle = angle;
-                this.lifetime = 120;
+                this.lifetime = 500;
             }
 
             update() {
@@ -2057,7 +2057,7 @@
                     const zombieCenterX = zombie.x + zombie.width / 2;
                     const zombieCenterY = zombie.y + zombie.height / 2;
                     
-                    if (pointToLineDistance(zombieCenterX, zombieCenterY, laser.startX, laser.startY, laser.endX, laser.endY) < 30) {
+                    if (pointToLineDistance(zombieCenterX, zombieCenterY, laser.startX, laser.startY, laser.endX, laser.endY) < 60) {
                         zombie.applyLaserDamage();
                     }
                 });
@@ -2843,7 +2843,7 @@
                 case 'pistol': return 100;
                 case 'shotgun': return 25;
                 case 'medkit': return 10;
-                case 'grenade': return 5;
+                case 'grenade': return 6;
                 default: return null;
             }
         }
@@ -2930,7 +2930,7 @@
                 const barrelY = player.y + player.height / 2 + Math.sin(player.angle) * 40;
                 
                 for (let i = 0; i < 5; i++) {
-                    const spread = (i - 2) * Math.PI / 16;
+                    const spread = (i - 2) * Math.PI / 24;
                     gameState.bullets.push(new Bullet(
                         barrelX,
                         barrelY,
@@ -2955,50 +2955,6 @@
                 }
             }
         });
-        
-        function reloadWeapon() {
-            const weapon = gameState.inventory[gameState.selectedSlot];
-            
-            if (weapon.type === 'pistol') {
-                for (let i = 0; i < gameState.inventory.length; i++) {
-                    if (gameState.inventory[i].type === 'pistolAmmo' && gameState.inventory[i].ammo > 0) {
-                        const maxAmmo = weapon.maxAmmo;
-                        const currentAmmo = weapon.ammo;
-                        const ammoNeeded = maxAmmo - currentAmmo;
-                        const ammoTaken = Math.min(ammoNeeded, gameState.inventory[i].ammo);
-                        
-                        weapon.ammo += ammoTaken;
-                        gameState.inventory[i].ammo -= ammoTaken;
-                        
-                        if (gameState.inventory[i].ammo <= 0) {
-                            gameState.inventory[i] = { type: 'empty', ammo: null, maxAmmo: null };
-                        }
-                        
-                        updateInventoryUI();
-                        break;
-                    }
-                }
-            } else if (weapon.type === 'shotgun') {
-                for (let i = 0; i < gameState.inventory.length; i++) {
-                    if (gameState.inventory[i].type === 'shotgunAmmo' && gameState.inventory[i].ammo > 0) {
-                        const maxAmmo = weapon.maxAmmo;
-                        const currentAmmo = weapon.ammo;
-                        const ammoNeeded = maxAmmo - currentAmmo;
-                        const ammoTaken = Math.min(ammoNeeded, gameState.inventory[i].ammo);
-                        
-                        weapon.ammo += ammoTaken;
-                        gameState.inventory[i].ammo -= ammoTaken;
-                        
-                        if (gameState.inventory[i].ammo <= 0) {
-                            gameState.inventory[i] = { type: 'empty', ammo: null, maxAmmo: null };
-                        }
-                        
-                        updateInventoryUI();
-                        break;
-                    }
-                }
-            }
-        }
 
         function normalizeAngle(angle) {
             while (angle > Math.PI) angle -= Math.PI * 2;
