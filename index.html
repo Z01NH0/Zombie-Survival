@@ -639,6 +639,83 @@
             left: 40%;
             transform: rotate(10deg);
         }
+        
+        .difficulty-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .difficulty-title {
+            font-size: 18px;
+            color: #ffcc55;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0 #000;
+        }
+        
+        .difficulty-btn {
+            padding: 15px;
+            font-size: 14px;
+            background: linear-gradient(to bottom, #5555ff, #3333aa);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            transition: all 0.2s;
+            box-shadow: 0 5px 0 #000088;
+            text-align: center;
+        }
+        
+        .difficulty-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #000088;
+        }
+        
+        .difficulty-btn.easy {
+            background: linear-gradient(to bottom, #55ff55, #00aa00);
+            box-shadow: 0 5px 0 #008800;
+        }
+        
+        .difficulty-btn.easy:hover {
+            box-shadow: 0 8px 0 #008800;
+        }
+        
+        .difficulty-btn.hard {
+            background: linear-gradient(to bottom, #ff5555, #aa0000);
+            box-shadow: 0 5px 0 #880000;
+        }
+        
+        .difficulty-btn.hard:hover {
+            box-shadow: 0 8px 0 #880000;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .stat-item {
+            background: rgba(50, 50, 50, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #444;
+            text-align: left;
+            font-size: 12px;
+        }
+        
+        .stat-value {
+            color: #ffcc55;
+            font-size: 14px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -748,7 +825,14 @@
         
         <h1>ZOMBIE SURVIVAL</h1>
         <p class="screen-description">Sobreviva o máximo que puder em um mundo infestado de zumbis. Durante o dia, compre melhorias. À noite, enfrente hordas de mortos-vivos cada vez mais perigosos.</p>
-        <button id="startButton">INICIAR SOBREVIVÊNCIA</button>
+        
+        <div class="difficulty-title">ESCOLHA SUA DIFICULDADE</div>
+        <div class="difficulty-container">
+            <button class="difficulty-btn easy" id="easyButton">BEBÊZINHO DA MAMÃE</button>
+            <button class="difficulty-btn" id="normalButton">CLT</button>
+            <button class="difficulty-btn hard" id="hardButton">VERDADEIRO APOCALIPSE</button>
+        </div>
+        
         <div id="controls">
             WASD: MOVER | SHIFT: CORRER | 1-6: TROCAR ARMA <br>
             CLIQUE: ATACAR | E: ABRIR/FECHAR LOJA
@@ -758,7 +842,17 @@
     <div id="gameOverScreen" style="display: none;">
         <h1>FIM DE JOGO</h1>
         <p class="screen-description">Você sobreviveu <span id="survivedDays">0</span> dias no apocalipse zumbi.</p>
-        <button id="restartButton">TENTAR NOVAMENTE</button>
+        
+        <div class="stats-container">
+            <div class="stat-item">ZUMBIS ELIMINADOS:<div class="stat-value" id="statZombiesKilled">0</div></div>
+            <div class="stat-item">MOEDAS GASTAS:<div class="stat-value" id="statCoinsSpent">0</div></div>
+            <div class="stat-item">MUNIÇÃO USADA:<div class="stat-value" id="statAmmoUsed">0</div></div>
+            <div class="stat-item">BANDAGENS USADAS:<div class="stat-value" id="statMedkitsUsed">0</div></div>
+            <div class="stat-item">GRANADAS USADAS:<div class="stat-value" id="statGrenadesUsed">0</div></div>
+            <div class="stat-item">BOSSES ELIMINADOS:<div class="stat-value" id="statBossesKilled">0</div></div>
+        </div>
+        
+        <button id="restartButton">VOLTAR AO MENU</button>
     </div>
     
     <script>
@@ -774,6 +868,31 @@
             itemSpawnInterval: 2000,
             baseZombiesPerNight: 5,
             zombieIncreasePerDay: 4
+        };
+        
+        // Configurações de dificuldade
+        const difficultySettings = {
+            easy: {
+                coinMultiplier: 3,
+                itemDropMultiplier: 3,
+                zombieHealthMultiplier: 0.3,
+                zombieSpawnMultiplier: 0.2,
+                shopPriceMultiplier: 1
+            },
+            normal: {
+                coinMultiplier: 1,
+                itemDropMultiplier: 1,
+                zombieHealthMultiplier: 1,
+                zombieSpawnMultiplier: 1,
+                shopPriceMultiplier: 1
+            },
+            hard: {
+                coinMultiplier: 0.5,
+                itemDropMultiplier: 0.5,
+                zombieHealthMultiplier: 2.4,
+                zombieSpawnMultiplier: 3.3,
+                shopPriceMultiplier: 1.5
+            }
         };
         
         const canvas = document.getElementById('gameCanvas');
@@ -849,7 +968,30 @@
             },
             deathEffects: [],
             bossVomitCharging: false,
-            bossVomitChargeTime: 0
+            bossVomitChargeTime: 0,
+            difficulty: 'normal',
+            stats: {
+                zombiesKilled: 0,
+                coinsSpent: 0,
+                ammoUsed: 0,
+                medkitsUsed: 0,
+                grenadesUsed: 0,
+                bossesKilled: 0
+            },
+            baseCooldowns: {
+                pistol: 30,
+                shotgun: 60,
+                medkit: 150,
+                grenade: 300,
+                laserRifle: 600
+            },
+            potionCooldowns: {
+                pistol: 18,
+                shotgun: 30,
+                medkit: 90,
+                grenade: 180,
+                laserRifle: 300
+            }
         };
 
         function createPlayerSprite() {
@@ -894,40 +1036,71 @@
 
         function createBossSprite() {
             const canvas = document.createElement('canvas');
-            canvas.width = 80;
-            canvas.height = 80;
+            canvas.width = 120;
+            canvas.height = 120;
             const ctx = canvas.getContext('2d');
             
-            const gradient = ctx.createLinearGradient(0, 0, 80, 80);
-            gradient.addColorStop(0, '#ff0000');
-            gradient.addColorStop(0.5, '#880000');
-            gradient.addColorStop(1, '#ff8800');
+            // Corpo inchado e deformado
+            const gradient = ctx.createRadialGradient(60, 60, 0, 60, 60, 60);
+            gradient.addColorStop(0, '#880000');
+            gradient.addColorStop(1, '#440000');
             ctx.fillStyle = gradient;
-            ctx.fillRect(10, 20, 60, 60);
-            
-            ctx.fillStyle = '#ff5555';
             ctx.beginPath();
-            ctx.arc(40, 20, 20, 0, Math.PI * 2);
+            ctx.ellipse(60, 70, 45, 55, 0, 0, Math.PI * 2);
             ctx.fill();
             
+            // Espinhos nas costas
+            ctx.fillStyle = '#660000';
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const x = 60 + Math.cos(angle) * 40;
+                const y = 70 + Math.sin(angle) * 50;
+                ctx.beginPath();
+                ctx.moveTo(60, 70);
+                ctx.lineTo(x, y);
+                ctx.lineWidth = 5;
+                ctx.stroke();
+            }
+            
+            // Cabeça
+            ctx.fillStyle = '#aa0000';
+            ctx.beginPath();
+            ctx.arc(60, 30, 25, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Olhos brilhantes
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.arc(50, 25, 5, 0, Math.PI * 2);
+            ctx.arc(70, 25, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Boca aberta com dentes
             ctx.fillStyle = '#000';
             ctx.beginPath();
-            ctx.arc(30, 15, 5, 0, Math.PI * 2);
-            ctx.arc(50, 15, 5, 0, Math.PI * 2);
+            ctx.arc(60, 35, 15, 0, Math.PI);
             ctx.fill();
             
+            ctx.fillStyle = '#fff';
+            for (let i = 0; i < 8; i++) {
+                const x = 50 + i * 3;
+                ctx.fillRect(x, 30, 2, 8);
+            }
+            
+            // Braços deformados
             ctx.fillStyle = '#880000';
-            ctx.beginPath();
-            ctx.moveTo(25, 5);
-            ctx.lineTo(15, 0);
-            ctx.lineTo(25, 10);
-            ctx.fill();
+            ctx.fillRect(15, 50, 20, 10);
+            ctx.fillRect(85, 50, 20, 10);
             
-            ctx.beginPath();
-            ctx.moveTo(55, 5);
-            ctx.lineTo(65, 0);
-            ctx.lineTo(55, 10);
-            ctx.fill();
+            // Detalhes de veias
+            ctx.strokeStyle = '#ff0000';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 10; i++) {
+                ctx.beginPath();
+                ctx.moveTo(20 + i * 10, 50);
+                ctx.lineTo(25 + i * 10, 30);
+                ctx.stroke();
+            }
             
             return canvas;
         }
@@ -1458,8 +1631,7 @@
                 if (this.health <= 0) {
                     this.health = 0;
                     gameState.gameOver = true;
-                    document.getElementById('gameOverScreen').style.display = 'flex';
-                    document.getElementById('survivedDays').textContent = gameState.day;
+                    showGameOverScreen();
                 }
             }
 
@@ -1530,8 +1702,10 @@
                     this.heal(this.maxHealth * 0.15);
                     if (!gameState.activePotions.infiniteAmmo.active) {
                         gameState.inventory[3].ammo--;
+                        gameState.stats.medkitsUsed++;
                     }
-                    gameState.medkitCooldown = 150;
+                    gameState.medkitCooldown = gameState.activePotions.cooldown.active ? 
+                        gameState.potionCooldowns.medkit : gameState.baseCooldowns.medkit;
                     updateInventoryUI();
                     return true;
                 }
@@ -1563,8 +1737,10 @@
                     
                     if (!gameState.activePotions.infiniteAmmo.active) {
                         gameState.inventory[4].ammo--;
+                        gameState.stats.grenadesUsed++;
                     }
-                    gameState.grenadeCooldown = 300;
+                    gameState.grenadeCooldown = gameState.activePotions.cooldown.active ? 
+                        gameState.potionCooldowns.grenade : gameState.baseCooldowns.grenade;
                     updateInventoryUI();
                     return true;
                 }
@@ -1597,7 +1773,8 @@
                     width: 90
                 });
                 
-                gameState.laserRifleCooldown = 600;
+                gameState.laserRifleCooldown = gameState.activePotions.cooldown.active ? 
+                    gameState.potionCooldowns.laserRifle : gameState.baseCooldowns.laserRifle;
                 
                 return true;
             }
@@ -1611,9 +1788,12 @@
             }
             
             applyCooldownPotion() {
+                // A poção de cooldown agora define os cooldowns específicos
+                // que são aplicados quando a poção está ativa
             }
             
             removeCooldownPotion() {
+                // Os cooldowns voltam ao normal quando a poção expira
             }
         }
 
@@ -1639,6 +1819,17 @@
             setTimeout(() => {
                 message.style.display = 'none';
             }, 3000);
+        }
+
+        function showGameOverScreen() {
+            document.getElementById('gameOverScreen').style.display = 'flex';
+            document.getElementById('survivedDays').textContent = gameState.day;
+            document.getElementById('statZombiesKilled').textContent = gameState.stats.zombiesKilled;
+            document.getElementById('statCoinsSpent').textContent = gameState.stats.coinsSpent;
+            document.getElementById('statAmmoUsed').textContent = gameState.stats.ammoUsed;
+            document.getElementById('statMedkitsUsed').textContent = gameState.stats.medkitsUsed;
+            document.getElementById('statGrenadesUsed').textContent = gameState.stats.grenadesUsed;
+            document.getElementById('statBossesKilled').textContent = gameState.stats.bossesKilled;
         }
 
         function pointToLineDistance(px, py, x1, y1, x2, y2) {
@@ -1761,7 +1952,7 @@
                 this.height = 8;
                 this.speed = 12;
                 this.angle = angle;
-                this.lifetime = 200;
+                this.lifetime = 2000; // Aumentado para ter alcance maior
             }
 
             update() {
@@ -1889,7 +2080,11 @@
             gameState.coins = 0;
             gameState.playerDamageMultiplier = 1;
             gameState.playerDefenseMultiplier = 1;
-            gameState.zombiesToSpawn = config.baseZombiesPerNight;
+            
+            // Aplicar configurações de dificuldade
+            const difficulty = difficultySettings[gameState.difficulty];
+            gameState.zombiesToSpawn = Math.floor((config.baseZombiesPerNight + (gameState.day - 1) * config.zombieIncreasePerDay) * difficulty.zombieSpawnMultiplier);
+            
             gameState.zombiesSpawned = 0;
             gameState.shopOpen = false;
             gameState.itemSpawnTimer = 0;
@@ -1900,22 +2095,24 @@
             gameState.laserRifleCooldown = 0;
             gameState.medkitCooldown = 0;
             gameState.grenadeCooldown = 0;
-            gameState.hasLaserRifle = false;
+            gameState.hasLaserRifle = true;
             gameState.bossVomitCharging = false;
             gameState.bossVomitChargeTime = 0;
             
+            // Aplicar multiplicador de preços da loja
+            const shopPriceMultiplier = difficulty.shopPriceMultiplier;
             gameState.shopPrices = {
-                ammo: 12,
-                shotgunAmmo: 25,
-                medkit: 8,
-                grenades: 50,
-                health: 20,
-                damage: 15,
-                speed: 18,
-                strengthPotion: 120,
-                luckPotion: 200,
-                ammoPotion: 250,
-                cooldownPotion: 150
+                ammo: Math.floor(12 * shopPriceMultiplier),
+                shotgunAmmo: Math.floor(25 * shopPriceMultiplier),
+                medkit: Math.floor(8 * shopPriceMultiplier),
+                grenades: Math.floor(50 * shopPriceMultiplier),
+                health: Math.floor(20 * shopPriceMultiplier),
+                damage: Math.floor(15 * shopPriceMultiplier),
+                speed: Math.floor(18 * shopPriceMultiplier),
+                strengthPotion: Math.floor(120 * shopPriceMultiplier),
+                luckPotion: Math.floor(200 * shopPriceMultiplier),
+                ammoPotion: Math.floor(250 * shopPriceMultiplier),
+                cooldownPotion: Math.floor(150 * shopPriceMultiplier)
             };
             
             gameState.activePotions = {
@@ -1934,6 +2131,17 @@
                 { type: 'empty', ammo: null, maxAmmo: null } 
             ];
             gameState.selectedSlot = 0;
+            
+            // Resetar estatísticas
+            gameState.stats = {
+                zombiesKilled: 0,
+                coinsSpent: 0,
+                ammoUsed: 0,
+                medkitsUsed: 0,
+                grenadesUsed: 0,
+                bossesKilled: 0
+            };
+            
             updateInventoryUI();
             updateCoinUI();
             updateShopPricesUI();
@@ -2053,12 +2261,13 @@
                 ctx.lineTo(laser.endX, laser.endY);
                 ctx.stroke();
                 
+                // Aplicar dano continuamente enquanto o laser está ativo
                 gameState.zombies.forEach(zombie => {
                     const zombieCenterX = zombie.x + zombie.width / 2;
                     const zombieCenterY = zombie.y + zombie.height / 2;
                     
                     if (pointToLineDistance(zombieCenterX, zombieCenterY, laser.startX, laser.startY, laser.endX, laser.endY) < 60) {
-                        zombie.applyLaserDamage();
+                        zombie.takeDamage(250); // 250 de dano por frame
                     }
                 });
                 
@@ -2337,13 +2546,11 @@
         function updateCooldownIndicators() {
             document.querySelectorAll('.cooldown-indicator').forEach(el => el.remove());
             
-            const cooldownMultiplier = gameState.activePotions.cooldown.active ? 0.4 : 1;
-            
             if (gameState.pistolCooldown > 0) {
                 const slot = document.querySelectorAll('.inventory-slot')[1];
                 const indicator = document.createElement('div');
                 indicator.className = 'cooldown-indicator';
-                indicator.textContent = (gameState.pistolCooldown / 60 * cooldownMultiplier).toFixed(1);
+                indicator.textContent = (gameState.pistolCooldown / 60).toFixed(1);
                 slot.appendChild(indicator);
             }
             
@@ -2351,7 +2558,7 @@
                 const slot = document.querySelectorAll('.inventory-slot')[2];
                 const indicator = document.createElement('div');
                 indicator.className = 'cooldown-indicator';
-                indicator.textContent = (gameState.shotgunCooldown / 60 * cooldownMultiplier).toFixed(1);
+                indicator.textContent = (gameState.shotgunCooldown / 60).toFixed(1);
                 slot.appendChild(indicator);
             }
             
@@ -2359,7 +2566,7 @@
                 const slot = document.querySelectorAll('.inventory-slot')[5];
                 const indicator = document.createElement('div');
                 indicator.className = 'cooldown-indicator';
-                indicator.textContent = (gameState.laserRifleCooldown / 60 * cooldownMultiplier).toFixed(1);
+                indicator.textContent = (gameState.laserRifleCooldown / 60).toFixed(1);
                 slot.appendChild(indicator);
             }
             
@@ -2367,7 +2574,7 @@
                 const slot = document.querySelectorAll('.inventory-slot')[3];
                 const indicator = document.createElement('div');
                 indicator.className = 'cooldown-indicator';
-                indicator.textContent = (gameState.medkitCooldown / 60 * cooldownMultiplier).toFixed(1);
+                indicator.textContent = (gameState.medkitCooldown / 60).toFixed(1);
                 slot.appendChild(indicator);
             }
             
@@ -2375,7 +2582,7 @@
                 const slot = document.querySelectorAll('.inventory-slot')[4];
                 const indicator = document.createElement('div');
                 indicator.className = 'cooldown-indicator';
-                indicator.textContent = (gameState.grenadeCooldown / 60 * cooldownMultiplier).toFixed(1);
+                indicator.textContent = (gameState.grenadeCooldown / 60).toFixed(1);
                 slot.appendChild(indicator);
             }
         }
@@ -2447,7 +2654,11 @@
             gameState.isNight = false;
             gameState.gameTime = 0;
             gameState.day++;
-            gameState.zombiesToSpawn = config.baseZombiesPerNight + (gameState.day - 1) * config.zombieIncreasePerDay;
+            
+            // Aplicar configurações de dificuldade
+            const difficulty = difficultySettings[gameState.difficulty];
+            gameState.zombiesToSpawn = Math.floor((config.baseZombiesPerNight + (gameState.day - 1) * config.zombieIncreasePerDay) * difficulty.zombieSpawnMultiplier);
+            
             gameState.zombiesSpawned = 0;
             document.getElementById('nightOverlay').style.display = 'none';
             
@@ -2503,7 +2714,11 @@
                     gameState.isNight = false;
                     gameState.gameTime = 0;
                     gameState.day++;
-                    gameState.zombiesToSpawn = config.baseZombiesPerNight + (gameState.day - 1) * config.zombieIncreasePerDay;
+                    
+                    // Aplicar configurações de dificuldade
+                    const difficulty = difficultySettings[gameState.difficulty];
+                    gameState.zombiesToSpawn = Math.floor((config.baseZombiesPerNight + (gameState.day - 1) * config.zombieIncreasePerDay) * difficulty.zombieSpawnMultiplier);
+                    
                     gameState.zombiesSpawned = 0;
                     document.getElementById('nightOverlay').style.display = 'none';
                     
@@ -2606,6 +2821,7 @@
                         
                         gameState.inventory[i].ammo += ammoToAdd;
                         gameState.coins -= gameState.shopPrices.ammo;
+                        gameState.stats.coinsSpent += gameState.shopPrices.ammo;
                         updateInventoryUI();
                         updateCoinUI();
                         updateShopButtons();
@@ -2625,6 +2841,7 @@
                         
                         gameState.inventory[i].ammo += ammoToAdd;
                         gameState.coins -= gameState.shopPrices.shotgunAmmo;
+                        gameState.stats.coinsSpent += gameState.shopPrices.shotgunAmmo;
                         updateInventoryUI();
                         updateCoinUI();
                         updateShopButtons();
@@ -2638,6 +2855,7 @@
             if (gameState.coins >= gameState.shopPrices.health) {
                 gameState.player.increaseMaxHealth(10);
                 gameState.coins -= gameState.shopPrices.health;
+                gameState.stats.coinsSpent += gameState.shopPrices.health;
                 gameState.shopPrices.health = Math.floor(gameState.shopPrices.health * 1.2);
                 updateCoinUI();
                 updateShopPricesUI();
@@ -2649,6 +2867,7 @@
             if (gameState.coins >= gameState.shopPrices.damage) {
                 gameState.player.increaseDamage(0.1);
                 gameState.coins -= gameState.shopPrices.damage;
+                gameState.stats.coinsSpent += gameState.shopPrices.damage;
                 gameState.shopPrices.damage = Math.floor(gameState.shopPrices.damage * 1.2);
                 updateCoinUI();
                 updateShopPricesUI();
@@ -2660,6 +2879,7 @@
             if (gameState.coins >= gameState.shopPrices.speed) {
                 gameState.player.increaseMaxStamina(10);
                 gameState.coins -= gameState.shopPrices.speed;
+                gameState.stats.coinsSpent += gameState.shopPrices.speed;
                 gameState.shopPrices.speed = Math.floor(gameState.shopPrices.speed * 1.2);
                 updateCoinUI();
                 updateShopPricesUI();
@@ -2677,6 +2897,7 @@
                         if (currentAmmo < maxAmmo) {
                             gameState.inventory[i].ammo += 1;
                             gameState.coins -= gameState.shopPrices.medkit;
+                            gameState.stats.coinsSpent += gameState.shopPrices.medkit;
                             updateInventoryUI();
                             updateCoinUI();
                             updateShopButtons();
@@ -2697,6 +2918,7 @@
                         if (currentAmmo < maxAmmo) {
                             gameState.inventory[i].ammo += 2;
                             gameState.coins -= gameState.shopPrices.grenades;
+                            gameState.stats.coinsSpent += gameState.shopPrices.grenades;
                             updateInventoryUI();
                             updateCoinUI();
                             updateShopButtons();
@@ -2710,6 +2932,7 @@
         function buyStrengthPotion() {
             if (gameState.coins >= gameState.shopPrices.strengthPotion && !gameState.activePotions.strength.active) {
                 gameState.coins -= gameState.shopPrices.strengthPotion;
+                gameState.stats.coinsSpent += gameState.shopPrices.strengthPotion;
                 gameState.activePotions.strength.active = true;
                 gameState.activePotions.strength.daysLeft = 3;
                 gameState.player.applyStrengthPotion();
@@ -2722,6 +2945,7 @@
         function buyLuckPotion() {
             if (gameState.coins >= gameState.shopPrices.luckPotion && !gameState.activePotions.luck.active) {
                 gameState.coins -= gameState.shopPrices.luckPotion;
+                gameState.stats.coinsSpent += gameState.shopPrices.luckPotion;
                 gameState.activePotions.luck.active = true;
                 gameState.activePotions.luck.daysLeft = 1;
                 updateCoinUI();
@@ -2733,6 +2957,7 @@
         function buyAmmoPotion() {
             if (gameState.coins >= gameState.shopPrices.ammoPotion && !gameState.activePotions.infiniteAmmo.active) {
                 gameState.coins -= gameState.shopPrices.ammoPotion;
+                gameState.stats.coinsSpent += gameState.shopPrices.ammoPotion;
                 gameState.activePotions.infiniteAmmo.active = true;
                 gameState.activePotions.infiniteAmmo.daysLeft = 2;
                 updateCoinUI();
@@ -2744,8 +2969,9 @@
         function buyCooldownPotion() {
             if (gameState.coins >= gameState.shopPrices.cooldownPotion && !gameState.activePotions.cooldown.active) {
                 gameState.coins -= gameState.shopPrices.cooldownPotion;
+                gameState.stats.coinsSpent += gameState.shopPrices.cooldownPotion;
                 gameState.activePotions.cooldown.active = true;
-                gameState.activePotions.cooldown.daysLeft = 3;
+                gameState.activePotions.cooldown.daysLeft = 2;
                 gameState.player.applyCooldownPotion();
                 updateCoinUI();
                 updateActivePotionsUI();
@@ -2863,7 +3089,6 @@
                 case '4': gameState.selectedSlot = 3; updateInventoryUI(); break;
                 case '5': gameState.selectedSlot = 4; updateInventoryUI(); break;
                 case '6': gameState.selectedSlot = 5; updateInventoryUI(); break;
-                case 'r': reloadWeapon(); break;
                 case 'e': 
                     if (!gameState.isNight && !gameState.shopOpen) {
                         openShop();
@@ -2921,8 +3146,10 @@
                 
                 if (!gameState.activePotions.infiniteAmmo.active) {
                     weapon.ammo--;
+                    gameState.stats.ammoUsed++;
                 }
-                gameState.pistolCooldown = 30;
+                gameState.pistolCooldown = gameState.activePotions.cooldown.active ? 
+                    gameState.potionCooldowns.pistol : gameState.baseCooldowns.pistol;
                 updateInventoryUI();
             } else if (weapon.type === 'shotgun' && weapon.ammo > 0 && gameState.shotgunCooldown <= 0) {
                 const player = gameState.player;
@@ -2941,8 +3168,10 @@
                 
                 if (!gameState.activePotions.infiniteAmmo.active) {
                     weapon.ammo--;
+                    gameState.stats.ammoUsed++;
                 }
-                gameState.shotgunCooldown = 60;
+                gameState.shotgunCooldown = gameState.activePotions.cooldown.active ? 
+                    gameState.potionCooldowns.shotgun : gameState.baseCooldowns.shotgun;
                 updateInventoryUI();
             } else if (weapon.type === 'medkit') {
                 gameState.player.useMedkit();
@@ -2951,6 +3180,7 @@
             } else if (weapon.type === 'laserRifle' && weapon.ammo > 0) {
                 if (gameState.player.startLaserRifleCharge()) {
                     weapon.ammo--;
+                    gameState.stats.ammoUsed++;
                     updateInventoryUI();
                 }
             }
@@ -2962,14 +3192,27 @@
             return angle;
         }
 
-        document.getElementById('startButton').addEventListener('click', () => {
+        document.getElementById('easyButton').addEventListener('click', () => {
+            gameState.difficulty = 'easy';
+            document.getElementById('startScreen').style.display = 'none';
+            initGame();
+        });
+
+        document.getElementById('normalButton').addEventListener('click', () => {
+            gameState.difficulty = 'normal';
+            document.getElementById('startScreen').style.display = 'none';
+            initGame();
+        });
+
+        document.getElementById('hardButton').addEventListener('click', () => {
+            gameState.difficulty = 'hard';
             document.getElementById('startScreen').style.display = 'none';
             initGame();
         });
 
         document.getElementById('restartButton').addEventListener('click', () => {
             document.getElementById('gameOverScreen').style.display = 'none';
-            initGame();
+            document.getElementById('startScreen').style.display = 'flex';
         });
 
         document.getElementById('buyAmmo').addEventListener('click', buyAmmo);
@@ -3033,10 +3276,14 @@
             constructor(x, y, type = 'normal') {
                 this.x = x;
                 this.y = y;
-                this.width = type === 'boss' ? 80 : 40;
-                this.height = type === 'boss' ? 80 : 40;
+                this.width = type === 'boss' ? 120 : 40;
+                this.height = type === 'boss' ? 120 : 40;
                 this.type = type;
-                this.health = this.getMaxHealth();
+                
+                // Aplicar multiplicador de vida baseado na dificuldade
+                const difficulty = difficultySettings[gameState.difficulty];
+                this.health = this.getMaxHealth() * difficulty.zombieHealthMultiplier;
+                
                 this.speed = this.getSpeed();
                 this.detectionRange = this.getDetectionRange();
                 this.attackCooldown = 0;
@@ -3044,7 +3291,10 @@
                 this.color = this.getColor();
                 this.randomAngle = Math.random() * Math.PI * 2;
                 this.lastSoundTime = 0;
-                this.coinValue = this.getCoinValue();
+                
+                // Aplicar multiplicador de moedas baseado na dificuldade
+                this.coinValue = Math.floor(this.getCoinValue() * difficulty.coinMultiplier);
+                
                 this.lastAcidShot = 0;
                 this.specialAbilityCooldown = 0;
                 this.lastBossAttack = 0;
@@ -3094,7 +3344,7 @@
                     case 'tank': return 400;
                     case 'fast': return 300;
                     case 'spitter': return 350;
-                    case 'sniper': return 1500;
+                    case 'sniper': return 1500; // Alcance muito maior para snipers
                     case 'boss': return 500;
                     default: return 300;
                 }
@@ -3152,7 +3402,8 @@
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (this.isSniper) {
-                    if (distance < this.detectionRange) {
+                    // Snipers têm alcance total do mapa
+                    if (distance < this.detectionRange || this.isSniper) {
                         if (distance < 200) {
                             this.retreating = true;
                             const angle = Math.atan2(dy, dx);
@@ -3273,11 +3524,11 @@
                 
                 ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
                 
-                if (this.health < this.getMaxHealth()) {
+                if (this.health < this.getMaxHealth() * difficultySettings[gameState.difficulty].zombieHealthMultiplier) {
                     ctx.fillStyle = '#300';
                     ctx.fillRect(this.x, this.y - 12, this.width, 5);
                     ctx.fillStyle = this.type === 'boss' ? '#f0f' : '#f00';
-                    ctx.fillRect(this.x, this.y - 12, this.width * (this.health / this.getMaxHealth()), 5);
+                    ctx.fillRect(this.x, this.y - 12, this.width * (this.health / (this.getMaxHealth() * difficultySettings[gameState.difficulty].zombieHealthMultiplier)), 5);
                 }
                 
                 if (this.laserDamageTimer > 0) {
@@ -3308,6 +3559,9 @@
                 
                 this.health -= amount;
                 if (this.health <= 0) {
+                    // Aplicar multiplicador de drops baseado na dificuldade
+                    const difficulty = difficultySettings[gameState.difficulty];
+                    
                     gameState.items.push({
                         type: 'coin',
                         x: this.x,
@@ -3317,10 +3571,7 @@
                         value: this.coinValue
                     });
                     
-                    let dropChance = this.getDropChance();
-                    if (gameState.activePotions.luck.active) {
-                        dropChance *= 3;
-                    }
+                    let dropChance = this.getDropChance() * difficulty.itemDropMultiplier;
                     
                     const numDrops = this.getNumDrops();
                     for (let i = 0; i < numDrops; i++) {
@@ -3337,9 +3588,11 @@
                             width: 30,
                             height: 30
                         });
+                        gameState.stats.bossesKilled++;
                     }
                     
                     gameState.coins += this.coinValue;
+                    gameState.stats.zombiesKilled++;
                     updateCoinUI();
                     
                     this.createDeathEffect();
@@ -3495,14 +3748,14 @@
             
             getEpicItemChance() {
                 switch (this.type) {
-                    case 'runner': return 0.1;
-                    case 'brute': return 0.15;
-                    case 'crawler': return 0.1;
-                    case 'toxic': return 0.15;
-                    case 'tank': return 0.25;
-                    case 'fast': return 0.15;
-                    case 'spitter': return 0.15;
-                    case 'sniper': return 0.15;
+                    case 'runner': return 0.0;
+                    case 'brute': return 0.05;
+                    case 'crawler': return 0.0;
+                    case 'toxic': return 0.05;
+                    case 'tank': return 0.15;
+                    case 'fast': return 0.1;
+                    case 'spitter': return 0.1;
+                    case 'sniper': return 0.1;
                     case 'boss': return 0.4;
                     default: return 0.0;
                 }
@@ -3513,12 +3766,12 @@
                     case 'runner': return 0.0;
                     case 'brute': return 0.0;
                     case 'crawler': return 0.0;
-                    case 'toxic': return 0.1;
-                    case 'tank': return 0.2;
-                    case 'fast': return 0.05;
-                    case 'spitter': return 0.15;
-                    case 'sniper': return 0.15;
-                    case 'boss': return 0.45;
+                    case 'toxic': return 0.0;
+                    case 'tank': return 0.05;
+                    case 'fast': return 0.0;
+                    case 'spitter': return 0.05;
+                    case 'sniper': return 0.05;
+                    case 'boss': return 0.3;
                     default: return 0.0;
                 }
             }
