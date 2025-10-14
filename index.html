@@ -74,6 +74,7 @@
             border-radius: 10px;
             border: 2px solid #444;
             box-shadow: 0 0 15px rgba(0,0,0,0.8);
+            pointer-events: none;
         }
         
         .inventory-slot {
@@ -262,19 +263,25 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px;
-            border: 3px solid #ffcc55;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 25px;
+            border: 4px solid #ffcc55;
+            border-radius: 15px;
             z-index: 200;
             display: none;
-            width: 720px;
+            width: 900px;
+            box-shadow: 0 0 30px rgba(255, 204, 85, 0.5);
+            backdrop-filter: blur(10px);
         }
         
         #shop h2 {
             color: #ffcc55;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-align: center;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(255, 204, 85, 0.7);
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffcc55;
         }
         
         .shop-columns {
@@ -284,46 +291,96 @@
         
         .shop-column {
             flex: 1;
+            background: rgba(30, 30, 50, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid;
         }
         
         .shop-column-title {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             text-align: center;
-            font-size: 14px;
-            padding: 5px;
-            border-radius: 5px;
+            font-size: 16px;
+            padding: 8px;
+            border-radius: 8px;
+            text-transform: uppercase;
+        }
+        
+        .shop-column.arsenal {
+            border-color: #ff5555;
         }
         
         .shop-column.arsenal .shop-column-title {
-            background: #ff5555;
+            background: linear-gradient(to right, #ff5555, #cc0000);
             color: #fff;
+            box-shadow: 0 0 10px rgba(255, 85, 85, 0.5);
+        }
+        
+        .shop-column.status {
+            border-color: #5555ff;
         }
         
         .shop-column.status .shop-column-title {
-            background: #5555ff;
+            background: linear-gradient(to right, #5555ff, #3333aa);
             color: #fff;
+            box-shadow: 0 0 10px rgba(85, 85, 255, 0.5);
+        }
+        
+        .shop-column.potions {
+            border-color: #55ff55;
         }
         
         .shop-column.potions .shop-column-title {
-            background: #55ff55;
+            background: linear-gradient(to right, #55ff55, #00aa00);
             color: #fff;
+            box-shadow: 0 0 10px rgba(85, 255, 85, 0.5);
         }
         
         .shop-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 10px 0;
-            padding: 10px;
-            background: rgba(50, 50, 50, 0.5);
-            border-radius: 5px;
+            margin: 12px 0;
+            padding: 12px;
+            background: rgba(50, 50, 70, 0.8);
+            border-radius: 8px;
             font-size: 12px;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .shop-item:hover {
+            background: rgba(60, 60, 90, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
         
         .shop-item button {
-            padding: 5px 10px;
-            font-size: 12px;
+            padding: 8px 12px;
+            font-size: 10px;
             margin: 0;
+            box-shadow: 0 3px 0 #880000;
+        }
+        
+        .shop-item button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 0 #880000;
+        }
+        
+        .shop-item button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 0 #880000;
+        }
+        
+        .shop-item button:disabled {
+            background: #666;
+            box-shadow: 0 3px 0 #444;
+            cursor: not-allowed;
+        }
+        
+        .shop-item button:disabled:hover {
+            transform: none;
+            box-shadow: 0 3px 0 #444;
         }
         
         .potion-icon {
@@ -332,6 +389,7 @@
             display: inline-block;
             margin-right: 5px;
             border-radius: 50%;
+            box-shadow: 0 0 5px currentColor;
         }
         
         .potion-strength {
@@ -716,15 +774,348 @@
             font-size: 14px;
             margin-top: 5px;
         }
+
+        #loadingScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        
+        #loadingLogo {
+            width: 400px;
+            height: 200px;
+            background: #333;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ff5555;
+            font-family: 'Bungee', cursive;
+            font-size: 36px;
+            text-align: center;
+            border: 3px solid #ff5555;
+            border-radius: 10px;
+        }
+        
+        #loadingBarContainer {
+            width: 300px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        #loadingBar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #ff5555, #ff0000);
+            transition: width 0.3s;
+        }
+        
+        #loadingText {
+            margin-top: 15px;
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+        }
+        
+        
+        
+        .bullet-trail {
+            position: absolute;
+            background: linear-gradient(to right, rgba(255, 255, 0, 0.8), rgba(255, 165, 0, 0));
+            z-index: 110;
+            pointer-events: none;
+            border-radius: 2px;
+        }
+        
+        .muzzle-flash {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, rgba(255, 255, 0, 0.9), rgba(255, 165, 0, 0));
+            border-radius: 50%;
+            z-index: 110;
+            pointer-events: none;
+            animation: flash 0.1s ease-out;
+        }
+        
+        @keyframes flash {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        
+        .blood-explosion {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.8) 0%, rgba(139, 0, 0, 0) 70%);
+            border-radius: 50%;
+            z-index: 105;
+            pointer-events: none;
+            animation: bloodExpand 0.5s ease-out forwards;
+        }
+        
+        @keyframes bloodExpand {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+        
+        .blood-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ff0000;
+            border-radius: 50%;
+            z-index: 105;
+            pointer-events: none;
+        }
+        
+        .zombie-glow {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            z-index: 104;
+            pointer-events: none;
+            filter: blur(5px);
+        }
+        
+        .zombie-normal .zombie-glow { background: rgba(143, 187, 107, 0.3); }
+        .zombie-runner .zombie-glow { background: rgba(199, 143, 107, 0.3); }
+        .zombie-brute .zombie-glow { background: rgba(107, 143, 187, 0.3); }
+        .zombie-toxic .zombie-glow { background: rgba(143, 187, 143, 0.3); }
+        .zombie-tank .zombie-glow { background: rgba(255, 136, 0, 0.3); }
+        .zombie-fast .zombie-glow { background: rgba(170, 85, 255, 0.3); }
+        .zombie-spitter .zombie-glow { background: rgba(85, 170, 255, 0.3); }
+        .zombie-sniper .zombie-glow { background: rgba(85, 85, 255, 0.3); }
+        .zombie-boss .zombie-glow { 
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.5) 0%, rgba(139, 0, 0, 0) 70%);
+            width: 140px;
+            height: 140px;
+        }
+
+        .alien-world-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(100, 0, 150, 0.3);
+            pointer-events: none;
+            z-index: 110;
+        }
+        
+        .portal {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200, 0, 255, 0.8) 0%, rgba(100, 0, 150, 0) 70%);
+            z-index: 120;
+            pointer-events: none;
+            animation: portalPulse 2s infinite alternate;
+        }
+        
+        @keyframes portalPulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+        
+        .moon-store {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #2a0a4a, #1a083a);
+            padding: 25px;
+            border: 4px solid #ff55ff;
+            border-radius: 15px;
+            z-index: 200;
+            display: none;
+            width: 800px;
+            box-shadow: 0 0 30px rgba(255, 85, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        
+        .moon-store h2 {
+            color: #ff55ff;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(255, 85, 255, 0.7);
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff55ff;
+        }
+        
+        #moonCoins {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 14px;
+            color: #ff55ff;
+            text-shadow: 2px 2px 0 #000;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 2px solid #ff55ff;
+            margin-top: 140px;
+        }
+        
+        .glowing-vomit {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.8) 0%, rgba(255, 0, 0, 0.4) 50%, rgba(255, 0, 0, 0) 70%);
+            border-radius: 50%;
+            z-index: 110;
+            pointer-events: none;
+            animation: glowPulse 1s infinite alternate;
+        }
+        
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 5px 5px rgba(255, 0, 0, 0.5); }
+            100% { box-shadow: 0 0 15px 10px rgba(255, 0, 0, 0.8); }
+        }
+        
+        .hard-vomit {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.4) 0%, rgba(255, 0, 0, 0.2) 50%, rgba(255, 0, 0, 0) 70%);
+            border-radius: 50%;
+            z-index: 110;
+            pointer-events: none;
+        }
+        
+        .sandstorm {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(210, 180, 140, 0.6) 0%, rgba(210, 180, 140, 0.2) 50%, rgba(210, 180, 140, 0) 70%);
+            border-radius: 50%;
+            z-index: 110;
+            pointer-events: none;
+            animation: sandstormMove 3s linear infinite;
+        }
+        
+        @keyframes sandstormMove {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(100px, 100px) rotate(360deg); }
+        }
+        
+        .enhanced-explosion {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            z-index: 110;
+            pointer-events: none;
+            animation: enhancedExplosion 0.8s ease-out forwards;
+        }
+        
+        @keyframes enhancedExplosion {
+            0% { 
+                transform: scale(0); 
+                background: radial-gradient(circle, rgba(255, 100, 0, 0.9) 0%, rgba(255, 50, 0, 0.7) 30%, rgba(255, 0, 0, 0) 70%);
+                box-shadow: 0 0 30px 20px rgba(255, 100, 0, 0.8);
+            }
+            50% { 
+                transform: scale(1.2); 
+                background: radial-gradient(circle, rgba(255, 150, 0, 0.8) 0%, rgba(255, 100, 0, 0.6) 40%, rgba(255, 50, 0, 0) 80%);
+                box-shadow: 0 0 50px 30px rgba(255, 150, 0, 0.7);
+            }
+            100% { 
+                transform: scale(1.5); 
+                background: radial-gradient(circle, rgba(255, 200, 0, 0.5) 0%, rgba(255, 150, 0, 0.3) 50%, rgba(255, 100, 0, 0) 90%);
+                box-shadow: 0 0 70px 40px rgba(255, 200, 0, 0.4);
+                opacity: 0;
+            }
+        }
+        
+        .shotgun-effect {
+            position: absolute;
+            width: 120px;
+            height: 60px;
+            background: radial-gradient(ellipse at center, rgba(255, 200, 0, 0.8) 0%, rgba(255, 150, 0, 0.6) 50%, rgba(255, 100, 0, 0) 100%);
+            z-index: 110;
+            pointer-events: none;
+            animation: shotgunBlast 0.2s ease-out forwards;
+        }
+        
+        @keyframes shotgunBlast {
+            0% { 
+                transform: scale(0.5) rotate(var(--angle)); 
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(1.5) rotate(var(--angle)); 
+                opacity: 0;
+            }
+        }
+        
+        .crosshair {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 300;
+            transform: translate(-50%, -50%);
+        }
+        
+        .crosshair::before, .crosshair::after {
+            content: '';
+            position: absolute;
+            background: #ff5555;
+        }
+        
+        .crosshair::before {
+            width: 2px;
+            height: 20px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .crosshair::after {
+            width: 20px;
+            height: 2px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 <body>
+    <!-- Tela de Loading -->
+    <div id="loadingScreen">
+        <div id="loadingLogo">
+            ZOMBIE<br>SURVIVAL
+        </div>
+        <div id="loadingBarContainer">
+            <div id="loadingBar"></div>
+        </div>
+        <div id="loadingText">CARREGANDO...</div>
+    </div>
+    
     <canvas id="gameCanvas"></canvas>
+    
+    <!-- Logo durante o jogo -->
+    
     
     <div id="bloodOverlay"></div>
     <div id="healEffect"></div>
     <div id="poisonEffect" class="poison-effect"></div>
     <div id="nightOverlay" class="night-overlay" style="display: none;"></div>
+    <div id="alienWorldOverlay" class="alien-world-overlay" style="display: none;"></div>
     
     <div id="ui">
         <div>SAÚDE: <span id="health">100</span>%</div>
@@ -741,6 +1132,7 @@
     <div id="timeLeft">TEMPO: 15s</div>
     <div id="bossMessage">MATE-O PARA PROSSEGUIR</div>
     <div id="coins">MOEDAS: <span id="coinCount">0</span></div>
+    <div id="moonCoins" style="display: none;">MOEDAS GALÁTICAS: <span id="moonCoinCount">0</span></div>
     
     <div id="inventory">
         <div class="inventory-slot active">🔪<div class="slot-ammo">-</div></div>
@@ -789,6 +1181,10 @@
                     <span>+10% Stamina</span>
                     <button id="buySpeed">🪙18 COMPRAR</button>
                 </div>
+                <div class="shop-item">
+                    <span>+2 Armazenamento</span>
+                    <button id="buyStorage">🪙150 COMPRAR</button>
+                </div>
             </div>
             <div class="shop-column potions">
                 <div class="shop-column-title">POÇÕES</div>
@@ -813,7 +1209,71 @@
         <button id="closeShop" style="width: 100%; margin-top: 15px;">FECHAR LOJA</button>
     </div>
     
-    <div id="startScreen">
+    <div id="moonStore" class="moon-store">
+        <h2>MOOOON STORE</h2>
+        <div class="shop-columns">
+            <div class="shop-column arsenal">
+                <div class="shop-column-title">ARSENAL</div>
+                <div class="shop-item">
+                    <span>Munição Pistola</span>
+                    <button id="buyMoonAmmo">🪙24 COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span>Munição Shotgun</span>
+                    <button id="buyMoonShotgunAmmo">🪙50 COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span>Kit Médico</span>
+                    <button id="buyMoonMedkit">🪙16 COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span>Granadas</span>
+                    <button id="buyMoonGrenades">🪙100 COMPRAR</button>
+                </div>
+            </div>
+            <div class="shop-column status">
+                <div class="shop-column-title">STATUS</div>
+                <div class="shop-item">
+                    <span>+10% Vida</span>
+                    <button id="buyMoonHealth">🪙40 COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span>+10% Dano</span>
+                    <button id="buyMoonDamage">🪙30 COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span>+10% Stamina</span>
+                    <button id="buyMoonSpeed">🪙36 COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span>+2 Armazenamento</span>
+                    <button id="buyMoonStorage">🪙300 COMPRAR</button>
+                </div>
+            </div>
+            <div class="shop-column potions">
+                <div class="shop-column-title">POÇÕES</div>
+                <div class="shop-item">
+                    <span><div class="potion-icon potion-strength"></div> Poção de Força</span>
+                    <button id="buyMoonStrengthPotion">🪙240 COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span><div class="potion-icon potion-luck"></div> Poção de Sorte</span>
+                    <button id="buyMoonLuckPotion">🪙400 COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span><div class="potion-icon potion-ammo"></div> Poção de Munição Inf.</span>
+                    <button id="buyMoonAmmoPotion">🪙500 COMPRAR</button>
+                </div>
+                <div class="shop-item">
+                    <span><div class="potion-icon potion-cooldown"></div> Poção de Cooldown</span>
+                    <button id="buyMoonCooldownPotion">🪙300 COMPRAR</button>
+                </div>
+            </div>
+        </div>
+        <button id="closeMoonShop" style="width: 100%; margin-top: 15px;">FECHAR LOJA</button>
+    </div>
+    
+    <div id="startScreen" style="display: none;">
         <div class="start-screen-bg"></div>
         <div class="zombie-silhouette silhouette1"></div>
         <div class="zombie-silhouette silhouette2"></div>
@@ -867,7 +1327,10 @@
             itemSpawnChance: 0.05,
             itemSpawnInterval: 2000,
             baseZombiesPerNight: 5,
-            zombieIncreasePerDay: 4
+            zombieIncreasePerDay: 4,
+            alienWaveDuration: 20000, 
+            baseAliensPerWave: 3,      
+            alienIncreasePerWave: 1.3    
         };
         
         // Configurações de dificuldade
@@ -877,21 +1340,27 @@
                 itemDropMultiplier: 3,
                 zombieHealthMultiplier: 0.3,
                 zombieSpawnMultiplier: 0.2,
-                shopPriceMultiplier: 1
+                shopPriceMultiplier: 1,
+                vomitVisibility: 'glowing',
+                bossLaserRifleDropChance: 0.4
             },
             normal: {
                 coinMultiplier: 1,
                 itemDropMultiplier: 1,
                 zombieHealthMultiplier: 1,
                 zombieSpawnMultiplier: 1,
-                shopPriceMultiplier: 1
+                shopPriceMultiplier: 1,
+                vomitVisibility: 'normal',
+                bossLaserRifleDropChance: 0.2
             },
             hard: {
                 coinMultiplier: 0.7,
                 itemDropMultiplier: 0.5,
                 zombieHealthMultiplier: 2,
                 zombieSpawnMultiplier: 3.3,
-                shopPriceMultiplier: 2.2
+                shopPriceMultiplier: 2.2,
+                vomitVisibility: 'hard',
+                bossLaserRifleDropChance: 0.05
             }
         };
         
@@ -900,9 +1369,20 @@
         canvas.width = config.width;
         canvas.height = config.height;
 
+        // Variáveis para os novos efeitos
+        const bulletTrails = [];
+        const muzzleFlashes = [];
+        const bloodExplosions = [];
+        const bloodParticles = [];
+        const zombieGlows = [];
+        const crosshair = document.createElement('div');  
+        crosshair.className = 'crosshair';               
+        document.body.appendChild(crosshair); 
+
         const gameState = {
             player: null,
             zombies: [],
+            aliens: [],
             bullets: [],
             acidBullets: [],
             bossProjectiles: [],
@@ -930,11 +1410,13 @@
             knifeAngle: 0,
             isAttacking: false,
             coins: 0,
+            moonCoins: 0,
             playerDamageMultiplier: 1,
             playerDefenseMultiplier: 1,
             zombiesToSpawn: 0,
             zombiesSpawned: 0,
             shopOpen: false,
+            moonShopOpen: false,
             itemSpawnTimer: 0,
             bossSpawned: false,
             bossAlive: false,
@@ -957,14 +1439,29 @@
                 ammo: 12,
                 shotgunAmmo: 25,
                 medkit: 8,
-                grenades: 40,
+                grenades: 50,
                 health: 20,
                 damage: 15,
                 speed: 18,
+                storage: 150,
                 strengthPotion: 120,
                 luckPotion: 200,
                 ammoPotion: 250,
                 cooldownPotion: 150
+            },
+            moonShopPrices: {
+                ammo: 24,
+                shotgunAmmo: 50,
+                medkit: 16,
+                grenades: 100,
+                health: 40,
+                damage: 30,
+                speed: 36,
+                storage: 300,
+                strengthPotion: 240,
+                luckPotion: 400,
+                ammoPotion: 500,
+                cooldownPotion: 300
             },
             deathEffects: [],
             bossVomitCharging: false,
@@ -991,44 +1488,588 @@
                 medkit: 90,
                 grenade: 180,
                 laserRifle: 300
-            }
+            },
+            inAlienWorld: false,
+            alienWave: 1,
+            aliensToSpawn: 0,
+            aliensSpawned: 0,
+            alienBossSpawned: false,
+            alienBossAlive: false,
+            portalSpawned: false,
+            portal: null,
+            sandstorms: [],
+            dimensionTravelMessage: false,
+            attackAnimations: []
         };
 
+        // Função para mostrar a tela de loading
+        function showLoadingScreen() {
+            document.getElementById('loadingScreen').style.display = 'flex';
+            
+            // Simular carregamento
+            let progress = 0;
+            const loadingBar = document.getElementById('loadingBar');
+            const loadingInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(loadingInterval);
+                    
+                    // Esconder tela de loading e mostrar menu principal
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').style.display = 'none';
+                        document.getElementById('startScreen').style.display = 'flex';
+                    }, 500);
+                }
+                loadingBar.style.width = `${progress}%`;
+            }, 200);
+        }
+
+        // Chamar a tela de loading ao carregar a página
+        window.addEventListener('load', showLoadingScreen);
+
+        // Funções para os novos efeitos visuais
+        function createBulletTrail(startX, startY, endX, endY, type) {
+            const trail = document.createElement('div');
+            trail.className = 'bullet-trail';
+            
+            const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+            const angle = Math.atan2(endY - startY, endX - startX);
+            
+            trail.style.width = `${length}px`;
+            trail.style.height = type === 'pistol' ? '2px' : '4px';
+            trail.style.left = `${startX}px`;
+            trail.style.top = `${startY}px`;
+            trail.style.transform = `rotate(${angle}rad)`;
+            trail.style.transformOrigin = '0 0';
+            
+            document.body.appendChild(trail);
+            bulletTrails.push(trail);
+            
+            setTimeout(() => {
+                if (trail.parentNode) {
+                    trail.parentNode.removeChild(trail);
+                }
+                const index = bulletTrails.indexOf(trail);
+                if (index !== -1) bulletTrails.splice(index, 1);
+            }, 100);
+        }
+
+        function createMuzzleFlash(x, y, angle, type) {
+            const flash = document.createElement('div');
+            flash.className = 'muzzle-flash';
+            
+            // Posicionar o flash na ponta da arma
+            const barrelLength = type === 'pistol' ? 35 : 40;
+            const flashX = x + Math.cos(angle) * barrelLength;
+            const flashY = y + Math.sin(angle) * barrelLength;
+            
+            flash.style.left = `${flashX - 10}px`;
+            flash.style.top = `${flashY - 10}px`;
+            
+            document.body.appendChild(flash);
+            muzzleFlashes.push(flash);
+            
+            setTimeout(() => {
+                if (flash.parentNode) {
+                    flash.parentNode.removeChild(flash);
+                }
+                const index = muzzleFlashes.indexOf(flash);
+                if (index !== -1) muzzleFlashes.splice(index, 1);
+            }, 100);
+        }
+
+        function createBloodExplosion(x, y, size = 100) {
+            const explosion = document.createElement('div');
+            explosion.className = 'blood-explosion';
+            
+            explosion.style.left = `${x - size/2}px`;
+            explosion.style.top = `${y - size/2}px`;
+            explosion.style.width = `${size}px`;
+            explosion.style.height = `${size}px`;
+            
+            document.body.appendChild(explosion);
+            bloodExplosions.push(explosion);
+            
+            setTimeout(() => {
+                if (explosion.parentNode) {
+                    explosion.parentNode.removeChild(explosion);
+                }
+                const index = bloodExplosions.indexOf(explosion);
+                if (index !== -1) bloodExplosions.splice(index, 1);
+            }, 500);
+        }
+
+        function createBloodParticles(x, y, count = 15) {
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'blood-particle';
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 50;
+                const speed = 2 + Math.random() * 3;
+                const size = 4 + Math.random() * 4;
+                
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                document.body.appendChild(particle);
+                bloodParticles.push({
+                    element: particle,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 60 + Math.random() * 60
+                });
+            }
+        }
+
+        function updateBloodParticles() {
+            for (let i = bloodParticles.length - 1; i >= 0; i--) {
+                const particle = bloodParticles[i];
+                const rect = particle.element.getBoundingClientRect();
+                
+                particle.element.style.left = `${rect.left + particle.vx}px`;
+                particle.element.style.top = `${rect.top + particle.vy}px`;
+                particle.life--;
+                
+                if (particle.life <= 0) {
+                    if (particle.element.parentNode) {
+                        particle.element.parentNode.removeChild(particle.element);
+                    }
+                    bloodParticles.splice(i, 1);
+                }
+            }
+        }
+
+        function createZombieGlow(zombie, type) {
+            const glow = document.createElement('div');
+            glow.className = `zombie-glow zombie-${type}`;
+            
+            // Posicionar o brilho no centro do zumbi
+            const centerX = zombie.x + zombie.width/2;
+            const centerY = zombie.y + zombie.height/2;
+            const size = type === 'boss' ? 140 : 60;
+            
+            glow.style.left = `${centerX - size/2}px`;
+            glow.style.top = `${centerY - size/2}px`;
+            
+            document.body.appendChild(glow);
+            zombieGlows.push({
+                element: glow,
+                zombie: zombie,
+                type: type
+            });
+        }
+
+        function updateZombieGlows() {
+            for (let i = zombieGlows.length - 1; i >= 0; i--) {
+                const glow = zombieGlows[i];
+                const zombie = glow.zombie;
+                
+                // Verificar se o zumbi ainda existe
+                if (!gameState.zombies.includes(zombie)) {
+                    if (glow.element.parentNode) {
+                        glow.element.parentNode.removeChild(glow.element);
+                    }
+                    zombieGlows.splice(i, 1);
+                    continue;
+                }
+                
+                // Atualizar posição do brilho
+                const centerX = zombie.x + zombie.width/2;
+                const centerY = zombie.y + zombie.height/2;
+                const size = glow.type === 'boss' ? 140 : 60;
+                
+                glow.element.style.left = `${centerX - size/2}px`;
+                glow.element.style.top = `${centerY - size/2}px`;
+            }
+        }
+
+        // NOVAS ANIMAÇÕES DE ATAQUE
+        function createKnifeSlash(x, y, angle) {
+            const slash = {
+                x: x,
+                y: y,
+                angle: angle,
+                radius: 70,
+                progress: 0,
+                maxProgress: Math.PI / 2,
+                color: '#ff5555'
+            };
+            gameState.attackAnimations.push(slash);
+        }
+
+        function createShotgunBlast(x, y, angle) {
+            for (let i = 0; i < 5; i++) {
+                const spread = (i - 2) * Math.PI / 16;
+                const blast = {
+                    x: x,
+                    y: y,
+                    angle: angle + spread,
+                    distance: 0,
+                    maxDistance: 200,
+                    speed: 15,
+                    color: '#ffaa00'
+                };
+                gameState.attackAnimations.push(blast);
+            }
+        }
+
+        function createPistolShot(x, y, angle) {
+            const shot = {
+                x: x,
+                y: y,
+                angle: angle,
+                distance: 0,
+                maxDistance: 300,
+                speed: 20,
+                color: '#ffcc55'
+            };
+            gameState.attackAnimations.push(shot);
+        }
+
+        function createLaserBeam(x, y, angle) {
+            const beam = {
+                x: x,
+                y: y,
+                angle: angle,
+                distance: 0,
+                maxDistance: 2000,
+                speed: 30,
+                color: '#00ff00',
+                width: 8
+            };
+            gameState.attackAnimations.push(beam);
+        }
+
+        function updateAttackAnimations() {
+            for (let i = gameState.attackAnimations.length - 1; i >= 0; i--) {
+                const attack = gameState.attackAnimations[i];
+                
+                if (attack.progress !== undefined) {
+                    // Animação de progresso (para faca)
+                    attack.progress += 0.3;
+                    if (attack.progress >= attack.maxProgress) {
+                        gameState.attackAnimations.splice(i, 1);
+                    }
+                } else {
+                    // Animação de distância (para armas de fogo)
+                    attack.distance += attack.speed;
+                    if (attack.distance >= attack.maxDistance) {
+                        gameState.attackAnimations.splice(i, 1);
+                    }
+                }
+            }
+        }
+
+        function drawAttackAnimations() {
+            gameState.attackAnimations.forEach(attack => {
+                ctx.save();
+                ctx.translate(attack.x, attack.y);
+                ctx.rotate(attack.angle);
+                
+                if (attack.progress !== undefined) {
+                    // Desenhar animação de faca
+                    ctx.strokeStyle = attack.color;
+                    ctx.lineWidth = 4;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, attack.radius, 0, attack.progress);
+                    ctx.stroke();
+                    
+                    // Efeito de brilho
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, attack.radius, 0, attack.progress);
+                    ctx.stroke();
+                } else {
+                    // Desenhar animação de arma de fogo
+                    const endX = Math.cos(0) * attack.distance;
+                    const endY = Math.sin(0) * attack.distance;
+                    
+                    ctx.strokeStyle = attack.color;
+                    ctx.lineWidth = attack.width || 3;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(endX, endY);
+                    ctx.stroke();
+                    
+                    // Efeito de brilho
+                    if (attack.color === '#00ff00') {
+                        ctx.strokeStyle = 'rgba(0, 255, 0, 0.3)';
+                        ctx.lineWidth = (attack.width || 3) + 6;
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(endX, endY);
+                        ctx.stroke();
+                    }
+                }
+                
+                ctx.restore();
+            });
+        }
+
+        // SPRITES
         function createPlayerSprite() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 60;
+            canvas.height = 60;
+            const ctx = canvas.getContext('2d');
+            
+            // Corpo maior e mais detalhado
+            ctx.fillStyle = '#1a6fb3';
+            ctx.fillRect(20, 20, 20, 30);
+            
+            // Detalhes da roupa
+            ctx.fillStyle = '#0d4d80';
+            ctx.fillRect(20, 30, 20, 5);
+            ctx.fillRect(20, 40, 20, 5);
+            
+            // Cabeça maior
+            ctx.fillStyle = '#ffccaa';
+            ctx.beginPath();
+            ctx.arc(30, 20, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Detalhes faciais mais bonitos (sem boca)
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(25, 17, 3, 0, Math.PI * 2);
+            ctx.arc(35, 17, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Sobrancelhas
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(22, 14);
+            ctx.lineTo(28, 14);
+            ctx.moveTo(32, 14);
+            ctx.lineTo(38, 14);
+            ctx.stroke();
+            
+            return canvas;
+        }
+
+        function createZombieSprite(color, type = 'normal') {
             const canvas = document.createElement('canvas');
             canvas.width = 50;
             canvas.height = 50;
             const ctx = canvas.getContext('2d');
             
-            ctx.fillStyle = '#55aaff';
-            ctx.fillRect(10, 10, 30, 40);
+            // Corpo mais amedrontador
+            ctx.fillStyle = color;
+            ctx.fillRect(10, 15, 30, 30);
             
-            ctx.fillStyle = '#ffccaa';
+            // Feridas e detalhes
+            ctx.fillStyle = '#a00';
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(15 + i * 10, 25, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Cabeça mais assustadora
+            ctx.fillStyle = '#8fbb6b';
             ctx.beginPath();
-            ctx.arc(25, 15, 10, 0, Math.PI * 2);
+            ctx.arc(25, 15, 15, 0, Math.PI * 2);
             ctx.fill();
+            
+            // Olhos mais assustadores
+            ctx.fillStyle = '#a00';
+            ctx.beginPath();
+            ctx.arc(20, 12, 4, 0, Math.PI * 2);
+            ctx.arc(30, 12, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Boca aberta com dentes
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(25, 20, 8, 0, Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#fff';
+            for (let i = 0; i < 5; i++) {
+                const x = 18 + i * 3;
+                ctx.fillRect(x, 18, 2, 6);
+            }
+            
+            // Detalhes específicos por tipo
+            if (type === 'runner') {
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(10, 45, 30, 3);
+            } else if (type === 'brute') {
+                ctx.fillStyle = '#333';
+                ctx.fillRect(5, 45, 40, 5);
+            } else if (type === 'boss') {
+                // Espinhos
+                ctx.fillStyle = '#660000';
+                for (let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(15 + i * 8, 5);
+                    ctx.lineTo(15 + i * 8, 15);
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+            }
             
             return canvas;
         }
 
-        function createZombieSprite(color) {
+        function createAlienSprite(color, type = 'normal') {
             const canvas = document.createElement('canvas');
-            canvas.width = 40;
-            canvas.height = 40;
+            canvas.width = 50;
+            canvas.height = 50;
             const ctx = canvas.getContext('2d');
             
+            // Corpo alienígena mais detalhado
             ctx.fillStyle = color;
-            ctx.fillRect(5, 10, 30, 30);
-            
-            ctx.fillStyle = '#8fbb6b';
             ctx.beginPath();
-            ctx.arc(20, 15, 10, 0, Math.PI * 2);
+            ctx.ellipse(25, 30, 18, 25, 0, 0, Math.PI * 2);
             ctx.fill();
             
-            ctx.fillStyle = '#a00';
+            // Cabeça
+            ctx.fillStyle = color;
             ctx.beginPath();
-            ctx.arc(15, 12, 2, 0, Math.PI * 2);
-            ctx.arc(25, 12, 3, 0, Math.PI * 2);
+            ctx.arc(25, 15, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Olhos grandes e assustadores
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.arc(18, 12, 5, 0, Math.PI * 2);
+            ctx.arc(32, 12, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Pupilas verticais
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.ellipse(18, 12, 2, 4, 0, 0, Math.PI * 2);
+            ctx.ellipse(32, 12, 2, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Boca pequena e sinistra
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(25, 20, 4, 0, Math.PI);
+            ctx.fill();
+            
+            // Detalhes específicos por tipo
+            if (type === 'martian') {
+                // Antenas
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(18, 0);
+                ctx.lineTo(12, -8);
+                ctx.moveTo(32, 0);
+                ctx.lineTo(38, -8);
+                ctx.stroke();
+            } else if (type === 'saturnian') {
+                // Anéis
+                ctx.strokeStyle = '#ffcc00';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.ellipse(25, 30, 22, 6, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (type === 'plutonian') {
+                // Cristais nas costas
+                ctx.fillStyle = '#00aaff';
+                for (let i = 0; i < 4; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(5, 20 + i * 8);
+                    ctx.lineTo(15, 25 + i * 8);
+                    ctx.lineTo(5, 30 + i * 8);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            } else if (type === 'jupiterian') {
+                // Padrão de tempestade
+                ctx.strokeStyle = '#ff8800';
+                ctx.lineWidth = 3;
+                for (let i = 0; i < 6; i++) {
+                    ctx.beginPath();
+                    ctx.arc(25, 30, 12 + i * 4, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+            
+            return canvas;
+        }
+
+        function createTitanianSprite() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 180;
+            canvas.height = 180;
+            const ctx = canvas.getContext('2d');
+            
+            // Corpo gigante e musculoso
+            ctx.fillStyle = '#5a2d81';
+            ctx.beginPath();
+            ctx.ellipse(90, 100, 60, 80, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Músculos
+            ctx.fillStyle = '#4a1d71';
+            ctx.beginPath();
+            ctx.ellipse(60, 80, 15, 25, 0.5, 0, Math.PI * 2);
+            ctx.ellipse(120, 80, 15, 25, -0.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Cabeça
+            ctx.fillStyle = '#5a2d81';
+            ctx.beginPath();
+            ctx.arc(90, 40, 30, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Olhos múltiplos
+            ctx.fillStyle = '#ff0000';
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(75 + i * 15, 35, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Boca com dentes afiados
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(90, 50, 15, 0, Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#fff';
+            for (let i = 0; i < 6; i++) {
+                const x = 75 + i * 5;
+                ctx.fillRect(x, 45, 3, 8);
+            }
+            
+            // Antenas
+            ctx.strokeStyle = '#5a2d81';
+            ctx.lineWidth = 4;
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo(70 + i * 15, 10);
+                ctx.lineTo(60 + i * 15, -10);
+                ctx.stroke();
+            }
+            
+            // Chifres
+            ctx.fillStyle = '#4a1d71';
+            ctx.beginPath();
+            ctx.moveTo(60, 20);
+            ctx.lineTo(50, 0);
+            ctx.lineTo(70, 15);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(120, 20);
+            ctx.lineTo(130, 0);
+            ctx.lineTo(110, 15);
+            ctx.closePath();
             ctx.fill();
             
             return canvas;
@@ -1263,6 +2304,48 @@
             
             return canvas;
         }
+      
+        function createPortalSprite() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 80;
+            canvas.height = 80;
+            const ctx = canvas.getContext('2d');
+            
+            // Portal roxo
+            const gradient = ctx.createRadialGradient(40, 40, 0, 40, 40, 40);
+            gradient.addColorStop(0, 'rgba(200, 0, 255, 0.9)');
+            gradient.addColorStop(0.5, 'rgba(150, 0, 200, 0.7)');
+            gradient.addColorStop(1, 'rgba(100, 0, 150, 0.5)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(40, 40, 40, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Efeito de vortex
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 3;
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                ctx.arc(40, 40, 30 - i * 5, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            // Partículas brilhantes
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            for (let i = 0; i < 12; i++) {
+                const angle = (i / 12) * Math.PI * 2;
+                const distance = 25;
+                const x = 40 + Math.cos(angle) * distance;
+                const y = 40 + Math.sin(angle) * distance;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            return canvas;
+        }
 
         function createTerrainSprite(color) {
             const canvas = document.createElement('canvas');
@@ -1286,12 +2369,63 @@
             return canvas;
         }
 
+        const sprites = {
+            player: createPlayerSprite(),
+            zombies: {
+                normal: createZombieSprite('#8fbb6b', 'normal'),
+                runner: createZombieSprite('#c78f6b', 'runner'),
+                brute: createZombieSprite('#6b8fbb', 'brute'),
+                crawler: createZombieSprite('#6b8f6b', 'crawler'),
+                toxic: createZombieSprite('#8fbb8f', 'toxic'),
+                tank: createZombieSprite('#ff8800', 'tank'),
+                fast: createZombieSprite('#aa55ff', 'fast'),
+                spitter: createZombieSprite('#55aaff', 'spitter'),
+                sniper: createZombieSprite('#5555ff', 'sniper'),
+                boss: createBossSprite()
+            },
+            aliens: {
+                normal: createAlienSprite('#8a2be2', 'normal'),
+                martian: createAlienSprite('#ff4500', 'martian'),
+                saturnian: createAlienSprite('#deb887', 'saturnian'),
+                plutonian: createAlienSprite('#4169e1', 'plutonian'),
+                jupiterian: createAlienSprite('#9370db', 'jupiterian'),
+                titanian: createTitanianSprite()
+            },
+            items: {
+                pistol: createItemSprite('🔫', '#ff5555'),
+                shotgun: createItemSprite('💥', '#ffaa00'),
+                pistolAmmo: createItemSprite('🔹', '#55aaff'),
+                shotgunAmmo: createItemSprite('🔸', '#ffaa55'),
+                medkit: createItemSprite('🩹', '#55ff55'),
+                grenade: createItemSprite('🧨', '#ff55ff'),
+                coin: createItemSprite('🪙', '#ffcc00'),
+                moonCoin: createItemSprite('🌑', '#ff55ff'),
+                laserRifle: createItemSprite('🔋', '#00ff00'),
+                laserAmmo: null
+            },
+            weapons: {
+                pistol: createWeaponSprite('#777', '#ffcc55'),
+                shotgun: createShotgunSprite(),
+                knife: createKnifeSprite(),
+                laserRifle: createLaserRifleSprite(),
+                medkit: createMedkitSprite(),
+                grenade: createGrenadeSprite()
+            },
+            terrain: {
+                grass: createTerrainSprite('#3a5c3a'),
+                road: createTerrainSprite('#555555'),
+                water: createTerrainSprite('#3a5c8f'),
+                building: createTerrainSprite('#8f3a3a')
+            },
+            portal: createPortalSprite()  
+        };
+
         class Player {
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                this.width = 40;
-                this.height = 40;
+                this.width = 60;
+                this.height = 60;
                 this.speed = config.playerSpeed;
                 this.health = 100;
                 this.maxHealth = 100;
@@ -1313,15 +2447,20 @@
                 this.poisoned = false;
                 this.poisonTimer = 0;
                 this.poisonDamage = 0;
+                this.isMoving = false;
+                this.crosshairX = x + this.width / 2;
+                this.crosshairY = y + this.height / 2;
             }
 
             update() {
-                const speedMultiplier = this.isRunning ? (this.stamina > 0 ? 1.8 : 1) : 1;
-                this.x += this.direction.x * this.speed * speedMultiplier;
-                this.y += this.direction.y * this.speed * speedMultiplier;
+                if (this.isMoving) {
+                    const speedMultiplier = this.isRunning ? (this.stamina > 0 ? 1.8 : 1) : 1;
+                    this.x += this.direction.x * this.speed * speedMultiplier;
+                    this.y += this.direction.y * this.speed * speedMultiplier;
 
-                this.x = Math.max(0, Math.min(config.width - this.width, this.x));
-                this.y = Math.max(0, Math.min(config.height - this.height, this.y));
+                    this.x = Math.max(0, Math.min(config.width - this.width, this.x));
+                    this.y = Math.max(0, Math.min(config.height - this.height, this.y));
+                }
 
                 if (this.isRunning) {
                     this.stamina -= 0.3;
@@ -1428,14 +2567,6 @@
                         this.takeDamage(20);
                         this.applyPoison(2, 180);
                         gameState.bossVomits.splice(i, 1);
-                        
-                        createParticle(
-                            vomit.x, vomit.y,
-                            (Math.random() - 0.5) * 4,
-                            (Math.random() - 0.5) * 4,
-                            '#ff0000',
-                            60
-                        );
                     }
                 }
                 
@@ -1451,6 +2582,27 @@
                         gameState.sniperBullets.splice(i, 1);
                     }
                 }
+                
+                // Verificar se entrou no portal
+                if (gameState.portal && !gameState.inAlienWorld) {
+                    const dx = this.x + this.width/2 - gameState.portal.x;
+                    const dy = this.y + this.height/2 - gameState.portal.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 60) {
+                        this.enterAlienWorld();
+                    }
+                }
+                
+                // Atualizar mira
+                crosshair.style.left = `${this.crosshairX}px`;
+                crosshair.style.top = `${this.crosshairY}px`;
+                
+                // Atualizar ângulo baseado na mira
+                this.angle = Math.atan2(
+                    this.crosshairY - (this.y + this.height / 2),
+                    this.crosshairX - (this.x + this.width / 2)
+                );
             }
 
             applyPoison(damagePerSecond, duration) {
@@ -1465,6 +2617,13 @@
                     gameState.coins += item.value;
                     gameState.items.splice(index, 1);
                     updateCoinUI();
+                    return;
+                }
+                
+                if (item.type === 'moonCoin') {
+                    gameState.moonCoins += item.value;
+                    gameState.items.splice(index, 1);
+                    updateMoonCoinUI();
                     return;
                 }
 
@@ -1540,6 +2699,7 @@
             }
 
             draw() {
+                // Sombra centralizada
                 ctx.fillStyle = 'rgba(0,0,0,0.5)';
                 ctx.beginPath();
                 ctx.ellipse(
@@ -1553,7 +2713,8 @@
                 
                 ctx.save();
                 ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-                ctx.rotate(this.angle);
+                
+                // Desenhar o personagem (sempre na mesma direção)
                 ctx.drawImage(
                     sprites.player,
                     -this.width / 2,
@@ -1561,6 +2722,9 @@
                     this.width,
                     this.height
                 );
+                
+                // Rotacionar apenas as armas
+                ctx.rotate(this.angle);
                 
                 const weaponType = gameState.inventory[gameState.selectedSlot].type;
                 const weaponAmmo = gameState.inventory[gameState.selectedSlot].ammo;
@@ -1646,6 +2810,11 @@
                 const attackAngle = this.angle;
                 const attackArc = Math.PI / 2;
                 
+                // Criar animação de ataque com faca
+                const barrelX = this.x + this.width / 2 + Math.cos(attackAngle) * 35;
+                const barrelY = this.y + this.height / 2 + Math.sin(attackAngle) * 35;
+                createKnifeSlash(barrelX, barrelY, attackAngle);
+                
                 gameState.zombies.forEach(zombie => {
                     const dx = zombie.x + zombie.width / 2 - (this.x + this.width / 2);
                     const dy = zombie.y + zombie.height / 2 - (this.y + this.height / 2);
@@ -1657,6 +2826,22 @@
                         
                         if (angleDiff < attackArc / 2) {
                             zombie.takeDamage(25 * this.damageMultiplier);
+                        }
+                    }
+                });
+                
+                // Verificar hit em alienígenas
+                gameState.aliens.forEach(alien => {
+                    const dx = alien.x + alien.width / 2 - (this.x + this.width / 2);
+                    const dy = alien.y + alien.height / 2 - (this.y + this.height / 2);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < attackRange) {
+                        const angleToAlien = Math.atan2(dy, dx);
+                        const angleDiff = Math.abs(normalizeAngle(angleToAlien - attackAngle));
+                        
+                        if (angleDiff < attackArc / 2) {
+                            alien.takeDamage(25 * this.damageMultiplier);
                         }
                     }
                 });
@@ -1697,6 +2882,17 @@
                 this.speed *= 1.1;
             }
 
+            increaseStorage() {
+                // Aumentar capacidade de todas as armas
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i].maxAmmo !== null) {
+                        gameState.inventory[i].maxAmmo += 2;
+                        gameState.inventory[i].ammo += 2;
+                    }
+                }
+                updateInventoryUI();
+            }
+
             useMedkit() {
                 if (gameState.inventory[3].ammo > 0 && gameState.medkitCooldown <= 0) {
                     this.heal(this.maxHealth * 0.15);
@@ -1732,7 +2928,8 @@
                         distanceTraveled: 0,
                         maxDistance: 500,
                         flashTimer: 0,
-                        stuckZombie: null
+                        stuckZombie: null,
+                        stuckAlien: null
                     });
                     
                     if (!gameState.activePotions.infiniteAmmo.active) {
@@ -1759,18 +2956,28 @@
                 const startX = this.x + this.width / 2 + Math.cos(this.angle) * 140;
                 const startY = this.y + this.height / 2 + Math.sin(this.angle) * 140;
                 
-                const endX = startX + Math.cos(this.angle) * 2000;
-                const endY = startY + Math.sin(this.angle) * 2000;
+                // Criar animação de laser
+                createLaserBeam(startX, startY, this.angle);
                 
-                gameState.laserBeams.push({
-                    startX: startX,
-                    startY: startY,
-                    endX: endX,
-                    endY: endY,
-                    angle: this.angle,
-                    timer: 80,
-                    damageTimer: 0,
-                    width: 90
+                // Aplicar dano a zumbis e alienígenas
+                gameState.zombies.forEach(zombie => {
+                    const zombieCenterX = zombie.x + zombie.width / 2;
+                    const zombieCenterY = zombie.y + zombie.height / 2;
+                    
+                    if (pointToLineDistance(zombieCenterX, zombieCenterY, startX, startY, 
+                        startX + Math.cos(this.angle) * 2000, startY + Math.sin(this.angle) * 2000) < 60) {
+                        zombie.takeDamage(250);
+                    }
+                });
+                
+                gameState.aliens.forEach(alien => {
+                    const alienCenterX = alien.x + alien.width / 2;
+                    const alienCenterY = alien.y + alien.height / 2;
+                    
+                    if (pointToLineDistance(alienCenterX, alienCenterY, startX, startY, 
+                        startX + Math.cos(this.angle) * 2000, startY + Math.sin(this.angle) * 2000) < 60) {
+                        alien.takeDamage(250);
+                    }
                 });
                 
                 gameState.laserRifleCooldown = gameState.activePotions.cooldown.active ? 
@@ -1794,6 +3001,568 @@
             
             removeCooldownPotion() {
                 // Os cooldowns voltam ao normal quando a poção expira
+            }
+            
+            enterAlienWorld() {
+                gameState.inAlienWorld = true;
+                gameState.portalSpawned = false;
+                gameState.portal = null;
+                gameState.zombies = [];
+                gameState.items = [];
+                gameState.day = 1;
+                gameState.alienWave = 1;
+                gameState.moonCoins = 0;
+                
+                // Mostrar mensagem de viagem dimensional
+                gameState.dimensionTravelMessage = true;
+                setTimeout(() => {
+                    gameState.dimensionTravelMessage = false;
+                    startAlienWave();
+                }, 4000);
+                
+                // Atualizar UI
+                document.getElementById('coins').style.display = 'none';
+                document.getElementById('moonCoins').style.display = 'block';
+                document.getElementById('nightOverlay').style.display = 'none';
+                updateMoonCoinUI();
+            }
+        }
+      
+        class Alien {
+            constructor(x, y, type = 'normal') {
+                this.x = x;
+                this.y = y;
+                this.width = type === 'titanian' ? 180 : 50;
+                this.height = type === 'titanian' ? 180 : 50;
+                this.type = type;
+                
+                // Configurações baseadas no tipo
+                const baseHealth = 250; // Vida de um zumbi tank
+                
+                switch (type) {
+                    case 'martian':
+                        this.health = baseHealth * 1.3;
+                        this.damage = 12;
+                        break;
+                    case 'saturnian':
+                        this.health = baseHealth * 0.6;
+                        this.damage = 15;
+                        break;
+                    case 'plutonian':
+                        this.health = baseHealth * 2.0;
+                        this.damage = 30;
+                        break;
+                    case 'jupiterian':
+                        this.health = baseHealth * 2.2;
+                        this.damage = 10;
+                        break;
+                    case 'titanian':
+                        this.health = baseHealth * 4.0; // 300% a mais que o boss normal
+                        this.damage = 48; // 60% a mais que o boss normal
+                        break;
+                    default:
+                        this.health = baseHealth;
+                        this.damage = 10;
+                }
+                
+                this.speed = this.getSpeed();
+                this.detectionRange = 300;
+                this.attackCooldown = 0;
+                this.color = this.getColor();
+                this.randomAngle = Math.random() * Math.PI * 2;
+                this.lastSandstorm = 0;
+                this.moonCoinValue = this.getMoonCoinValue();
+            }
+            
+            getSpeed() {
+                switch (this.type) {
+                    case 'saturnian': return 2.4; // 60% mais rápido
+                    case 'jupiterian': return 1.5;
+                    case 'titanian': return 1.2;
+                    default: return 1.8;
+                }
+            }
+            
+            getColor() {
+                switch (this.type) {
+                    case 'martian': return '#ff4500';
+                    case 'saturnian': return '#deb887';
+                    case 'plutonian': return '#4169e1';
+                    case 'jupiterian': return '#9370db';
+                    case 'titanian': return '#5a2d81';
+                    default: return '#8a2be2';
+                }
+            }
+            
+            getMoonCoinValue() {
+                switch (this.type) {
+                    case 'normal': return 5;
+                    case 'martian': return 8;
+                    case 'saturnian': return 6;
+                    case 'plutonian': return 15;
+                    case 'jupiterian': return 12;
+                    case 'titanian': return 100;
+                    default: return 5;
+                }
+            }
+            
+            update() {
+                const player = gameState.player;
+                const dx = player.x - this.x;
+                const dy = player.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < this.detectionRange) {
+                    const angle = Math.atan2(dy, dx);
+                    this.x += Math.cos(angle) * this.speed;
+                    this.y += Math.sin(angle) * this.speed;
+                    
+                    if (distance < (this.type === 'titanian' ? 80 : 40) && this.attackCooldown <= 0) {
+                        player.takeDamage(this.damage);
+                        this.attackCooldown = this.type === 'titanian' ? 30 : 60;
+                    }
+                    
+                    // Habilidade especial do Jupiteriano
+                    if (this.type === 'jupiterian' && Date.now() - this.lastSandstorm > 10000) {
+                        this.lastSandstorm = Date.now();
+                        this.createSandstorm();
+                    }
+                } else {
+                    if (Math.random() < 0.02) {
+                        this.randomAngle = Math.random() * Math.PI * 2;
+                    }
+                    this.x += Math.cos(this.randomAngle) * this.speed * 0.5;
+                    this.y += Math.sin(this.randomAngle) * this.speed * 0.5;
+                }
+
+                if (this.attackCooldown > 0) this.attackCooldown--;
+
+                this.x = Math.max(0, Math.min(config.width - this.width, this.x));
+                this.y = Math.max(0, Math.min(config.height - this.height, this.y));
+            }
+            
+            createSandstorm() {
+                for (let i = 0; i < 3; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 100 + Math.random() * 100;
+                    const startX = this.x + this.width/2 + Math.cos(angle) * distance;
+                    const startY = this.y + this.height/2 + Math.sin(angle) * distance;
+                    
+                    gameState.sandstorms.push({
+                        x: startX,
+                        y: startY,
+                        timer: 180,
+                        damage: this.damage
+                    });
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.beginPath();
+                ctx.ellipse(
+                    this.x + this.width / 2,
+                    this.y + this.height - 5,
+                    this.width / 2,
+                    this.width / 6,
+                    0, 0, Math.PI * 2
+                );
+                ctx.fill();
+                
+                let sprite;
+                switch (this.type) {
+                    case 'martian': sprite = sprites.aliens.martian; break;
+                    case 'saturnian': sprite = sprites.aliens.saturnian; break;
+                    case 'plutonian': sprite = sprites.aliens.plutonian; break;
+                    case 'jupiterian': sprite = sprites.aliens.jupiterian; break;
+                    case 'titanian': sprite = sprites.aliens.titanian; break;
+                    default: sprite = sprites.aliens.normal;
+                }
+                
+                ctx.drawImage(sprite, this.x, this.y, this.width, this.height);
+                
+                // Barra de vida
+                if (this.health < this.getMaxHealth()) {
+                    ctx.fillStyle = '#300';
+                    ctx.fillRect(this.x, this.y - 12, this.width, 5);
+                    ctx.fillStyle = '#f0f';
+                    ctx.fillRect(this.x, this.y - 12, this.width * (this.health / this.getMaxHealth()), 5);
+                }
+            }
+            
+            getMaxHealth() {
+                const baseHealth = 250;
+                
+                switch (this.type) {
+                    case 'martian': return baseHealth * 1.3;
+                    case 'saturnian': return baseHealth * 0.6;
+                    case 'plutonian': return baseHealth * 2.0;
+                    case 'jupiterian': return baseHealth * 2.2;
+                    case 'titanian': return baseHealth * 4.0;
+                    default: return baseHealth;
+                }
+            }
+
+            takeDamage(amount) {
+                this.health -= amount;
+                if (this.health <= 0) {
+                    // Dropar moeda galática
+                    gameState.items.push({
+                        type: 'moonCoin',
+                        x: this.x,
+                        y: this.y,
+                        width: 20,
+                        height: 20,
+                        value: this.moonCoinValue
+                    });
+                    
+                    // Chance de dropar arma secreta
+                    if (!gameState.hasLaserRifle) {
+                        let dropChance = 0.001; // 0.1% para alienígenas normais
+                        if (this.type === 'titanian') {
+                            dropChance = 0.005; // 0.5% para o titaniano
+                        }
+                        
+                        if (Math.random() < dropChance) {
+                            gameState.items.push({
+                                type: 'laserRifle',
+                                x: this.x,
+                                y: this.y,
+                                width: 30,
+                                height: 30
+                            });
+                        }
+                    }
+                    
+                    gameState.moonCoins += this.moonCoinValue;
+                    updateMoonCoinUI();
+                    
+                    this.createDeathEffect();
+                    
+                    if (this.type === 'titanian') {
+                        gameState.alienBossSpawned = false;
+                        gameState.alienBossAlive = false;
+                        endAlienWave();
+                    }
+                    
+                    const index = gameState.aliens.indexOf(this);
+                    if (index !== -1) gameState.aliens.splice(index, 1);
+                    gameState.aliensSpawned--;
+                }
+            }
+            
+            createDeathEffect() {
+                createBloodExplosion(this.x + this.width/2, this.y + this.height/2, 
+                                    this.type === 'titanian' ? 200 : 100);
+                createBloodParticles(this.x + this.width/2, this.y + this.height/2, 
+                                   this.type === 'titanian' ? 50 : 15);
+                
+                // Efeito de morte alienígena
+                for (let i = 0; i < 15; i++) {
+                    createParticle(
+                        this.x + this.width/2,
+                        this.y + this.height/2,
+                        (Math.random() - 0.5) * 6,
+                        (Math.random() - 0.5) * 6,
+                        this.color,
+                        60
+                    );
+                }
+            }
+        }
+      
+        function spawnPortal() {
+            if (!gameState.inAlienWorld && !gameState.portalSpawned && gameState.day % 5 === 0 && Math.random() < 0.1) {
+                gameState.portal = {
+                    x: 100, // Spawn na esquerda do mapa
+                    y: Math.random() * (config.height - 100),
+                    width: 80,
+                    height: 80
+                };
+                gameState.portalSpawned = true;
+            }
+        }
+
+        // Função para iniciar wave alienígena
+        function startAlienWave() {
+            gameState.aliensToSpawn = Math.floor(config.baseAliensPerWave * Math.pow(config.alienIncreasePerWave, gameState.alienWave - 1));
+            gameState.aliensSpawned = 0;
+            gameState.alienBossSpawned = false;
+            gameState.alienBossAlive = false;
+            
+            // Spawnar alienígenas baseado na wave
+            spawnAliens();
+            
+            // Iniciar contador para próxima wave
+            gameState.gameTime = 0;
+        }
+
+        // Função para spawnar alienígenas
+        function spawnAliens() {
+            const alienTypes = ['normal'];
+            
+            // Adicionar tipos especiais baseado na wave
+            if (gameState.alienWave >= 2) alienTypes.push('martian');
+            if (gameState.alienWave >= 3) alienTypes.push('saturnian');
+            if (gameState.alienWave >= 4) alienTypes.push('plutonian');
+            if (gameState.alienWave >= 5) alienTypes.push('jupiterian');
+            
+            // Spawnar boss a cada 5 waves
+            if (gameState.alienWave % 5 === 0 && gameState.aliensSpawned >= Math.floor(gameState.aliensToSpawn * 0.7)) {
+                spawnTitanian();
+                gameState.alienBossSpawned = true;
+                gameState.alienBossAlive = true;
+                return;
+            }
+            
+            // Spawnar alienígenas normais
+            while (gameState.aliensSpawned < gameState.aliensToSpawn) {
+                const side = Math.floor(Math.random() * 4);
+                let x, y;
+                
+                switch (side) {
+                    case 0: x = -50; y = Math.random() * config.height; break;
+                    case 1: x = config.width + 50; y = Math.random() * config.height; break;
+                    case 2: x = Math.random() * config.width; y = -50; break;
+                    case 3: x = Math.random() * config.width; y = config.height + 50; break;
+                }
+                
+                const selectedType = alienTypes[Math.floor(Math.random() * alienTypes.length)];
+                const newAlien = new Alien(x, y, selectedType);
+                gameState.aliens.push(newAlien);
+                gameState.aliensSpawned++;
+            }
+        }
+
+        // Função para spawnar titaniano
+        function spawnTitanian() {
+            const side = Math.floor(Math.random() * 4);
+            let x, y;
+            
+            switch (side) {
+                case 0: x = -90; y = Math.random() * config.height; break;
+                case 1: x = config.width + 90; y = Math.random() * config.height; break;
+                case 2: x = Math.random() * config.width; y = -90; break;
+                case 3: x = Math.random() * config.width; y = config.height + 90; break;
+            }
+            
+            const newTitanian = new Alien(x, y, 'titanian');
+            gameState.aliens.push(newTitanian);
+            gameState.aliensSpawned++;
+        }
+
+        // Função para finalizar wave alienígena
+        function endAlienWave() {
+            gameState.alienWave++;
+            gameState.aliensToSpawn = Math.floor(config.baseAliensPerWave * Math.pow(config.alienIncreasePerWave, gameState.alienWave - 1));
+            gameState.aliensSpawned = 0;
+            
+            // Abrir loja da lua
+            openMoonShop();
+        }
+
+        // Função para abrir loja da lua
+        function openMoonShop() {
+            if (gameState.inAlienWorld) {
+                gameState.moonShopOpen = true;
+                document.getElementById('moonStore').style.display = 'block';
+                updateMoonShopButtons();
+            }
+        }
+
+        // Função para fechar loja da lua
+        function closeMoonShop() {
+            gameState.moonShopOpen = false;
+            document.getElementById('moonStore').style.display = 'none';
+            
+            // Iniciar próxima wave
+            if (gameState.inAlienWorld) {
+                startAlienWave();
+            }
+        }
+
+        // Atualizar UI das moedas da lua
+        function updateMoonCoinUI() {
+            document.getElementById('moonCoinCount').textContent = gameState.moonCoins;
+        }
+
+        // Atualizar botões da loja da lua
+        function updateMoonShopButtons() {
+            document.getElementById('buyMoonAmmo').disabled = gameState.moonCoins < gameState.moonShopPrices.ammo;
+            document.getElementById('buyMoonShotgunAmmo').disabled = gameState.moonCoins < gameState.moonShopPrices.shotgunAmmo;
+            document.getElementById('buyMoonMedkit').disabled = gameState.moonCoins < gameState.moonShopPrices.medkit;
+            document.getElementById('buyMoonGrenades').disabled = gameState.moonCoins < gameState.moonShopPrices.grenades;
+            document.getElementById('buyMoonHealth').disabled = gameState.moonCoins < gameState.moonShopPrices.health;
+            document.getElementById('buyMoonDamage').disabled = gameState.moonCoins < gameState.moonShopPrices.damage;
+            document.getElementById('buyMoonSpeed').disabled = gameState.moonCoins < gameState.moonShopPrices.speed;
+            document.getElementById('buyMoonStorage').disabled = gameState.moonCoins < gameState.moonShopPrices.storage;
+            document.getElementById('buyMoonStrengthPotion').disabled = gameState.moonCoins < gameState.moonShopPrices.strengthPotion || gameState.activePotions.strength.active;
+            document.getElementById('buyMoonLuckPotion').disabled = gameState.moonCoins < gameState.moonShopPrices.luckPotion || gameState.activePotions.luck.active;
+            document.getElementById('buyMoonAmmoPotion').disabled = gameState.moonCoins < gameState.moonShopPrices.ammoPotion || gameState.activePotions.infiniteAmmo.active;
+            document.getElementById('buyMoonCooldownPotion').disabled = gameState.moonCoins < gameState.moonShopPrices.cooldownPotion || gameState.activePotions.cooldown.active;
+        }
+      
+        function buyMoonAmmo() {
+            if (gameState.moonCoins >= gameState.moonShopPrices.ammo) {
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i].type === 'pistol') {
+                        const maxAmmo = gameState.inventory[i].maxAmmo;
+                        const currentAmmo = gameState.inventory[i].ammo;
+                        const ammoToAdd = Math.min(16, maxAmmo - currentAmmo); // 30% a mais
+                        
+                        gameState.inventory[i].ammo += ammoToAdd;
+                        gameState.moonCoins -= gameState.moonShopPrices.ammo;
+                        updateInventoryUI();
+                        updateMoonCoinUI();
+                        updateMoonShopButtons();
+                        break;
+                    }
+                }
+            }
+        }
+
+        function buyMoonShotgunAmmo() {
+            if (gameState.moonCoins >= gameState.moonShopPrices.shotgunAmmo) {
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i].type === 'shotgun') {
+                        const maxAmmo = gameState.inventory[i].maxAmmo;
+                        const currentAmmo = gameState.inventory[i].ammo;
+                        const ammoToAdd = Math.min(7, maxAmmo - currentAmmo); // 30% a mais
+                        
+                        gameState.inventory[i].ammo += ammoToAdd;
+                        gameState.moonCoins -= gameState.moonShopPrices.shotgunAmmo;
+                        updateInventoryUI();
+                        updateMoonCoinUI();
+                        updateMoonShopButtons();
+                        break;
+                    }
+                }
+            }
+        }
+
+        function buyMoonHealth() {
+            if (gameState.moonCoins >= gameState.moonShopPrices.health) {
+                gameState.player.increaseMaxHealth(10);
+                gameState.moonCoins -= gameState.moonShopPrices.health;
+                gameState.moonShopPrices.health = Math.floor(gameState.moonShopPrices.health * 1.2);
+                updateMoonCoinUI();
+                updateMoonShopButtons();
+            }
+        }
+
+        function buyMoonDamage() {
+            if (gameState.moonCoins >= gameState.moonShopPrices.damage) {
+                gameState.player.increaseDamage(0.1);
+                gameState.moonCoins -= gameState.moonShopPrices.damage;
+                gameState.moonShopPrices.damage = Math.floor(gameState.moonShopPrices.damage * 1.2);
+                updateMoonCoinUI();
+                updateMoonShopButtons();
+            }
+        }
+
+        function buyMoonSpeed() {
+            if (gameState.moonCoins >= gameState.moonShopPrices.speed) {
+                gameState.player.increaseMaxStamina(10);
+                gameState.moonCoins -= gameState.moonShopPrices.speed;
+                gameState.moonShopPrices.speed = Math.floor(gameState.moonShopPrices.speed * 1.2);
+                updateMoonCoinUI();
+                updateMoonShopButtons();
+            }
+        }
+
+        function buyMoonStorage() {
+            if (gameState.moonCoins >= gameState.moonShopPrices.storage) {
+                gameState.player.increaseStorage();
+                gameState.moonCoins -= gameState.moonShopPrices.storage;
+                gameState.moonShopPrices.storage = Math.floor(gameState.moonShopPrices.storage * 1.2);
+                updateMoonCoinUI();
+                updateMoonShopButtons();
+            }
+        }
+
+        function buyMoonMedkit() {
+            if (gameState.moonCoins >= gameState.moonShopPrices.medkit) {
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i].type === 'medkit') {
+                        const maxAmmo = gameState.inventory[i].maxAmmo;
+                        const currentAmmo = gameState.inventory[i].ammo;
+                        
+                        if (currentAmmo < maxAmmo) {
+                            gameState.inventory[i].ammo += 1;
+                            gameState.moonCoins -= gameState.moonShopPrices.medkit;
+                            updateInventoryUI();
+                            updateMoonCoinUI();
+                            updateMoonShopButtons();
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        function buyMoonGrenades() {
+            if (gameState.moonCoins >= gameState.moonShopPrices.grenades) {
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i].type === 'grenade') {
+                        const maxAmmo = gameState.inventory[i].maxAmmo;
+                        const currentAmmo = gameState.inventory[i].ammo;
+                        
+                        if (currentAmmo < maxAmmo) {
+                            gameState.inventory[i].ammo += 2;
+                            gameState.moonCoins -= gameState.moonShopPrices.grenades;
+                            updateInventoryUI();
+                            updateMoonCoinUI();
+                            updateMoonShopButtons();
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        function buyMoonStrengthPotion() {
+            if (gameState.moonCoins >= gameState.moonShopPrices.strengthPotion && !gameState.activePotions.strength.active) {
+                gameState.moonCoins -= gameState.moonShopPrices.strengthPotion;
+                gameState.activePotions.strength.active = true;
+                gameState.activePotions.strength.daysLeft = 3;
+                gameState.player.applyStrengthPotion();
+                updateMoonCoinUI();
+                updateActivePotionsUI();
+                updateMoonShopButtons();
+            }
+        }
+
+        function buyMoonLuckPotion() {
+            if (gameState.moonCoins >= gameState.moonShopPrices.luckPotion && !gameState.activePotions.luck.active) {
+                gameState.moonCoins -= gameState.moonShopPrices.luckPotion;
+                gameState.activePotions.luck.active = true;
+                gameState.activePotions.luck.daysLeft = 1;
+                updateMoonCoinUI();
+                updateActivePotionsUI();
+                updateMoonShopButtons();
+            }
+        }
+
+        function buyMoonAmmoPotion() {
+            if (gameState.moonCoins >= gameState.moonShopPrices.ammoPotion && !gameState.activePotions.infiniteAmmo.active) {
+                gameState.moonCoins -= gameState.moonShopPrices.ammoPotion;
+                gameState.activePotions.infiniteAmmo.active = true;
+                gameState.activePotions.infiniteAmmo.daysLeft = 2;
+                updateMoonCoinUI();
+                updateActivePotionsUI();
+                updateMoonShopButtons();
+            }
+        }
+
+        function buyMoonCooldownPotion() {
+            if (gameState.moonCoins >= gameState.moonShopPrices.cooldownPotion && !gameState.activePotions.cooldown.active) {
+                gameState.moonCoins -= gameState.moonShopPrices.cooldownPotion;
+                gameState.activePotions.cooldown.active = true;
+                gameState.activePotions.cooldown.daysLeft = 2;
+                gameState.player.applyCooldownPotion();
+                updateMoonCoinUI();
+                updateActivePotionsUI();
+                updateMoonShopButtons();
             }
         }
 
@@ -2080,6 +3849,18 @@
             gameState.coins = 0;
             gameState.playerDamageMultiplier = 1;
             gameState.playerDefenseMultiplier = 1;
+            gameState.inAlienWorld = false;
+            gameState.alienWave = 1;
+            gameState.aliensToSpawn = 0;
+            gameState.aliensSpawned = 0;
+            gameState.alienBossSpawned = false;
+            gameState.alienBossAlive = false;
+            gameState.portalSpawned = false;
+            gameState.portal = null;
+            gameState.sandstorms = [];
+            gameState.moonCoins = 0;
+            gameState.dimensionTravelMessage = false;
+            gameState.attackAnimations = [];
             
             // Aplicar configurações de dificuldade
             const difficulty = difficultySettings[gameState.difficulty];
@@ -2109,6 +3890,7 @@
                 health: Math.floor(20 * shopPriceMultiplier),
                 damage: Math.floor(15 * shopPriceMultiplier),
                 speed: Math.floor(18 * shopPriceMultiplier),
+                storage: Math.floor(150 * shopPriceMultiplier),
                 strengthPotion: Math.floor(120 * shopPriceMultiplier),
                 luckPotion: Math.floor(200 * shopPriceMultiplier),
                 ammoPotion: Math.floor(250 * shopPriceMultiplier),
@@ -2158,69 +3940,265 @@
                 });
             }
             
+            // Mostrar logo durante o jogo
+            
+            
             gameLoop();
             dayNightCycle();
             itemSpawnLoop();
+        }
+      
+        function createShotgunEffect(x, y, angle) {
+            for (let i = 0; i < 5; i++) {
+                const effect = document.createElement('div');
+                effect.className = 'shotgun-effect';
+                
+                const spread = (i - 2) * Math.PI / 16;
+                const finalAngle = angle + spread;
+                
+                effect.style.left = `${x}px`;
+                effect.style.top = `${y}px`;
+                effect.style.setProperty('--angle', `${finalAngle}rad`);
+                
+                document.body.appendChild(effect);
+                
+                setTimeout(() => {
+                    if (effect.parentNode) {
+                        effect.parentNode.removeChild(effect);
+                    }
+                }, 200);
+            }
+        }
+
+        function createEnhancedExplosion(x, y) {
+            const explosion = document.createElement('div');
+            explosion.className = 'enhanced-explosion';
+            
+            explosion.style.left = `${x - 75}px`;
+            explosion.style.top = `${y - 75}px`;
+            
+            document.body.appendChild(explosion);
+            
+            // Adicionar partículas de explosão
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'blood-particle';
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 100;
+                const speed = 3 + Math.random() * 4;
+                const size = 4 + Math.random() * 6;
+                
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.background = i % 3 === 0 ? '#ff8800' : (i % 3 === 1 ? '#ff5500' : '#ff0000');
+                
+                document.body.appendChild(particle);
+                bloodParticles.push({
+                    element: particle,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 80 + Math.random() * 80
+                });
+            }
+            
+            setTimeout(() => {
+                if (explosion.parentNode) {
+                    explosion.parentNode.removeChild(explosion);
+                }
+            }, 800);
         }
 
         function gameLoop() {
             if (gameState.gameOver) return;
             
+            // Atualizar efeitos visuais
+            updateBloodParticles();
+            updateZombieGlows();
+            updateAttackAnimations();
+            
             ctx.clearRect(0, 0, config.width, config.height);
             
             drawMap();
             
-            ctx.fillStyle = 'rgba(50, 50, 50, 1)';
-            gameState.obstacles.forEach(obstacle => {
-                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            // Mostrar mensagem de viagem dimensional
+            if (gameState.dimensionTravelMessage) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fillRect(0, 0, config.width, config.height);
                 
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-            });
+                ctx.fillStyle = '#ff55ff';
+                ctx.font = '48px "Press Start 2P"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('VOCÊ VIAJOU ENTRE DIMENSÕES!', config.width / 2, config.height / 2 - 50);
+                ctx.fillText('TOME CUIDADO DAQUI PRA FRENTE,', config.width / 2, config.height / 2);
+                ctx.fillText('OS ALIENÍGENAS VIRÃO SEM PARAR!', config.width / 2, config.height / 2 + 50);
+                
+                requestAnimationFrame(gameLoop);
+                return;
+            }
             
-            gameState.items.forEach(item => {
-                let sprite;
-                switch (item.type) {
-                    case 'pistol': sprite = sprites.items.pistol; break;
-                    case 'shotgun': sprite = sprites.items.shotgun; break;
-                    case 'pistolAmmo': sprite = sprites.items.pistolAmmo; break;
-                    case 'shotgunAmmo': sprite = sprites.items.shotgunAmmo; break;
-                    case 'medkit': sprite = sprites.items.medkit; break;
-                    case 'grenade': sprite = sprites.items.grenade; break;
-                    case 'coin': sprite = sprites.items.coin; break;
-                    case 'laserRifle': sprite = sprites.items.laserRifle; break;
-                    case 'laserAmmo': 
-                        sprite = document.createElement('canvas');
-                        sprite.width = 30;
-                        sprite.height = 30;
-                        const ictx = sprite.getContext('2d');
-                        ictx.fillStyle = '#00ff00';
-                        ictx.beginPath();
-                        ictx.arc(15, 15, 15, 0, Math.PI * 2);
-                        ictx.fill();
-                        ictx.font = '20px Arial';
-                        ictx.textAlign = 'center';
-                        ictx.textBaseline = 'middle';
-                        ictx.fillStyle = '#fff';
-                        ictx.fillText('🔋', 15, 15);
-                        break;
+            // Lógica do mundo normal
+            if (!gameState.inAlienWorld) {
+                // Desenhar obstáculos
+                ctx.fillStyle = 'rgba(50, 50, 50, 1)';
+                gameState.obstacles.forEach(obstacle => {
+                    ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                    
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                });
+                
+                // Desenhar itens
+                gameState.items.forEach(item => {
+                    let sprite;
+                    switch (item.type) {
+                        case 'pistol': sprite = sprites.items.pistol; break;
+                        case 'shotgun': sprite = sprites.items.shotgun; break;
+                        case 'pistolAmmo': sprite = sprites.items.pistolAmmo; break;
+                        case 'shotgunAmmo': sprite = sprites.items.shotgunAmmo; break;
+                        case 'medkit': sprite = sprites.items.medkit; break;
+                        case 'grenade': sprite = sprites.items.grenade; break;
+                        case 'coin': sprite = sprites.items.coin; break;
+                        case 'moonCoin': sprite = sprites.items.moonCoin; break;
+                        case 'laserRifle': sprite = sprites.items.laserRifle; break;
+                        case 'laserAmmo': 
+                            sprite = document.createElement('canvas');
+                            sprite.width = 30;
+                            sprite.height = 30;
+                            const ictx = sprite.getContext('2d');
+                            ictx.fillStyle = '#00ff00';
+                            ictx.beginPath();
+                            ictx.arc(15, 15, 15, 0, Math.PI * 2);
+                            ictx.fill();
+                            ictx.font = '20px Arial';
+                            ictx.textAlign = 'center';
+                            ictx.textBaseline = 'middle';
+                            ictx.fillStyle = '#fff';
+                            ictx.fillText('🔋', 15, 15);
+                            break;
+                    }
+                    
+                    const floatY = Math.sin(Date.now() / 500) * 3;
+                    
+                    ctx.drawImage(
+                        sprite,
+                        item.x,
+                        item.y + floatY,
+                        item.width,
+                        item.height
+                    );
+                });
+                
+                // Atualizar e desenhar zumbis (apenas se for noite)
+                if (gameState.isNight) {
+                    gameState.zombies.forEach(zombie => {
+                        zombie.update();
+                        zombie.draw();
+                    });
+                    
+                    // Spawnar zumbis se necessário
+                    if (gameState.zombiesSpawned < gameState.zombiesToSpawn && !gameState.bossAlive) {
+                        spawnZombie();
+                    }
+                    
+                    // Spawnar boss se necessário
+                    if (gameState.day % 5 === 0 && !gameState.bossSpawned && gameState.zombiesSpawned >= Math.floor(gameState.zombiesToSpawn * 0.7)) {
+                        spawnBoss();
+                        gameState.bossSpawned = true;
+                        gameState.bossAlive = true;
+                    }
+                } else {
+                    // Durante o dia, zumbis desaparecem
+                    gameState.zombies = [];
+                    gameState.zombiesSpawned = 0;
+                    gameState.bossSpawned = false;
+                    gameState.bossAlive = false;
                 }
                 
-                const floatY = Math.sin(Date.now() / 500) * 3;
+                // Verificar se deve spawnar portal
+                spawnPortal();
                 
-                ctx.drawImage(
-                    sprite,
-                    item.x,
-                    item.y + floatY,
-                    item.width,
-                    item.height
-                );
-            });
+                // Desenhar portal se existir
+                if (gameState.portal) {
+                    ctx.drawImage(
+                        sprites.portal,
+                        gameState.portal.x,
+                        gameState.portal.y,
+                        gameState.portal.width,
+                        gameState.portal.height
+                    );
+                }
+            } 
+            // Lógica do mundo alienígena
+            else {
+                // Desenhar mapa alienígena
+                ctx.fillStyle = '#2a0a4a';
+                ctx.fillRect(0, 0, config.width, config.height);
+                
+                // Desenhar rochas alienígenas
+                ctx.fillStyle = '#5a2d81';
+                for (let i = 0; i < 15; i++) {
+                    const x = (i * 100) % config.width;
+                    const y = Math.floor(i * 100 / config.width) * 100;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Atualizar alienígenas
+                gameState.aliens.forEach(alien => {
+                    alien.update();
+                    alien.draw();
+                });
+                
+                // Atualizar tempestades de areia
+                for (let i = gameState.sandstorms.length - 1; i >= 0; i--) {
+                    const storm = gameState.sandstorms[i];
+                    
+                    // Verificar colisão com o jogador
+                    const dx = gameState.player.x + gameState.player.width/2 - storm.x;
+                    const dy = gameState.player.y + gameState.player.height/2 - storm.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 50) {
+                        gameState.player.takeDamage(storm.damage);
+                    }
+                    
+                    storm.timer--;
+                    if (storm.timer <= 0) {
+                        gameState.sandstorms.splice(i, 1);
+                    }
+                }
+                
+                // Spawnar alienígenas se necessário
+                if (gameState.aliensSpawned < gameState.aliensToSpawn && !gameState.alienBossAlive) {
+                    spawnAliens();
+                }
+                
+                // Atualizar tempo da wave
+                if (!gameState.alienBossAlive) {
+                    const timeLeft = Math.ceil((config.alienWaveDuration - gameState.gameTime) / 1000);
+                    document.getElementById('timeLeft').textContent = `TEMPO: ${timeLeft}s`;
+                    
+                    if (gameState.gameTime >= config.alienWaveDuration) {
+                        endAlienWave();
+                    }
+                } else {
+                    document.getElementById('timeLeft').style.display = 'none';
+                    document.getElementById('bossMessage').style.display = 'block';
+                }
+            }
             
+            // Efeitos visuais comuns a ambos os mundos
             updateParticles();
             drawParticles();
+            drawAttackAnimations();
             
+            // Efeitos de laser
             for (let i = gameState.laserChargeEffects.length - 1; i >= 0; i--) {
                 const effect = gameState.laserChargeEffects[i];
                 
@@ -2267,7 +4245,16 @@
                     const zombieCenterY = zombie.y + zombie.height / 2;
                     
                     if (pointToLineDistance(zombieCenterX, zombieCenterY, laser.startX, laser.startY, laser.endX, laser.endY) < 60) {
-                        zombie.takeDamage(250); // 250 de dano por frame
+                        zombie.takeDamage(250);
+                    }
+                });
+                
+                gameState.aliens.forEach(alien => {
+                    const alienCenterX = alien.x + alien.width / 2;
+                    const alienCenterY = alien.y + alien.height / 2;
+                    
+                    if (pointToLineDistance(alienCenterX, alienCenterY, laser.startX, laser.startY, laser.endX, laser.endY) < 60) {
+                        alien.takeDamage(250);
                     }
                 });
                 
@@ -2277,6 +4264,7 @@
                 }
             }
             
+            // Atualizar e desenhar projéteis do boss
             for (let i = gameState.bossProjectiles.length - 1; i >= 0; i--) {
                 const projectile = gameState.bossProjectiles[i];
                 projectile.update();
@@ -2293,13 +4281,36 @@
                 }
             }
             
+            // Atualizar vômitos do boss com efeitos visuais baseados na dificuldade
             for (let i = gameState.bossVomits.length - 1; i >= 0; i--) {
                 const vomit = gameState.bossVomits[i];
                 
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.6)';
-                ctx.beginPath();
-                ctx.arc(vomit.x, vomit.y, 5, 0, Math.PI * 2);
-                ctx.fill();
+                // Aplicar efeito visual baseado na dificuldade
+                const difficulty = difficultySettings[gameState.difficulty];
+                if (difficulty.vomitVisibility === 'glowing') {
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
+                    ctx.beginPath();
+                    ctx.arc(vomit.x, vomit.y, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Efeito de brilho
+                    ctx.strokeStyle = 'rgba(255, 100, 100, 0.6)';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(vomit.x, vomit.y, 20, 0, Math.PI * 2);
+                    ctx.stroke();
+                } else if (difficulty.vomitVisibility === 'hard') {
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(vomit.x, vomit.y, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // Normal
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.6)';
+                    ctx.beginPath();
+                    ctx.arc(vomit.x, vomit.y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
                 
                 vomit.timer--;
                 if (vomit.timer <= 0) {
@@ -2307,18 +4318,7 @@
                 }
             }
             
-            for (let i = gameState.sniperBullets.length - 1; i >= 0; i--) {
-                const bullet = gameState.sniperBullets[i];
-                bullet.update();
-                bullet.draw();
-                
-                if (bullet.lifetime <= 0 ||
-                    bullet.x < 0 || bullet.x > config.width ||
-                    bullet.y < 0 || bullet.y > config.height) {
-                    gameState.sniperBullets.splice(i, 1);
-                }
-            }
-            
+            // Atualizar e desenhar granadas
             for (let i = gameState.grenades.length - 1; i >= 0; i--) {
                 const grenade = gameState.grenades[i];
                 
@@ -2334,13 +4334,24 @@
                 ctx.arc(grenade.x, grenade.y, 5, 0, Math.PI * 2);
                 ctx.fill();
                 
-                if (!grenade.exploded && !grenade.stuckZombie) {
+                if (!grenade.exploded && !grenade.stuckZombie && !grenade.stuckAlien) {
                     for (const zombie of gameState.zombies) {
                         if (
                             grenade.x > zombie.x && grenade.x < zombie.x + zombie.width &&
                             grenade.y > zombie.y && grenade.y < zombie.y + zombie.height
                         ) {
                             grenade.stuckZombie = zombie;
+                            grenade.exploded = true;
+                            grenade.flashTimer = 0;
+                            break;
+                        }
+                    }
+                    for (const alien of gameState.aliens) {
+                        if (
+                            grenade.x > alien.x && grenade.x < alien.x + alien.width &&
+                            grenade.y > alien.y && grenade.y < alien.y + alien.height
+                        ) {
+                            grenade.stuckAlien = alien;
                             grenade.exploded = true;
                             grenade.flashTimer = 0;
                             break;
@@ -2353,7 +4364,12 @@
                     grenade.y = grenade.stuckZombie.y + grenade.stuckZombie.height / 2;
                 }
                 
-                if (!grenade.exploded && !grenade.stuckZombie) {
+                if (grenade.stuckAlien) {
+                    grenade.x = grenade.stuckAlien.x + grenade.stuckAlien.width / 2;
+                    grenade.y = grenade.stuckAlien.y + grenade.stuckAlien.height / 2;
+                }
+                
+                if (!grenade.exploded && !grenade.stuckZombie && !grenade.stuckAlien) {
                     grenade.x += grenade.vx;
                     grenade.y += grenade.vy;
                     grenade.distanceTraveled += Math.sqrt(grenade.vx * grenade.vx + grenade.vy * grenade.vy);
@@ -2366,14 +4382,10 @@
                     grenade.flashTimer--;
                     
                     if (grenade.flashTimer <= 0) {
-                        gameState.explosions.push({
-                            x: grenade.x,
-                            y: grenade.y,
-                            radius: 0,
-                            maxRadius: 70,
-                            timer: 30
-                        });
+                        // Usar explosão aprimorada
+                        createEnhancedExplosion(grenade.x, grenade.y);
                         
+                        // Aplicar dano
                         gameState.zombies.forEach(zombie => {
                             const dx = zombie.x + zombie.width/2 - grenade.x;
                             const dy = zombie.y + zombie.height/2 - grenade.y;
@@ -2385,110 +4397,27 @@
                             }
                         });
                         
+                        gameState.aliens.forEach(alien => {
+                            const dx = alien.x + alien.width/2 - grenade.x;
+                            const dy = alien.y + alien.height/2 - grenade.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (distance < 500) {
+                                const damage = 300 * (1 - distance/250);
+                                alien.takeDamage(damage);
+                            }
+                        });
+                        
                         gameState.grenades.splice(i, 1);
                     }
                 }
             }
             
-            for (let i = gameState.explosions.length - 1; i >= 0; i--) {
-                const explosion = gameState.explosions[i];
-                
-                const gradient = ctx.createRadialGradient(
-                    explosion.x, explosion.y, 0,
-                    explosion.x, explosion.y, explosion.radius
-                );
-                gradient.addColorStop(0, 'rgba(255, 100, 0, 0.8)');
-                gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
-                
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(explosion.x, explosion.y, explosion.radius, 0, Math.PI * 2);
-                ctx.fill();
-                
-                explosion.radius += explosion.maxRadius / 6;
-                explosion.timer--;
-                
-                if (explosion.timer <= 0) {
-                    gameState.explosions.splice(i, 1);
-                }
-            }
-            
-            for (let i = gameState.deathEffects.length - 1; i >= 0; i--) {
-                const effect = gameState.deathEffects[i];
-                
-                ctx.globalAlpha = effect.alpha;
-                ctx.fillStyle = effect.color;
-                
-                if (effect.type === 'blood') {
-                    for (let j = 0; j < effect.particles; j++) {
-                        const angle = (j / effect.particles) * Math.PI * 2;
-                        const distance = effect.radius * (effect.timer / effect.maxTimer);
-                        const x = effect.x + Math.cos(angle) * distance;
-                        const y = effect.y + Math.sin(angle) * distance;
-                        
-                        ctx.beginPath();
-                        ctx.arc(x, y, 3, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                } else if (effect.type === 'boss') {
-                    ctx.beginPath();
-                    ctx.arc(effect.x, effect.y, effect.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    for (let j = 0; j < 8; j++) {
-                        const angle = (j / 8) * Math.PI * 2;
-                        const x = effect.x + Math.cos(angle) * effect.radius * 1.5;
-                        const y = effect.y + Math.sin(angle) * effect.radius * 1.5;
-                        
-                        ctx.beginPath();
-                        ctx.moveTo(effect.x, effect.y);
-                        ctx.lineTo(x, y);
-                        ctx.stroke();
-                    }
-                }
-                
-                ctx.globalAlpha = 1;
-                
-                effect.timer--;
-                if (effect.timer <= 0) {
-                    gameState.deathEffects.splice(i, 1);
-                }
-            }
-            
-            gameState.acidBullets.forEach((acid, index) => {
-                acid.update();
-                acid.draw();
-                
-                if (acid.lifetime <= 0) {
-                    gameState.acidBullets.splice(index, 1);
-                }
-            });
-            
+            // Atualizar e desenhar jogador
             gameState.player.update();
             gameState.player.draw();
             
-            gameState.zombies.forEach(zombie => {
-                zombie.update();
-                zombie.draw();
-            });
-            
-            if (gameState.isNight && gameState.zombiesSpawned < gameState.zombiesToSpawn && !gameState.bossAlive) {
-                spawnZombie();
-            }
-            
-            if (gameState.isNight && gameState.day % 5 === 0 && !gameState.bossSpawned && gameState.zombiesSpawned >= Math.floor(gameState.zombiesToSpawn * 0.7)) {
-                spawnBoss();
-                gameState.bossSpawned = true;
-                gameState.bossAlive = true;
-            }
-            
-            if (!gameState.isNight && gameState.zombies.length > 0) {
-                gameState.zombies = [];
-                gameState.zombiesSpawned = 0;
-                gameState.bossSpawned = false;
-                gameState.bossAlive = false;
-            }
-            
+            // Atualizar e desenhar balas
             gameState.bullets.forEach((bullet, index) => {
                 bullet.update();
                 bullet.draw();
@@ -2502,6 +4431,7 @@
                 }
             });
             
+            // Atualizar cooldowns
             if (gameState.pistolCooldown > 0) {
                 gameState.pistolCooldown--;
             }
@@ -2521,21 +4451,30 @@
                 gameState.grenadeCooldown--;
             }
             
-            document.getElementById('zombieCount').textContent = gameState.zombies.length;
-            document.getElementById('day').textContent = gameState.day;
-            document.getElementById('dayTime').textContent = gameState.isNight ? '🌙 NOITE' : '☀️ DIA';
-            document.getElementById('dayTime').style.color = gameState.isNight ? '#ff5555' : '#ffcc55';
+            // Atualizar UI
+            document.getElementById('zombieCount').textContent = gameState.zombies.length + gameState.aliens.length;
+            document.getElementById('day').textContent = gameState.inAlienWorld ? gameState.alienWave : gameState.day;
             
-            if (gameState.bossAlive) {
+            if (gameState.inAlienWorld) {
+                document.getElementById('dayTime').textContent = '👽 ONDA ' + gameState.alienWave;
+                document.getElementById('dayTime').style.color = '#ff55ff';
+            } else {
+                document.getElementById('dayTime').textContent = gameState.isNight ? '🌙 NOITE' : '☀️ DIA';
+                document.getElementById('dayTime').style.color = gameState.isNight ? '#ff5555' : '#ffcc55';
+            }
+            
+            if (gameState.bossAlive || gameState.alienBossAlive) {
                 document.getElementById('timeLeft').style.display = 'none';
                 document.getElementById('bossMessage').style.display = 'block';
             } else {
                 document.getElementById('timeLeft').style.display = 'block';
                 document.getElementById('bossMessage').style.display = 'none';
-                const timeLeft = gameState.isNight 
-                    ? Math.ceil((config.nightDuration - gameState.gameTime) / 1000)
-                    : Math.ceil((config.dayDuration - gameState.gameTime) / 1000);
-                document.getElementById('timeLeft').textContent = `TEMPO: ${timeLeft}s`;
+                if (!gameState.inAlienWorld) {
+                    const timeLeft = gameState.isNight 
+                        ? Math.ceil((config.nightDuration - gameState.gameTime) / 1000)
+                        : Math.ceil((config.dayDuration - gameState.gameTime) / 1000);
+                    document.getElementById('timeLeft').textContent = `TEMPO: ${timeLeft}s`;
+                }
             }
             
             updateCooldownIndicators();
@@ -2630,8 +4569,12 @@
                 roll -= weights[i];
             }
             
-            gameState.zombies.push(new Zombie(x, y, selectedType));
+            const newZombie = new Zombie(x, y, selectedType);
+            gameState.zombies.push(newZombie);
             gameState.zombiesSpawned++;
+            
+            // Adicionar efeito de brilho ao zumbi
+            createZombieGlow(newZombie, selectedType);
         }
 
         function spawnBoss() {
@@ -2645,9 +4588,13 @@
                 case 3: x = Math.random() * config.width; y = config.height + 80; break;
             }
             
-            gameState.zombies.push(new Zombie(x, y, 'boss'));
+            const newBoss = new Zombie(x, y, 'boss');
+            gameState.zombies.push(newBoss);
             gameState.zombiesSpawned++;
             gameState.zombiesToSpawn = Math.floor(gameState.zombiesToSpawn * 0.7);
+            
+            // Adicionar efeito de brilho ao boss
+            createZombieGlow(newBoss, 'boss');
         }
 
         function endNight() {
@@ -2703,7 +4650,7 @@
         }
 
         function dayNightCycle() {
-            if (gameState.gameOver) return;
+            if (gameState.gameOver || gameState.inAlienWorld) return;
             
             if (!(gameState.isNight && gameState.bossAlive)) {
                 gameState.gameTime += 100;
@@ -2767,7 +4714,7 @@
         }
 
         function openShop() {
-            if (gameState.isNight) return;
+            if (gameState.isNight || gameState.inAlienWorld) return;
             gameState.shopOpen = true;
             document.getElementById('shop').style.display = 'block';
             updateShopButtons();
@@ -2786,6 +4733,7 @@
             document.getElementById('buyHealth').textContent = `🪙${Math.floor(gameState.shopPrices.health)} COMPRAR`;
             document.getElementById('buyDamage').textContent = `🪙${Math.floor(gameState.shopPrices.damage)} COMPRAR`;
             document.getElementById('buySpeed').textContent = `🪙${Math.floor(gameState.shopPrices.speed)} COMPRAR`;
+            document.getElementById('buyStorage').textContent = `🪙${Math.floor(gameState.shopPrices.storage)} COMPRAR`;
             document.getElementById('buyStrengthPotion').textContent = `🪙${Math.floor(gameState.shopPrices.strengthPotion)} COMPRAR`;
             document.getElementById('buyLuckPotion').textContent = `🪙${Math.floor(gameState.shopPrices.luckPotion)} COMPRAR`;
             document.getElementById('buyAmmoPotion').textContent = `🪙${Math.floor(gameState.shopPrices.ammoPotion)} COMPRAR`;
@@ -2797,6 +4745,7 @@
             document.getElementById('buyLuckPotion').disabled = gameState.activePotions.luck.active;
             document.getElementById('buyAmmoPotion').disabled = gameState.activePotions.infiniteAmmo.active;
             document.getElementById('buyCooldownPotion').disabled = gameState.activePotions.cooldown.active;
+            document.getElementById('buyStorage').disabled = gameState.coins < gameState.shopPrices.storage;
             
             document.getElementById('buyAmmo').disabled = gameState.coins < gameState.shopPrices.ammo;
             document.getElementById('buyShotgunAmmo').disabled = gameState.coins < gameState.shopPrices.shotgunAmmo;
@@ -2881,6 +4830,18 @@
                 gameState.coins -= gameState.shopPrices.speed;
                 gameState.stats.coinsSpent += gameState.shopPrices.speed;
                 gameState.shopPrices.speed = Math.floor(gameState.shopPrices.speed * 1.2);
+                updateCoinUI();
+                updateShopPricesUI();
+                updateShopButtons();
+            }
+        }
+        
+        function buyStorage() {
+            if (gameState.coins >= gameState.shopPrices.storage) {
+                gameState.player.increaseStorage();
+                gameState.coins -= gameState.shopPrices.storage;
+                gameState.stats.coinsSpent += gameState.shopPrices.storage;
+                gameState.shopPrices.storage = Math.floor(gameState.shopPrices.storage * 1.2);
                 updateCoinUI();
                 updateShopPricesUI();
                 updateShopButtons();
@@ -3074,210 +5035,12 @@
             }
         }
 
-        window.addEventListener('keydown', (e) => {
-            const player = gameState.player;
-            
-            switch (e.key) {
-                case 'w': player.direction.y = -1; break;
-                case 's': player.direction.y = 1; break;
-                case 'a': player.direction.x = -1; break;
-                case 'd': player.direction.x = 1; break;
-                case 'Shift': player.isRunning = true; break;
-                case '1': gameState.selectedSlot = 0; updateInventoryUI(); break;
-                case '2': gameState.selectedSlot = 1; updateInventoryUI(); break;
-                case '3': gameState.selectedSlot = 2; updateInventoryUI(); break;
-                case '4': gameState.selectedSlot = 3; updateInventoryUI(); break;
-                case '5': gameState.selectedSlot = 4; updateInventoryUI(); break;
-                case '6': gameState.selectedSlot = 5; updateInventoryUI(); break;
-                case 'e': 
-                    if (!gameState.isNight && !gameState.shopOpen) {
-                        openShop();
-                    } else if (gameState.shopOpen) {
-                        closeShop();
-                    }
-                    break;
-            }
-        });
-
-        window.addEventListener('keyup', (e) => {
-            const player = gameState.player;
-            
-            switch (e.key) {
-                case 'w': if (player.direction.y === -1) player.direction.y = 0; break;
-                case 's': if (player.direction.y === 1) player.direction.y = 0; break;
-                case 'a': if (player.direction.x === -1) player.direction.x = 0; break;
-                case 'd': if (player.direction.x === 1) player.direction.x = 0; break;
-                case 'Shift': player.isRunning = false; break;
-            }
-        });
-
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
-            
-            gameState.player.angle = Math.atan2(
-                mouseY - (gameState.player.y + gameState.player.height / 2),
-                mouseX - (gameState.player.x + gameState.player.width / 2)
-            );
-        });
-
-        canvas.addEventListener('click', (e) => {
-            if (gameState.shopOpen) return;
-            
-            const weapon = gameState.inventory[gameState.selectedSlot];
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
-            
-            if (weapon.type === 'knife') {
-                gameState.player.meleeAttack();
-            } else if (weapon.type === 'pistol' && weapon.ammo > 0 && gameState.pistolCooldown <= 0) {
-                const player = gameState.player;
-                const barrelX = player.x + player.width / 2 + Math.cos(player.angle) * 35;
-                const barrelY = player.y + player.height / 2 + Math.sin(player.angle) * 35;
-                
-                gameState.bullets.push(new Bullet(
-                    barrelX,
-                    barrelY,
-                    player.angle,
-                    'pistol'
-                ));
-                
-                if (!gameState.activePotions.infiniteAmmo.active) {
-                    weapon.ammo--;
-                    gameState.stats.ammoUsed++;
-                }
-                gameState.pistolCooldown = gameState.activePotions.cooldown.active ? 
-                    gameState.potionCooldowns.pistol : gameState.baseCooldowns.pistol;
-                updateInventoryUI();
-            } else if (weapon.type === 'shotgun' && weapon.ammo > 0 && gameState.shotgunCooldown <= 0) {
-                const player = gameState.player;
-                const barrelX = player.x + player.width / 2 + Math.cos(player.angle) * 40;
-                const barrelY = player.y + player.height / 2 + Math.sin(player.angle) * 40;
-                
-                for (let i = 0; i < 5; i++) {
-                    const spread = (i - 2) * Math.PI / 24;
-                    gameState.bullets.push(new Bullet(
-                        barrelX,
-                        barrelY,
-                        player.angle + spread,
-                        'shotgun'
-                    ));
-                }
-                
-                if (!gameState.activePotions.infiniteAmmo.active) {
-                    weapon.ammo--;
-                    gameState.stats.ammoUsed++;
-                }
-                gameState.shotgunCooldown = gameState.activePotions.cooldown.active ? 
-                    gameState.potionCooldowns.shotgun : gameState.baseCooldowns.shotgun;
-                updateInventoryUI();
-            } else if (weapon.type === 'medkit') {
-                gameState.player.useMedkit();
-            } else if (weapon.type === 'grenade') {
-                gameState.player.throwGrenade(mouseX, mouseY);
-            } else if (weapon.type === 'laserRifle' && weapon.ammo > 0) {
-                if (gameState.player.startLaserRifleCharge()) {
-                    weapon.ammo--;
-                    gameState.stats.ammoUsed++;
-                    updateInventoryUI();
-                }
-            }
-        });
-
-        function normalizeAngle(angle) {
-            while (angle > Math.PI) angle -= Math.PI * 2;
-            while (angle < -Math.PI) angle += Math.PI * 2;
-            return angle;
-        }
-
-        document.getElementById('easyButton').addEventListener('click', () => {
-            gameState.difficulty = 'easy';
-            document.getElementById('startScreen').style.display = 'none';
-            initGame();
-        });
-
-        document.getElementById('normalButton').addEventListener('click', () => {
-            gameState.difficulty = 'normal';
-            document.getElementById('startScreen').style.display = 'none';
-            initGame();
-        });
-
-        document.getElementById('hardButton').addEventListener('click', () => {
-            gameState.difficulty = 'hard';
-            document.getElementById('startScreen').style.display = 'none';
-            initGame();
-        });
-
-        document.getElementById('restartButton').addEventListener('click', () => {
-            document.getElementById('gameOverScreen').style.display = 'none';
-            document.getElementById('startScreen').style.display = 'flex';
-        });
-
-        document.getElementById('buyAmmo').addEventListener('click', buyAmmo);
-        document.getElementById('buyShotgunAmmo').addEventListener('click', buyShotgunAmmo);
-        document.getElementById('buyHealth').addEventListener('click', buyHealth);
-        document.getElementById('buyDamage').addEventListener('click', buyDamage);
-        document.getElementById('buySpeed').addEventListener('click', buySpeed);
-        document.getElementById('buyMedkit').addEventListener('click', buyMedkit);
-        document.getElementById('buyGrenades').addEventListener('click', buyGrenades);
-        document.getElementById('buyStrengthPotion').addEventListener('click', buyStrengthPotion);
-        document.getElementById('buyLuckPotion').addEventListener('click', buyLuckPotion);
-        document.getElementById('buyAmmoPotion').addEventListener('click', buyAmmoPotion);
-        document.getElementById('buyCooldownPotion').addEventListener('click', buyCooldownPotion);
-        document.getElementById('closeShop').addEventListener('click', closeShop);
-
-        document.getElementById('bloodOverlay').style.background = 
-            'radial-gradient(circle, rgba(255,0,0,0.7) 0%, rgba(255,0,0,0) 70%)';
-
-        const sprites = {
-            player: createPlayerSprite(),
-            zombies: {
-                normal: createZombieSprite('#8fbb6b'),
-                runner: createZombieSprite('#c78f6b'),
-                brute: createZombieSprite('#6b8fbb'),
-                crawler: createZombieSprite('#6b8f6b'),
-                toxic: createZombieSprite('#8fbb8f'),
-                tank: createZombieSprite('#ff8800'),
-                fast: createZombieSprite('#aa55ff'),
-                spitter: createZombieSprite('#55aaff'),
-                sniper: createSniperZombieSprite(),
-                boss: createBossSprite()
-            },
-            items: {
-                pistol: createItemSprite('🔫', '#ff5555'),
-                shotgun: createItemSprite('💥', '#ffaa00'),
-                pistolAmmo: createItemSprite('🔹', '#55aaff'),
-                shotgunAmmo: createItemSprite('🔸', '#ffaa55'),
-                medkit: createItemSprite('🩹', '#55ff55'),
-                grenade: createItemSprite('🧨', '#ff55ff'),
-                coin: createItemSprite('🪙', '#ffcc00'),
-                laserRifle: createItemSprite('🔋', '#00ff00'),
-                laserAmmo: null
-            },
-            weapons: {
-                pistol: createWeaponSprite('#777', '#ffcc55'),
-                shotgun: createShotgunSprite(),
-                knife: createKnifeSprite(),
-                laserRifle: createLaserRifleSprite(),
-                medkit: createMedkitSprite(),
-                grenade: createGrenadeSprite()
-            },
-            terrain: {
-                grass: createTerrainSprite('#3a5c3a'),
-                road: createTerrainSprite('#555555'),
-                water: createTerrainSprite('#3a5c8f'),
-                building: createTerrainSprite('#8f3a3a')
-            }
-        };
-
         class Zombie {
             constructor(x, y, type = 'normal') {
                 this.x = x;
                 this.y = y;
-                this.width = type === 'boss' ? 120 : 40;
-                this.height = type === 'boss' ? 120 : 40;
+                this.width = type === 'boss' ? 120 : 50;
+                this.height = type === 'boss' ? 120 : 50;
                 this.type = type;
                 
                 // Aplicar multiplicador de vida baseado na dificuldade
@@ -3396,6 +5159,9 @@
             }
 
             update() {
+                // Zumbis só se movem durante a noite
+                if (!gameState.isNight) return;
+                
                 const player = gameState.player;
                 const dx = player.x - this.x;
                 const dy = player.y - this.y;
@@ -3497,6 +5263,9 @@
             }
 
             draw() {
+                // Zumbis só são desenhados durante a noite
+                if (!gameState.isNight) return;
+                
                 ctx.fillStyle = 'rgba(0,0,0,0.5)';
                 ctx.beginPath();
                 ctx.ellipse(
@@ -3580,7 +5349,8 @@
                         }
                     }
                     
-                    if (this.type === 'boss' && Math.random() < 0.2) {
+                    // Chance de dropar laser rifle baseada na dificuldade
+                    if (this.type === 'boss' && Math.random() < difficulty.bossLaserRifleDropChance) {
                         gameState.items.push({
                             type: 'laserRifle',
                             x: this.x,
@@ -3610,6 +5380,12 @@
             }
             
             createDeathEffect() {
+                // Adicionar efeitos visuais de morte
+                createBloodExplosion(this.x + this.width/2, this.y + this.height/2, 
+                                    this.type === 'boss' ? 200 : 100);
+                createBloodParticles(this.x + this.width/2, this.y + this.height/2, 
+                                   this.type === 'boss' ? 50 : 15);
+                
                 if (this.type === 'boss') {
                     gameState.deathEffects.push({
                         type: 'boss',
@@ -3791,6 +5567,19 @@
                 this.lifetime = type === 'pistol' ? 70 : 50;
                 this.type = type;
                 this.spread = type === 'pistol' ? 0 : Math.PI / 16;
+                
+                // Adicionar efeito visual de tiro
+                const endX = this.x + Math.cos(this.angle) * 50;
+                const endY = this.y + Math.sin(this.angle) * 50;
+                createBulletTrail(this.x, this.y, endX, endY, this.type);
+                createMuzzleFlash(this.x, this.y, this.angle, this.type);
+                
+                // Criar animação de tiro
+                if (type === 'pistol') {
+                    createPistolShot(this.x, this.y, this.angle);
+                } else if (type === 'shotgun') {
+                    createShotgunBlast(this.x, this.y, this.angle);
+                }
             }
 
             update() {
@@ -3798,12 +5587,24 @@
                 this.y += Math.sin(this.angle) * this.speed;
                 this.lifetime--;
 
+                // Verificar colisão com zumbis
                 gameState.zombies.forEach(zombie => {
                     if (
                         this.x > zombie.x && this.x < zombie.x + zombie.width &&
                         this.y > zombie.y && this.y < zombie.y + zombie.height
                     ) {
                         zombie.takeDamage(this.damage);
+                        this.lifetime = 0;
+                    }
+                });
+
+                // Verificar colisão com alienígenas
+                gameState.aliens.forEach(alien => {
+                    if (
+                        this.x > alien.x && this.x < alien.x + alien.width &&
+                        this.y > alien.y && this.y < alien.y + alien.height
+                    ) {
+                        alien.takeDamage(this.damage);
                         this.lifetime = 0;
                     }
                 });
@@ -3836,6 +5637,205 @@
                 ctx.stroke();
             }
         }
+
+        window.addEventListener('keydown', (e) => {
+            const player = gameState.player;
+            
+            switch (e.key) {
+                case 'w': 
+                    player.direction.y = -1; 
+                    player.isMoving = true;
+                    break;
+                case 's': 
+                    player.direction.y = 1; 
+                    player.isMoving = true;
+                    break;
+                case 'a': 
+                    player.direction.x = -1; 
+                    player.isMoving = true;
+                    break;
+                case 'd': 
+                    player.direction.x = 1; 
+                    player.isMoving = true;
+                    break;
+                case 'Shift': player.isRunning = true; break;
+                case '1': gameState.selectedSlot = 0; updateInventoryUI(); break;
+                case '2': gameState.selectedSlot = 1; updateInventoryUI(); break;
+                case '3': gameState.selectedSlot = 2; updateInventoryUI(); break;
+                case '4': gameState.selectedSlot = 3; updateInventoryUI(); break;
+                case '5': gameState.selectedSlot = 4; updateInventoryUI(); break;
+                case '6': gameState.selectedSlot = 5; updateInventoryUI(); break;
+                case 'e': 
+                    if (gameState.inAlienWorld && !gameState.moonShopOpen) {
+                        openMoonShop();
+                    } else if (gameState.moonShopOpen) {
+                        closeMoonShop();
+                    } else if (!gameState.isNight && !gameState.shopOpen) {
+                        openShop();
+                    } else if (gameState.shopOpen) {
+                        closeShop();
+                    }
+                    break;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const player = gameState.player;
+            
+            switch (e.key) {
+                case 'w': 
+                    if (player.direction.y === -1) player.direction.y = 0; 
+                    player.isMoving = player.direction.x !== 0 || player.direction.y !== 0;
+                    break;
+                case 's': 
+                    if (player.direction.y === 1) player.direction.y = 0; 
+                    player.isMoving = player.direction.x !== 0 || player.direction.y !== 0;
+                    break;
+                case 'a': 
+                    if (player.direction.x === -1) player.direction.x = 0; 
+                    player.isMoving = player.direction.x !== 0 || player.direction.y !== 0;
+                    break;
+                case 'd': 
+                    if (player.direction.x === 1) player.direction.x = 0; 
+                    player.isMoving = player.direction.x !== 0 || player.direction.y !== 0;
+                    break;
+                case 'Shift': player.isRunning = false; break;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // Atualizar posição da mira
+            gameState.player.crosshairX = mouseX;
+            gameState.player.crosshairY = mouseY;
+        });
+
+        // Evento de clique - ATUALIZADO
+        canvas.addEventListener('click', (e) => {
+            if (gameState.shopOpen || gameState.moonShopOpen) return;
+            
+            const weapon = gameState.inventory[gameState.selectedSlot];
+            const player = gameState.player;
+            
+            if (weapon.type === 'knife') {
+                player.meleeAttack();
+            } else if (weapon.type === 'pistol' && weapon.ammo > 0 && gameState.pistolCooldown <= 0) {
+                const barrelX = player.x + player.width / 2 + Math.cos(player.angle) * 35;
+                const barrelY = player.y + player.height / 2 + Math.sin(player.angle) * 35;
+                
+                gameState.bullets.push(new Bullet(
+                    barrelX,
+                    barrelY,
+                    player.angle,
+                    'pistol'
+                ));
+                
+                createMuzzleFlash(barrelX, barrelY, player.angle, 'pistol');
+                
+                if (!gameState.activePotions.infiniteAmmo.active) {
+                    weapon.ammo--;
+                    gameState.stats.ammoUsed++;
+                }
+                gameState.pistolCooldown = gameState.activePotions.cooldown.active ? 
+                    gameState.potionCooldowns.pistol : gameState.baseCooldowns.pistol;
+                updateInventoryUI();
+            } else if (weapon.type === 'shotgun' && weapon.ammo > 0 && gameState.shotgunCooldown <= 0) {
+                const barrelX = player.x + player.width / 2 + Math.cos(player.angle) * 40;
+                const barrelY = player.y + player.height / 2 + Math.sin(player.angle) * 40;
+                
+                createShotgunEffect(barrelX, barrelY, player.angle);
+                
+                for (let i = 0; i < 5; i++) {
+                    const spread = (i - 2) * Math.PI / 16;
+                    gameState.bullets.push(new Bullet(
+                        barrelX,
+                        barrelY,
+                        player.angle + spread,
+                        'shotgun'
+                    ));
+                }
+                
+                if (!gameState.activePotions.infiniteAmmo.active) {
+                    weapon.ammo--;
+                    gameState.stats.ammoUsed++;
+                }
+                gameState.shotgunCooldown = gameState.activePotions.cooldown.active ? 
+                    gameState.potionCooldowns.shotgun : gameState.baseCooldowns.shotgun;
+                updateInventoryUI();
+            } else if (weapon.type === 'medkit') {
+                player.useMedkit();
+            } else if (weapon.type === 'grenade') {
+                player.throwGrenade(player.crosshairX, player.crosshairY);
+            } else if (weapon.type === 'laserRifle' && weapon.ammo > 0) {
+                if (player.startLaserRifleCharge()) {
+                    weapon.ammo--;
+                    gameState.stats.ammoUsed++;
+                    updateInventoryUI();
+                }
+            }
+        });
+
+        function normalizeAngle(angle) {
+            while (angle > Math.PI) angle -= Math.PI * 2;
+            while (angle < -Math.PI) angle += Math.PI * 2;
+            return angle;
+        }
+
+        document.getElementById('easyButton').addEventListener('click', () => {
+            gameState.difficulty = 'easy';
+            document.getElementById('startScreen').style.display = 'none';
+            initGame();
+        });
+
+        document.getElementById('normalButton').addEventListener('click', () => {
+            gameState.difficulty = 'normal';
+            document.getElementById('startScreen').style.display = 'none';
+            initGame();
+        });
+
+        document.getElementById('hardButton').addEventListener('click', () => {
+            gameState.difficulty = 'hard';
+            document.getElementById('startScreen').style.display = 'none';
+            initGame();
+        });
+
+        document.getElementById('restartButton').addEventListener('click', () => {
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'flex';
+        });
+
+        document.getElementById('buyAmmo').addEventListener('click', buyAmmo);
+        document.getElementById('buyShotgunAmmo').addEventListener('click', buyShotgunAmmo);
+        document.getElementById('buyHealth').addEventListener('click', buyHealth);
+        document.getElementById('buyDamage').addEventListener('click', buyDamage);
+        document.getElementById('buySpeed').addEventListener('click', buySpeed);
+        document.getElementById('buyStorage').addEventListener('click', buyStorage);
+        document.getElementById('buyMedkit').addEventListener('click', buyMedkit);
+        document.getElementById('buyGrenades').addEventListener('click', buyGrenades);
+        document.getElementById('buyStrengthPotion').addEventListener('click', buyStrengthPotion);
+        document.getElementById('buyLuckPotion').addEventListener('click', buyLuckPotion);
+        document.getElementById('buyAmmoPotion').addEventListener('click', buyAmmoPotion);
+        document.getElementById('buyCooldownPotion').addEventListener('click', buyCooldownPotion);
+        document.getElementById('closeShop').addEventListener('click', closeShop);
+        document.getElementById('buyMoonAmmo').addEventListener('click', buyMoonAmmo);
+        document.getElementById('buyMoonShotgunAmmo').addEventListener('click', buyMoonShotgunAmmo);
+        document.getElementById('buyMoonHealth').addEventListener('click', buyMoonHealth);
+        document.getElementById('buyMoonDamage').addEventListener('click', buyMoonDamage);
+        document.getElementById('buyMoonSpeed').addEventListener('click', buyMoonSpeed);
+        document.getElementById('buyMoonStorage').addEventListener('click', buyMoonStorage);
+        document.getElementById('buyMoonMedkit').addEventListener('click', buyMoonMedkit);
+        document.getElementById('buyMoonGrenades').addEventListener('click', buyMoonGrenades);
+        document.getElementById('buyMoonStrengthPotion').addEventListener('click', buyMoonStrengthPotion);
+        document.getElementById('buyMoonLuckPotion').addEventListener('click', buyMoonLuckPotion);
+        document.getElementById('buyMoonAmmoPotion').addEventListener('click', buyMoonAmmoPotion);
+        document.getElementById('buyMoonCooldownPotion').addEventListener('click', buyMoonCooldownPotion);
+        document.getElementById('closeMoonShop').addEventListener('click', closeMoonShop);
+
+        document.getElementById('bloodOverlay').style.background = 
+            'radial-gradient(circle, rgba(255,0,0,0.7) 0%, rgba(255,0,0,0) 70%)';
     </script>
 </body>
 </html>
