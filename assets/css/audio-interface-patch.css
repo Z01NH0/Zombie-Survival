@@ -1,0 +1,168 @@
+/* Dead Signal — revisão final de interface e feedback audiovisual */
+:root{
+  --ui-glass:rgba(5,8,14,.88);
+  --ui-glass-strong:rgba(7,10,17,.97);
+  --ui-edge:rgba(255,255,255,.12);
+  --ui-edge-hot:rgba(255,70,99,.52);
+}
+
+*{scrollbar-width:thin;scrollbar-color:rgba(255,70,99,.55) rgba(255,255,255,.035)}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-track{background:rgba(255,255,255,.025)}
+*::-webkit-scrollbar-thumb{background:linear-gradient(#ff4867,#7e1830);border-radius:99px}
+
+.screen{
+  background:
+    radial-gradient(circle at 76% 8%,rgba(255,44,82,.14),transparent 31%),
+    radial-gradient(circle at 13% 84%,rgba(62,188,214,.08),transparent 32%),
+    linear-gradient(180deg,rgba(2,4,8,.8),rgba(1,2,5,.975))!important;
+}
+.panel{
+  border-color:rgba(255,255,255,.105)!important;
+  background:linear-gradient(150deg,rgba(16,21,32,.985),rgba(5,7,12,.99))!important;
+  box-shadow:0 32px 100px rgba(0,0,0,.66),inset 0 1px rgba(255,255,255,.025)!important;
+}
+.panel::after{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.012) 0 1px,transparent 1px 5px);
+  opacity:.45;z-index:0
+}
+.topline{position:sticky;top:-1px;z-index:8;padding:4px 0 14px;background:linear-gradient(180deg,rgba(10,14,22,.97),rgba(10,14,22,.72) 72%,transparent);backdrop-filter:blur(8px)}
+
+.btn,.close,.store-tab,.mobile-btn{
+  -webkit-tap-highlight-color:transparent;outline:none;
+}
+.btn{
+  border-color:rgba(255,255,255,.12)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.025))!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.025),0 9px 24px rgba(0,0,0,.18);
+}
+.btn:hover,.btn:focus-visible{
+  border-color:rgba(255,255,255,.27)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.045))!important;
+  transform:translateY(-2px);
+}
+.btn:active{transform:translateY(0) scale(.985)!important}
+.btn.primary{
+  background:linear-gradient(135deg,#ff3d60,#9f102f)!important;
+  border-color:rgba(255,105,130,.72)!important;
+  box-shadow:0 13px 31px rgba(255,42,78,.19),inset 0 1px rgba(255,255,255,.14)!important;
+}
+.btn:disabled{filter:saturate(.35);opacity:.34!important;box-shadow:none!important}
+.close{transition:.18s;background:rgba(255,255,255,.035)!important}
+.close:hover,.close:focus-visible{color:#fff;background:rgba(255,53,88,.16)!important;border-color:rgba(255,83,111,.52)!important;transform:rotate(4deg)}
+
+.card,.shop-card,.store-item,.setting,.upgrade-card,.statbox,.list-row,.equip-slot,.weapon-equip-slot,.inv-slot{
+  border-color:rgba(255,255,255,.095)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.018),0 12px 26px rgba(0,0,0,.14);
+}
+.card:hover,.shop-card:hover,.store-item:hover,.list-row:hover{
+  border-color:rgba(255,255,255,.2)!important;
+}
+.card.selected{
+  border-color:rgba(92,236,255,.65)!important;
+  box-shadow:0 0 0 1px rgba(92,236,255,.18),0 16px 38px rgba(34,156,179,.13)!important;
+}
+.setting{min-height:62px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.018))!important}
+.setting span{font-size:12px;font-weight:850;letter-spacing:.045em}
+.range{width:min(190px,42vw)!important;cursor:pointer}
+.audio-setting{border-left:3px solid rgba(92,236,255,.42)!important}
+
+#merchantScreen .store-panel,#specialistScreen .store-panel{width:min(1160px,96vw)!important}
+.store-tabs{position:sticky;top:87px;z-index:7;padding:8px;background:rgba(7,10,17,.88);border:1px solid rgba(255,255,255,.07);border-radius:16px;backdrop-filter:blur(10px)}
+.store-tab{transition:.18s}
+.store-tab:hover{background:rgba(255,255,255,.065)!important}
+.store-tab.active{box-shadow:inset 0 -2px rgba(92,236,255,.55),0 8px 20px rgba(0,0,0,.2)}
+.cost-chip{box-shadow:inset 0 1px rgba(255,255,255,.04)}
+
+.inventory-panel{width:min(1380px,98vw)!important;max-height:96vh!important}
+.inventory-layout{gap:12px!important}
+.paperdoll,.inventory-center,.inventory-side{border-color:rgba(255,255,255,.09)!important;background:rgba(4,7,12,.62)!important}
+.inv-slot,.equip-slot,.weapon-equip-slot{transition:.16s transform,.16s border-color,.16s background}
+.inv-slot:hover,.equip-slot:hover,.weapon-equip-slot:hover{transform:translateY(-2px);border-color:rgba(92,236,255,.32)!important;background:rgba(92,236,255,.045)!important}
+
+/* HUD enxuto, legível e com zonas sem sobreposição */
+#hud .hud-panel{background:linear-gradient(160deg,rgba(5,8,14,.86),rgba(3,5,9,.72))!important;border-color:rgba(255,255,255,.1)!important;box-shadow:0 12px 30px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.025)!important}
+.hud-top .bars{width:min(300px,30vw)!important;padding:8px 10px!important;border-radius:13px!important}
+.bar-row{grid-template-columns:43px 1fr 58px!important;font-size:7.5px!important}
+.bar{height:6px!important}
+#weaponHud{top:101px!important;left:11px!important;width:214px!important;gap:5px!important}
+.weapon-slot-hud{min-height:57px!important;padding:5px 8px 5px 5px!important;grid-template-columns:52px 1fr!important;gap:5px!important;border-radius:10px!important;background:linear-gradient(110deg,rgba(5,8,14,.88),rgba(10,15,23,.7))!important}
+.weapon-mini{width:50px!important;height:39px!important}
+.weapon-slot-hud .wname{font-size:8.2px!important;line-height:1.08!important}
+.weapon-slot-hud .wmeta{font-size:6.5px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.weapon-slot-hud .ammo{font-size:13px!important;margin-top:2px!important}
+.weapon-slot-hud .ammo small{font-size:7px!important}
+.weapon-slot-hud .slotkey{font-size:7px!important;top:5px!important;right:6px!important}
+.weapon-slot-hud .durbar{height:3px!important;margin-top:3px!important}
+.reload-progress{height:2px!important;margin-top:3px!important}
+#resourceStack{left:11px!important;top:286px!important;width:214px!important;gap:4px!important}
+.resource-chip{padding:6px 7px!important;font-size:8px!important;border-radius:8px!important;background:rgba(5,8,14,.79)!important}
+.left-bottom{left:11px!important;bottom:72px!important;max-width:225px!important}
+.combo{font-size:23px!important}.contracts{font-size:7.5px!important;max-width:225px!important;padding:7px 9px!important}
+.hud-bottom{bottom:9px!important;gap:6px!important}
+.skill{width:50px!important;height:50px!important;border-radius:10px!important}
+.skill.ultimate{width:58px!important;height:58px!important}
+.skill .glyph{font-size:18px!important}.skill .key{font-size:6px!important}.skill .label{font-size:5.5px!important}.skill .cdtext{font-size:10px!important}
+.mini-wrap{right:11px!important;top:10px!important;width:112px!important;height:112px!important;border-radius:17px!important}
+.phase-panel{right:11px!important;top:132px!important;width:86px!important;min-width:86px!important;padding:8px 6px!important}
+.phase-panel .phase-big{font-size:27px!important}.phase-panel .phase-timer{font-size:12px!important}.phase-panel .scrap{font-size:8px!important}
+.bossbar{top:11px!important;width:min(490px,43vw)!important;padding:9px 12px!important;border-color:rgba(255,53,88,.34)!important;box-shadow:0 0 34px rgba(255,28,68,.14),0 14px 34px rgba(0,0,0,.34)!important}
+.bossbar .name{font-size:9px!important;color:#ffd4dc;text-shadow:0 0 12px rgba(255,53,88,.7)}
+.notice{top:15.5%!important;max-width:min(680px,88vw);text-align:center;border-radius:13px!important;background:rgba(5,8,14,.92)!important;box-shadow:0 15px 40px rgba(0,0,0,.42)}
+
+/* Cura */
+#healFlash{position:fixed;inset:0;z-index:34;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 54%,rgba(82,255,164,.19),transparent 37%),linear-gradient(90deg,rgba(40,220,120,.08),transparent 20% 80%,rgba(40,220,120,.08));box-shadow:inset 0 0 75px rgba(71,255,158,.18)}
+#healFlash.show{animation:healScreenPulse .56s ease-out}
+#healFlash .heal-cross{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%) scale(.65);font-size:48px;font-weight:1000;color:rgba(102,255,178,.8);text-shadow:0 0 24px rgba(68,255,157,.72);opacity:0}
+#healFlash.show .heal-cross{animation:healCrossPulse .56s ease-out}
+@keyframes healScreenPulse{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+@keyframes healCrossPulse{0%{opacity:0;transform:translate(-50%,-50%) scale(.55)}30%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-62%) scale(1.15)}}
+
+/* Recarga sobre o personagem */
+#reloadIndicator{--reload-progress:0deg;position:fixed;z-index:29;display:flex;flex-direction:column;align-items:center;gap:4px;transform:translate(-50%,-50%) scale(.86);opacity:0;pointer-events:none;transition:opacity .12s,transform .12s}
+#reloadIndicator.show{opacity:.88;transform:translate(-50%,-50%) scale(1)}
+.reload-spinner{width:28px;height:28px;border-radius:50%;background:conic-gradient(#72efff var(--reload-progress),rgba(255,255,255,.13) 0);mask:radial-gradient(circle,transparent 52%,#000 55%);filter:drop-shadow(0 0 7px rgba(92,236,255,.55));animation:reloadSpin 1s linear infinite}
+#reloadIndicator span{padding:3px 6px;border-radius:5px;background:rgba(2,5,9,.7);color:#bdf7ff;font:900 6px/1 ui-monospace,monospace;letter-spacing:.13em;text-shadow:0 1px 3px #000}
+@keyframes reloadSpin{to{rotate:360deg}}
+
+/* Aviso de chefe */
+#bossAlert{position:fixed;left:50%;top:18%;z-index:95;width:min(660px,88vw);padding:18px 26px 17px;transform:translate(-50%,-28px) scale(.94);opacity:0;pointer-events:none;text-align:center;border:1px solid rgba(255,75,105,.62);border-left:5px solid #ff3558;border-right:5px solid #ff3558;background:linear-gradient(90deg,rgba(18,4,9,.94),rgba(43,8,17,.96),rgba(18,4,9,.94));box-shadow:0 0 0 1px rgba(255,255,255,.035),0 0 60px rgba(255,23,67,.28),0 24px 60px rgba(0,0,0,.58);clip-path:polygon(18px 0,calc(100% - 18px) 0,100% 18px,100% calc(100% - 18px),calc(100% - 18px) 100%,18px 100%,0 calc(100% - 18px),0 18px)}
+#bossAlert::before,#bossAlert::after{content:"";position:absolute;left:3%;right:3%;height:1px;background:linear-gradient(90deg,transparent,#ff6881,transparent);box-shadow:0 0 13px #ff3558}
+#bossAlert::before{top:7px}#bossAlert::after{bottom:7px}
+#bossAlert.show{animation:bossAlertIn 6s cubic-bezier(.2,.8,.2,1)}
+.boss-alert-kicker{display:block;color:#ff6f88;font-size:9px;font-weight:1000;letter-spacing:.32em}
+#bossAlert strong{display:block;margin-top:5px;font-size:clamp(25px,4vw,48px);line-height:1;text-transform:uppercase;letter-spacing:-.035em;color:#fff1f4;text-shadow:0 0 24px rgba(255,53,88,.68)}
+#bossAlert small{display:block;margin-top:7px;color:#be8994;font-size:8px;font-weight:900;letter-spacing:.2em;text-transform:uppercase}
+@keyframes bossAlertIn{0%{opacity:0;transform:translate(-50%,-35px) scale(.9)}7%,76%{opacity:1;transform:translate(-50%,0) scale(1)}84%{opacity:1}100%{opacity:0;transform:translate(-50%,18px) scale(.98)}}
+
+@media(max-width:900px){
+  .panel{padding:17px!important;border-radius:18px!important}
+  .topline{position:relative;top:auto}
+  .settings-grid{grid-template-columns:1fr!important}
+  .range{width:45vw!important;max-width:190px}
+  #weaponHud{top:88px!important;width:166px!important}
+  .weapon-slot-hud{min-height:48px!important;grid-template-columns:40px 1fr!important;padding:4px!important}
+  .weapon-mini{width:39px!important;height:31px!important}
+  .weapon-slot-hud .wmeta{display:none!important}
+  .weapon-slot-hud .ammo{font-size:11px!important}
+  #resourceStack{top:238px!important;width:166px!important}
+  .resource-chip{font-size:6.7px!important}
+  .hud-top .bars{width:56vw!important}
+  .mini-wrap{width:88px!important;height:88px!important}
+  .phase-panel{top:107px!important;width:70px!important;min-width:70px!important}
+  .phase-panel .phase-big{font-size:22px!important}
+  .skill{width:43px!important;height:43px!important}.skill.ultimate{width:49px!important;height:49px!important}.skill .label{display:none}
+  #bossAlert{top:21%;padding:14px 18px}
+  .bossbar{top:91px!important;width:70vw!important}
+}
+
+@media(max-width:560px){
+  .screen{padding:8px!important}
+  .panel{width:98vw!important;max-height:97vh!important;padding:13px!important}
+  h2{font-size:27px!important}
+  .topline{margin-bottom:14px!important}
+  .cards,.shop-grid,.choice-grid,.manual-grid,.upgrade-grid{gap:9px!important}
+  .setting{min-height:54px;padding:11px!important}.setting span{font-size:10px}.range{width:42vw!important}
+  #bossAlert strong{font-size:24px}
+}
