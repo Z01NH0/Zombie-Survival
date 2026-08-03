@@ -722,7 +722,7 @@
       this.qCd = 9 * this.cooldown;
       this.shieldPoints = Math.min(this.maxShieldPoints || 3, (this.shieldPoints || 0) + 1);
       this.shield = this.shieldPoints;
-      const barrier = new Field(this.x, this.y, 150 * this.area, 6.5, 'barrier', { color: '#5cecff', owner: this, hardWall: true });
+      const barrier = new Field(this.x, this.y, 150 * this.area, 5.1, 'barrier', { color: '#5cecff', owner: this, hardWall: true });
       game.fields.push(barrier);
       for (const enemy of game.enemies) pushOutsideBarrier(enemy, barrier, true);
       for (let i = 0; i < 4; i++) setTimeout(() => {
