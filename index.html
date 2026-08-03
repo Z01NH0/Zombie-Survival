@@ -76,6 +76,7 @@
 </style>
 
 <link rel="stylesheet" href="assets/css/audio-interface-patch.css">
+<link rel="stylesheet" href="assets/css/combat-arsenal-patch.css">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -313,7 +314,7 @@ const ARMOR_DEFS={
 const CONSUMABLE_DEFS={
  medkit:{name:'Kit Médico',icon:'🩹',desc:'Recupera 42% da vida máxima.',value:20,use(p){p.heal(p.maxHp*.42)}},
  fieldDressing:{name:'Bandagem de Campo',icon:'🩸',desc:'Recupera 18% da vida máxima.',value:8,use(p){p.heal(p.maxHp*.18)}},
- ammoPack:{name:'Caixa de Munição',icon:'📦',desc:'Recupera 45% da reserva máxima da arma equipada.',value:22,use(p){const w=currentWeapon();if(w&&w.def.kind!=='melee')w.reserve=Math.min(w.maxReserve,w.reserve+Math.ceil(w.maxReserve*.45))}},
+ ammoPack:{name:'Caixa de Munição',icon:'📦',desc:'Abre a seleção de armas e recupera 45% da reserva máxima somente da arma escolhida.',value:22,use(p){const w=currentWeapon();if(w&&w.def.kind!=='melee')w.reserve=Math.min(w.maxReserve,w.reserve+Math.ceil(w.maxReserve*.45))}},
  stim:{name:'Estimulante Veloz',icon:'💉',desc:'Aumenta velocidade e cadência por 24 segundos.',value:32,use(p){p.tempBoost=Math.max(p.tempBoost||0,24);p.tempBoostApplied=true}},
  battery:{name:'Bateria de Lanterna',icon:'🔋',desc:'Amplia permanentemente a lanterna nesta expedição.',value:34,use(){game.flashlight.range+=35;game.flashlight.arc=Math.min(.82,game.flashlight.arc+.02)}},
  necroVial:{name:'Frasco de Sangue Necrótico',icon:'🧪',desc:'Material raro usado pelo Especialista.',value:25,use(){game.blood+=4}}
@@ -760,7 +761,7 @@ itemAction=function(action){
  const ref=selectedItemRef;if(!ref?.item)return;const item=ref.item,p=game.player;
  if(action==='drop'){if(item.baseId==='starter'){notice('A PISTOLA INICIAL NÃO PODE SER DESCARTADA');return}removeOwned(ref);game.pickups.push(new GearPickup(p.x+Math.cos(p.angle)*54,p.y+Math.sin(p.angle)*54,item));selectedItemRef=null;ensureActiveWeapon();renderInventory();transactionFeedback('Item descartado','warn','↓');return}
  if(action!=='use')return;
- if(item.type==='consumable'){item.def.use(p);item.count=(item.count||1)-1;if(item.count<=0)removeOwned(ref);audio.ui();notice(`${item.name.toUpperCase()} UTILIZADO`);transactionFeedback(`${item.name} utilizado`,'success','✚')}
+ if(item.type==='consumable'){if(window.__requestAmmoAllocation?.(item,ref))return;item.def.use(p);item.count=(item.count||1)-1;const remains=item.count>0;if(!remains)removeOwned(ref);audio.ui();notice(`${item.name.toUpperCase()} UTILIZADO`);transactionFeedback(`${item.name} utilizado`,'success','✚');ensureActiveWeapon();renderInventory();renderWeaponHUD();if(remains){selectedItemRef={...ref,item};selectItem(selectedItemRef)}else{selectedItemRef=null;$('#scanContent').innerHTML='<h3 class="scan-title">Item utilizado</h3><p class="scan-desc">Selecione outro item para continuar.</p>';$('#itemActionArea').innerHTML=''}return}
  else if(item.type==='weapon'){
   if(ref.source==='inventory'){let slot=p.weaponSlots.findIndex(x=>!x);if(slot<0)slot=clamp(p.activeWeapon,0,p.weaponSlots.length-1);const old=p.weaponSlots[slot];p.weaponSlots[slot]=item;p.inventory[ref.index]=old||null;p.activeWeapon=slot;transactionFeedback(`${item.name} equipado`,'success','⚔')}
   else{const idx=firstFreeInventory();if(idx<0){notice('INVENTÁRIO CHEIO');transactionFeedback('Inventário cheio','bad','!');return}p.inventory[idx]=item;p.weaponSlots[ref.index]=null;ensureActiveWeapon();transactionFeedback(`${item.name} guardado`,'success','▣')}
@@ -791,7 +792,7 @@ renderRepair=function(){
  drawBenchItem(item);$$('[data-repair-select]').forEach(b=>b.onclick=()=>{repairSelection=owned[+b.dataset.repairSelect];renderRepair()});$('#repairBtn')?.addEventListener('click',performRepair);
 };
 drawBenchItem=function(item){const c=$('#benchItemCanvas');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);if(!item)return;if(item.type==='weapon'){const fn=window.__drawDetailedWeaponModel||drawWeaponModel;fn(x,item,c.width/2,c.height/2,2.25,0)}else{x.shadowBlur=24;x.shadowColor=itemColor(item);x.fillStyle=itemColor(item);x.font='112px system-ui';x.textAlign='center';x.textBaseline='middle';x.fillText(item.def.icon,c.width/2,c.height/2);x.shadowBlur=0}};
-performRepair=function(){if(!repairSelection)return;const item=repairSelection.item,c=repairCost(item);if(game.scrap<c.scrap||game.blood<c.blood){notice('RECURSOS INSUFICIENTES');transactionFeedback('Recursos insuficientes','bad','!');return}game.scrap-=c.scrap;game.blood-=c.blood;const bench=$('#repairBench');bench?.classList.add('repairing');audio.tone(170,.08,'square',.08);setTimeout(()=>audio.tone(230,.08,'square',.08),260);setTimeout(()=>audio.tone(310,.08,'square',.08),520);setTimeout(()=>{item.durability=item.maxDurability;item.broken=false;bench?.classList.remove('repairing');applyGearStats();renderRepair();renderWeaponHUD();renderInventory();syncStoreResources();transactionFeedback(`${item.name} reparado`,'success','🔧')},1250)};
+performRepair=function(){if(!repairSelection)return;const item=repairSelection.item,c=repairCost(item);if(game.scrap<c.scrap||game.blood<c.blood){notice('RECURSOS INSUFICIENTES');transactionFeedback('Recursos insuficientes','bad','!');return}game.scrap-=c.scrap;game.blood-=c.blood;const bench=$('#repairBench');bench?.classList.add('repairing');window.gameAudio?.play('repair');setTimeout(()=>{item.durability=item.maxDurability;item.broken=false;bench?.classList.remove('repairing');applyGearStats();renderRepair();renderWeaponHUD();renderInventory();syncStoreResources();transactionFeedback(`${item.name} reparado`,'success','🔧')},2050)};
 performFusion=function(){if(!fusionSelection)return;const c=fusionCost(fusionSelection);if(game.scrap<c.scrap||game.blood<c.blood){notice('RECURSOS INSUFICIENTES');transactionFeedback('Recursos insuficientes','bad','!');return}game.scrap-=c.scrap;game.blood-=c.blood;const result=fusionSelection.result;for(const it of [fusionSelection.a,fusionSelection.b]){const idx=game.player.inventory.findIndex(x=>x?.uid===it.uid);if(idx>=0)game.player.inventory[idx]=null}addToInventory(result,false);game.flash=.7;audio.ultimate();fusionSelection=null;renderFusion();renderInventory();syncStoreResources();transactionFeedback(`${result.name} criado`,'legendary','✦')};
 /* === END CONSOLIDATED ARSENAL PATCH === */
 window.__arsenalDebug={makeWeapon,makeArmor,makeConsumable,spawnLootCrate,openInventory,closeInventory,openMerchant,openSpecialist,renderSpecialist,renderMerchant,projectileHitsWorld,performFusion,performRepair,renderInventory,renderWeaponHUD,currentWeapon,weaponWear,showBrokenMessage,durabilityPct,itemColor,rarityById,rarityLabel,applyGearStats,syncStoreResources,reloadCurrent,switchWeapon,getAllOwned,sellPrice,addToInventory,transactionFeedback,blockedAt,drawBenchItem,renderRepair,renderFusion,selectItem,itemAction,repairCost,fusionCost};
@@ -891,11 +892,11 @@ const rarityData={
  bronze:{dmg:1,mag:1,dur:1},silver:{dmg:1.24,mag:1.25,dur:1.18},gold:{dmg:1.58,mag:1.5,dur:1.42},diamond:{dmg:2.05,mag:2,dur:1.78},platinum:{dmg:2.7,mag:2.5,dur:2.2},unique:{dmg:3.65,mag:3,dur:2.85}
 };
 const ammoDefs={
- handgun:{name:'Munição de Pistola',icon:'▰',desc:'Cartuchos para pistolas, armas duplas e revólveres.',kinds:['pistol','dual','revolver'],ratio:.42,flat:24},
- light:{name:'Munição Leve',icon:'▥',desc:'Carregadores para submetralhadoras e fuzis de assalto.',kinds:['smg','rifle'],ratio:.38,flat:55},
- shells:{name:'Cartuchos de Escopeta',icon:'▤',desc:'Cartuchos reforçados para todas as escopetas.',kinds:['shotgun'],ratio:.36,flat:24},
- precision:{name:'Munição de Precisão',icon:'◆',desc:'Projéteis especiais para P-AWP, besta e armas de precisão.',kinds:['sniper'],ratio:.34,flat:10},
- rockets:{name:'Mísseis Compactos',icon:'▲',desc:'Ogivas estabilizadas compatíveis com a Killer Bee.',kinds:['launcher'],ratio:.5,flat:3}
+ handgun:{name:'Munição de Pistola',icon:'▰',desc:'Escolha uma pistola, arma dupla ou revólver para receber estes cartuchos.',kinds:['pistol','dual','revolver'],ratio:.42,flat:24},
+ light:{name:'Munição Leve',icon:'▥',desc:'Escolha uma submetralhadora ou fuzil de assalto para receber estes carregadores.',kinds:['smg','rifle'],ratio:.38,flat:55},
+ shells:{name:'Cartuchos de Escopeta',icon:'▤',desc:'Escolha uma escopeta para receber estes cartuchos reforçados.',kinds:['shotgun'],ratio:.36,flat:24},
+ precision:{name:'Munição de Precisão',icon:'◆',desc:'Escolha a P-AWP, a besta ou outra arma de precisão para receber estes projéteis.',kinds:['sniper'],ratio:.34,flat:10},
+ rockets:{name:'Mísseis Compactos',icon:'▲',desc:'Escolha uma Killer Bee compatível para receber estas ogivas estabilizadas.',kinds:['launcher'],ratio:.5,flat:3}
 };
 let ammoUid=1;
 function makeAmmoPack(type,count=1){
@@ -1538,5 +1539,6 @@ setTimeout(()=>{drawCanvasPaperdoll();DBG.renderWeaponHUD?.()},100);
 </script>
 
 <script src="assets/js/audio-interface-patch.js"></script>
+<script src="assets/js/combat-arsenal-patch.js"></script>
 </body>
 </html>
