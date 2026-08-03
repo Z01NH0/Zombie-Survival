@@ -11,7 +11,7 @@
   const audioManager = window.gameAudio;
   if (audioManager) {
     const emptyDef = {
-      src: 'assets/audio/efeitos/sem-municao.mp3',
+      src: 'assets/audio/efeitos/semmunicao.mp3',
       gain: .82,
       cooldown: 85,
       maxVoices: 2,
@@ -34,20 +34,6 @@
     const originalStartLoop = audioManager.startLoop.bind(audioManager);
     const originalStopLoop = audioManager.stopLoop.bind(audioManager);
 
-    function rampLoop(manager, name, voice, target, duration = 28) {
-      const token = Symbol(name);
-      manager.__loopRamps.set(name, token);
-      const from = voice.volume;
-      const started = performance.now();
-      const tick = now => {
-        if (manager.__loopRamps.get(name) !== token || voice.paused) return;
-        const t = Math.min(1, (now - started) / duration);
-        voice.volume = clamp01(from + (target - from) * t);
-        if (t < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    }
-
     audioManager.startLoop = function (name, options = {}) {
       if (name !== 'machineGun') return originalStartLoop(name, options);
       if (!this.unlocked || !save?.settings?.sfx) return null;
@@ -56,23 +42,27 @@
         clearTimeout(stopTimer);
         this.__loopStops.delete(name);
       }
+      this.__loopRamps.delete(name);
       const target = clamp01(this.sfxVolume() * (this.effectDefs[name]?.gain || .58) * clamp01(options.gain ?? 1));
       let voice = this.loopVoices.get(name);
       if (voice) {
+        voice.volume = target;
+        voice.playbackRate = options.playbackRate || 1;
         if (voice.paused) {
           try { voice.currentTime = 0; } catch (_) {}
-          voice.play().catch(() => {});
+          voice.play().catch(() => {
+            if (this.loopVoices.get(name) === voice) this.loopVoices.delete(name);
+          });
         }
-        rampLoop(this, name, voice, target, 18);
         return voice;
       }
       voice = new Audio(this.effectDefs[name].src);
       voice.preload = 'auto';
       voice.loop = true;
-      voice.volume = 0;
+      voice.volume = target;
       voice.playbackRate = options.playbackRate || 1;
       this.loopVoices.set(name, voice);
-      voice.play().then(() => rampLoop(this, name, voice, target, 24)).catch(() => {
+      voice.play().catch(() => {
         if (this.loopVoices.get(name) === voice) this.loopVoices.delete(name);
       });
       return voice;
@@ -80,17 +70,15 @@
 
     audioManager.stopLoop = function (name) {
       if (name !== 'machineGun') return originalStopLoop(name);
+      const timer = this.__loopStops.get(name);
+      if (timer) clearTimeout(timer);
+      this.__loopStops.delete(name);
+      this.__loopRamps.delete(name);
       const voice = this.loopVoices.get(name);
-      if (!voice || this.__loopStops.has(name)) return;
-      rampLoop(this, name, voice, 0, 18);
-      const timer = setTimeout(() => {
-        voice.pause();
-        try { voice.currentTime = 0; } catch (_) {}
-        if (this.loopVoices.get(name) === voice) this.loopVoices.delete(name);
-        this.__loopStops.delete(name);
-        this.__loopRamps.delete(name);
-      }, 22);
-      this.__loopStops.set(name, timer);
+      if (!voice) return;
+      voice.pause();
+      try { voice.currentTime = 0; } catch (_) {}
+      if (this.loopVoices.get(name) === voice) this.loopVoices.delete(name);
     };
   }
 
@@ -439,6 +427,6 @@
   updateControlLabels();
   updateInventoryResources();
   const version = document.querySelector('#mainMenu .version');
-  if (version) version.textContent = 'Full Review & Stability 6.0';
-  console.info('[Dead Signal] Revisão completa e estabilidade 6.0 carregadas.');
+  if (version) version.textContent = 'Deep Review & Audio Stability 7.0';
+  console.info('[Dead Signal] Deep Review & Audio Stability 7.0 carregada.');
 })();
