@@ -12,6 +12,7 @@
       this.lastPlay = new Map();
       this.activeVoices = new Map();
       this.lastHurt = '';
+      this.loopVoices = new Map();
 
       this.musicDefs = {
         menu: { src: 'assets/audio/musicas/menu.mp3', gain: 0.78 },
@@ -33,9 +34,19 @@
         zombie: { src: 'assets/audio/efeitos/zumbi.mp3', gain: 0.64, cooldown: 1700, maxVoices: 2, startAt: 0.32, stopAfter: 5.0 },
         explosion: { src: 'assets/audio/efeitos/explosao.mp3', gain: 0.88, cooldown: 140, maxVoices: 4, startAt: 0.08, stopAfter: 4.05 },
         bazooka: { src: 'assets/audio/efeitos/bazuka.mp3', gain: 0.8, cooldown: 520, maxVoices: 2, stopAfter: 6.6 },
-        machineGun: { src: 'assets/audio/efeitos/metralha.mp3', gain: 0.54, cooldown: 1250, maxVoices: 1, stopAfter: 1.9 },
+        machineGun: { src: 'assets/audio/efeitos/metralha.mp3', gain: 0.58, cooldown: 0, maxVoices: 1, loop: true },
         reload: { src: 'assets/audio/efeitos/recarga.mp3', gain: 0.66, cooldown: 180, maxVoices: 2, stopAfter: 1.3 },
-        gunshot: { src: 'assets/audio/efeitos/tiro.mp3', gain: 0.62, cooldown: 170, maxVoices: 2, stopAfter: 4.25 }
+        gunshot: { src: 'assets/audio/efeitos/tiro.mp3', gain: 0.62, cooldown: 170, maxVoices: 2, stopAfter: 4.25 },
+        crossbow: { src: 'assets/audio/efeitos/crossbow.mp3', gain: 0.52, cooldown: 170, maxVoices: 3, stopAfter: 0.64 },
+        shotgun: { src: 'assets/audio/efeitos/shotgun.mp3', gain: 0.92, cooldown: 180, maxVoices: 3, stopAfter: 1.58 },
+        sniper: { src: 'assets/audio/efeitos/sniper.mp3', gain: 0.5, cooldown: 260, maxVoices: 2, stopAfter: 1.44 },
+        abilityVanguard: { src: 'assets/audio/efeitos/poder-vanguard.mp3', gain: 0.56, cooldown: 650, maxVoices: 1, stopAfter: 3.19 },
+        abilityReaper: { src: 'assets/audio/efeitos/poder-reaper.mp3', gain: 0.64, cooldown: 650, maxVoices: 1, stopAfter: 1.69 },
+        abilityTempest: { src: 'assets/audio/efeitos/poder-tempest.mp3', gain: 0.68, cooldown: 650, maxVoices: 1, stopAfter: 1.1 },
+        repair: { src: 'assets/audio/efeitos/reparo.mp3', gain: 0.38, cooldown: 750, maxVoices: 1, stopAfter: 2.04 },
+        ultimateVanguard: { src: 'assets/audio/efeitos/ultimate-vanguard.mp3', gain: 0.3, cooldown: 80, maxVoices: 4, stopAfter: 2.03 },
+        ultimateReaper: { src: 'assets/audio/efeitos/ultimate-reaper.mp3', gain: 0.66, cooldown: 1500, maxVoices: 1, stopAfter: 9.45 },
+        ultimateTempest: { src: 'assets/audio/efeitos/ultimate-tempest.mp3', gain: 0.58, cooldown: 1500, maxVoices: 1, stopAfter: 12.5 }
       };
 
       this.music = {};
@@ -104,6 +115,47 @@
 
     applySettings() {
       this.syncMusic(true);
+      this.syncLoopVolumes();
+    }
+
+    syncLoopVolumes() {
+      for (const [name, voice] of this.loopVoices) {
+        const def = this.effectDefs[name];
+        if (!def || !voice) continue;
+        voice.volume = clamp01(this.sfxVolume() * def.gain);
+        if (!save?.settings?.sfx) this.stopLoop(name);
+      }
+    }
+
+    startLoop(name, options = {}) {
+      if (!this.unlocked || !save?.settings?.sfx) return null;
+      const def = this.effectDefs[name];
+      if (!def) return null;
+      const current = this.loopVoices.get(name);
+      if (current && !current.paused) {
+        current.volume = clamp01(this.sfxVolume() * def.gain * clamp01(options.gain ?? 1));
+        return current;
+      }
+      const voice = new Audio(def.src);
+      voice.preload = 'auto';
+      voice.loop = true;
+      voice.volume = clamp01(this.sfxVolume() * def.gain * clamp01(options.gain ?? 1));
+      voice.playbackRate = options.playbackRate ?? 1;
+      voice.play().catch(() => this.loopVoices.delete(name));
+      this.loopVoices.set(name, voice);
+      return voice;
+    }
+
+    stopLoop(name) {
+      const voice = this.loopVoices.get(name);
+      if (!voice) return;
+      voice.pause();
+      try { voice.currentTime = 0; } catch (_) {}
+      this.loopVoices.delete(name);
+    }
+
+    stopAllLoops() {
+      for (const name of [...this.loopVoices.keys()]) this.stopLoop(name);
     }
 
     play(name, options = {}) {
@@ -377,15 +429,36 @@
     if (!canAttempt || !enoughAmmo) return result;
     if (melee) {
       gameAudio.play(meleeHit ? 'meleeHit' : 'meleeMiss');
+    } else if (weapon.baseId === 'crossbow') {
+      gameAudio.play('crossbow');
     } else if (weapon.def.kind === 'launcher') {
       gameAudio.play('bazooka');
-    } else if (weapon.def.kind === 'smg' || weapon.def.kind === 'rifle') {
-      gameAudio.play('machineGun');
+    } else if (weapon.def.kind === 'shotgun') {
+      gameAudio.play('shotgun');
+    } else if (weapon.def.kind === 'sniper') {
+      gameAudio.play('sniper');
+    } else if (weapon.def.auto && (weapon.def.kind === 'smg' || weapon.def.kind === 'rifle')) {
+      gameAudio.startLoop('machineGun');
     } else {
       gameAudio.play('gunshot');
     }
     return result;
   };
+
+  setInterval(() => {
+    const player = game?.player;
+    const weapon = DBG.currentWeapon?.();
+    const mobileFiring = Boolean(touch?.aim?.active && Math.hypot(touch.aim.x || 0, touch.aim.y || 0) > 0.24);
+    const holdingFire = Boolean(game?.mouse?.down || mobileFiring);
+    const shouldLoop = Boolean(
+      game?.running && !game.paused && game.phase === 'night' && player && holdingFire &&
+      weapon && !weapon.broken && player.reloadTimer <= 0 &&
+      weapon.mag >= (weapon.def.ammoCost || 1) && weapon.def.auto &&
+      (weapon.def.kind === 'smg' || weapon.def.kind === 'rifle')
+    );
+    if (shouldLoop) gameAudio.startLoop('machineGun');
+    else gameAudio.stopLoop('machineGun');
+  }, 30);
 
   const originalBulletUpdateAudio = Bullet.prototype.update;
   Bullet.prototype.update = function (dt) {
@@ -474,9 +547,9 @@
   requestAnimationFrame(updateReloadIndicator);
 
   const version = document.querySelector('#mainMenu .version');
-  if (version) version.textContent = 'Audio & Interface Reforged 3.2';
+  if (version) version.textContent = 'Combat & Arsenal Reforged 4.0';
   const menuLead = document.querySelector('#mainMenu .lead');
   if (menuLead) menuLead.textContent = 'Survival horror com áudio dinâmico, arsenal detalhado, lojas integradas, interface compacta e ameaças que ganham presença conforme se aproximam.';
 
-  console.info('[Dead Signal] Sistema de áudio externo e revisão de interface carregados.');
+  console.info('[Dead Signal] Áudio externo 4.0 carregado com loop de metralha e sons por classe.');
 })();
