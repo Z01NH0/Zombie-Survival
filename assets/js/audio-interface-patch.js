@@ -34,7 +34,7 @@
         zombie: { src: 'assets/audio/efeitos/zumbi.mp3', gain: 0.64, cooldown: 1700, maxVoices: 2, startAt: 0.32, stopAfter: 5.0 },
         explosion: { src: 'assets/audio/efeitos/explosao.mp3', gain: 0.88, cooldown: 140, maxVoices: 4, startAt: 0.08, stopAfter: 4.05 },
         bazooka: { src: 'assets/audio/efeitos/bazuka.mp3', gain: 0.8, cooldown: 520, maxVoices: 2, stopAfter: 6.6 },
-        machineGun: { src: 'assets/audio/efeitos/metralha.mp3', gain: 0.58, cooldown: 0, maxVoices: 1, loop: true },
+        machineGun: { src: 'assets/audio/efeitos/metralha-loop.wav', gain: 0.58, cooldown: 0, maxVoices: 1, loop: true },
         reload: { src: 'assets/audio/efeitos/recarga.mp3', gain: 0.66, cooldown: 180, maxVoices: 2, stopAfter: 1.3 },
         gunshot: { src: 'assets/audio/efeitos/tiro.mp3', gain: 0.62, cooldown: 170, maxVoices: 2, stopAfter: 4.25 },
         crossbow: { src: 'assets/audio/efeitos/crossbow.mp3', gain: 0.52, cooldown: 170, maxVoices: 3, stopAfter: 0.64 },
@@ -115,6 +115,14 @@
 
     applySettings() {
       this.syncMusic(true);
+      if (!save?.settings?.sfx) {
+        this.stopAllLoops();
+        for (const voices of this.activeVoices.values()) {
+          for (const voice of voices) voice.pause();
+          voices.clear();
+        }
+        return;
+      }
       this.syncLoopVolumes();
     }
 
@@ -271,6 +279,7 @@
     document.querySelector('#sfxVolumeRange').oninput = event => {
       save.settings.sfxVolume = +event.target.value;
       persist();
+      gameAudio.applySettings();
     };
   }
 
