@@ -97,6 +97,7 @@
   function ensureBattery() {
     if (!game.flashlight) game.flashlight = { range: 460, arc: .56, near: 92 };
     game.flashlight.maxBattery = Number(game.flashlight.maxBattery) || 100;
+    if (typeof game.flashlight.enabled !== 'boolean') game.flashlight.enabled = true;
     if (!Number.isFinite(game.flashlight.battery)) game.flashlight.battery = game.flashlight.maxBattery;
     game.flashlight.battery = Math.max(0, Math.min(game.flashlight.maxBattery, game.flashlight.battery));
   }
@@ -113,6 +114,9 @@
     batteryValue.textContent = `${Math.ceil(percent)}%`;
     batteryHud.classList.toggle('low', percent > 0 && percent <= 25);
     batteryHud.classList.toggle('depleted', percent <= 0);
+    batteryHud.classList.toggle('switched-off', game.flashlight.enabled === false);
+    const icon = batteryHud.querySelector('.battery-icon');
+    if (icon) icon.textContent = game.flashlight.enabled === false ? '◐' : '🔋';
     batteryHud.style.display = game.running ? 'flex' : 'none';
   }
 
@@ -159,7 +163,7 @@
   const bodyVisibilityBeforeBattery = bodyVisibility;
   bodyVisibility = function (enemy) {
     ensureBattery();
-    if (game.phase !== 'night' || game.flashlight.battery > 0) return bodyVisibilityBeforeBattery.call(this, enemy);
+    if (game.phase !== 'night' || (game.flashlight.enabled !== false && game.flashlight.battery > 0)) return bodyVisibilityBeforeBattery.call(this, enemy);
     const near = Math.max(50, (game.flashlight.near || 92) * .68);
     const d = Math.hypot(enemy.x - game.player.x, enemy.y - game.player.y);
     return Math.max(0, Math.min(.22, (1 - d / near) * .22));
@@ -168,7 +172,7 @@
   const drawLightingBeforeBattery = drawLighting;
   drawLighting = function () {
     ensureBattery();
-    if (game.phase !== 'night' || game.flashlight.battery > 0) return drawLightingBeforeBattery.apply(this, arguments);
+    if (game.phase !== 'night' || (game.flashlight.enabled !== false && game.flashlight.battery > 0)) return drawLightingBeforeBattery.apply(this, arguments);
     if (!game.player) return;
     const px = game.player.x - game.camera.x;
     const py = game.player.y - game.camera.y;
@@ -358,10 +362,11 @@
 
     const result = updateBeforePerformance.call(this, dt);
 
-    if (game.running && !game.paused && game.phase === 'night') {
+    if (game.running && !game.paused && game.phase === 'night' && game.flashlight?.enabled !== false) {
       ensureBattery();
       const drain = selectedDifficulty === 'nightmare' ? .82 : selectedDifficulty === 'survivor' ? .58 : .70;
-      game.flashlight.battery = Math.max(0, game.flashlight.battery - drain * dt);
+      const efficiency = Math.max(.35, Number(game.player?.flashlightDrainMult) || 1);
+      game.flashlight.battery = Math.max(0, game.flashlight.battery - drain * efficiency * dt);
       const percent = batteryPercent();
       if (percent <= 20 && percent > 0 && !game.__batteryWarningShown) {
         game.__batteryWarningShown = true;
