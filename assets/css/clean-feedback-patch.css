@@ -1,0 +1,63 @@
+/* Dead Signal 11.2 — feedback limpo e contextual */
+.notice{display:none!important;visibility:hidden!important;opacity:0!important}
+#reloadIndicator span{display:none!important}
+#reloadIndicator{gap:0!important}
+
+/* Apenas coletas de recursos continuam aparecendo como texto. */
+#resourcePickupFeed{
+  position:fixed;right:18px;top:300px;z-index:88;display:flex;flex-direction:column;
+  align-items:flex-end;gap:7px;pointer-events:none;max-width:min(310px,42vw)
+}
+.resource-pickup-entry{
+  --resource-color:#58f2a2;display:flex;align-items:center;gap:9px;min-width:170px;
+  padding:9px 12px;border:1px solid color-mix(in srgb,var(--resource-color) 34%,transparent);
+  border-right:3px solid var(--resource-color);border-radius:12px 4px 4px 12px;
+  background:linear-gradient(90deg,rgba(6,10,16,.76),rgba(6,10,16,.94));
+  box-shadow:0 12px 30px rgba(0,0,0,.32),inset 0 0 20px color-mix(in srgb,var(--resource-color) 6%,transparent);
+  backdrop-filter:blur(8px);animation:resourcePickupIn .2s ease-out,resourcePickupOut .3s 2.05s forwards
+}
+.resource-pickup-entry .resource-icon{display:grid;place-items:center;width:24px;height:24px;border-radius:8px;background:color-mix(in srgb,var(--resource-color) 12%,transparent);color:var(--resource-color);font-size:14px;filter:drop-shadow(0 0 6px var(--resource-color))}
+.resource-pickup-entry b{color:#f4f7fb;font-size:10px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.resource-pickup-entry b strong{color:var(--resource-color);font-size:12px;margin-right:5px}
+@keyframes resourcePickupIn{from{opacity:0;transform:translateX(24px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes resourcePickupOut{to{opacity:0;transform:translateX(22px) scale(.97)}}
+
+/* Sinais especiais sem frases. */
+#weaponStateSignal{
+  --state-color:#ffd166;position:fixed;left:50%;top:56%;z-index:87;width:66px;height:66px;
+  transform:translate(-50%,-50%) scale(.72);opacity:0;pointer-events:none
+}
+#weaponStateSignal.show{animation:weaponStateSignal .72s cubic-bezier(.2,.85,.25,1)}
+#weaponStateSignal.broken.show{animation-duration:1.15s}
+.weapon-state-ring{position:absolute;inset:0;border:2px solid var(--state-color);border-radius:50%;box-shadow:0 0 18px color-mix(in srgb,var(--state-color) 65%,transparent),inset 0 0 20px color-mix(in srgb,var(--state-color) 15%,transparent)}
+.weapon-state-ring::before,.weapon-state-ring::after{content:"";position:absolute;inset:8px;border:1px solid color-mix(in srgb,var(--state-color) 55%,transparent);border-radius:50%}
+.weapon-state-ring::after{inset:-8px;border-style:dashed;opacity:.42;animation:stateSpin 1.4s linear infinite}
+.weapon-state-core{position:absolute;inset:18px;border-radius:50%;background:rgba(4,7,12,.9);box-shadow:inset 0 0 13px rgba(0,0,0,.9)}
+#weaponStateSignal.empty{--state-color:#ffd166}
+#weaponStateSignal.empty .weapon-state-core::before{content:"";position:absolute;left:8px;top:8px;width:12px;height:12px;border:3px solid var(--state-color);border-radius:50%;box-shadow:0 0 8px var(--state-color)}
+#weaponStateSignal.empty .weapon-state-core::after{content:"";position:absolute;left:5px;top:17px;width:25px;height:3px;border-radius:99px;background:var(--state-color);transform:rotate(-45deg);box-shadow:0 0 8px var(--state-color)}
+#weaponStateSignal.broken{--state-color:#ff3558}
+#weaponStateSignal.broken .weapon-state-core::before,#weaponStateSignal.broken .weapon-state-core::after{content:"";position:absolute;left:15px;top:4px;width:4px;height:28px;background:var(--state-color);clip-path:polygon(35% 0,100% 0,65% 37%,100% 45%,45% 100%,0 100%,34% 56%,0 47%);filter:drop-shadow(0 0 5px var(--state-color))}
+#weaponStateSignal.broken .weapon-state-core::after{transform:rotate(77deg)}
+@keyframes stateSpin{to{transform:rotate(360deg)}}
+@keyframes weaponStateSignal{0%{opacity:0;transform:translate(-50%,-50%) scale(.55)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}65%{opacity:.9;transform:translate(-50%,-50%) scale(.96)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.22)}}
+
+.weapon-slot-hud.state-empty{animation:emptySlotPulse .45s ease}
+.weapon-slot-hud.state-empty .ammo{color:#ffd166!important;text-shadow:0 0 12px rgba(255,209,102,.8)}
+.weapon-slot-hud.state-broken{animation:brokenSlotPulse .92s ease;border-color:rgba(255,53,88,.82)!important;box-shadow:inset 0 0 24px rgba(255,53,88,.12),0 0 24px rgba(255,53,88,.22)!important}
+.weapon-slot-hud.state-broken::before,.weapon-slot-hud.state-broken::after{content:"";position:absolute;z-index:5;left:36%;top:4px;width:2px;height:78%;background:linear-gradient(180deg,transparent,#ff5772 20%,#ff3558 75%,transparent);transform:rotate(19deg);filter:drop-shadow(0 0 4px #ff3558);pointer-events:none}
+.weapon-slot-hud.state-broken::after{left:58%;height:58%;top:22%;transform:rotate(-31deg)}
+@keyframes emptySlotPulse{0%,100%{transform:none}25%{transform:translateX(-3px)}50%{transform:translateX(3px)}75%{transform:translateX(-1px)}}
+@keyframes brokenSlotPulse{0%,100%{transform:none}18%{transform:translate(-3px,1px)}35%{transform:translate(4px,-1px)}52%{transform:translate(-2px,0)}72%{transform:translate(2px,0)}}
+body.weapon-break-vignette::after{content:"";position:fixed;inset:0;z-index:84;pointer-events:none;background:radial-gradient(circle at center,transparent 42%,rgba(255,26,62,.16) 100%);animation:weaponBreakVignette .9s ease forwards}
+@keyframes weaponBreakVignette{0%{opacity:0}18%{opacity:1}100%{opacity:0}}
+
+/* O progresso da recarga já comunica o estado; o texto repetido é removido. */
+.weapon-slot-hud.reloading .wmeta{opacity:.65}
+
+@media(max-width:840px){#resourcePickupFeed{right:9px;top:235px;max-width:54vw}.resource-pickup-entry{min-width:145px;padding:7px 9px}.resource-pickup-entry b{font-size:8px}#weaponStateSignal{top:60%;width:55px;height:55px}.weapon-state-core{inset:15px}}
+/* Respostas contextuais sem mensagens: erro é mostrado na própria interface afetada. */
+.context-denied{animation:contextDenied .48s ease!important;border-color:rgba(255,53,88,.72)!important;box-shadow:0 0 0 1px rgba(255,53,88,.2),0 0 24px rgba(255,53,88,.2)!important}
+@keyframes contextDenied{0%,100%{transform:none}22%{transform:translateX(-4px)}48%{transform:translateX(4px)}72%{transform:translateX(-2px)}}
+#flashlightBatteryHud.context-denied{animation:batteryDenied .6s ease!important}
+@keyframes batteryDenied{0%,100%{filter:none}30%,65%{filter:brightness(1.65) saturate(1.4)}}

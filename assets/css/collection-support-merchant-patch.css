@@ -1,0 +1,85 @@
+/* Dead Signal 11.3 — coletas, suportes por arraste e Mercador reorganizado */
+
+/* Feed universal de itens coletados no chão. */
+#resourcePickupFeed{top:286px!important;gap:6px!important;max-width:min(340px,44vw)!important}
+.resource-pickup-entry.item-pickup-entry{min-width:205px;max-width:330px;padding:10px 12px!important;border-radius:14px 5px 5px 14px!important}
+.resource-pickup-entry.item-pickup-entry .resource-icon{width:30px;height:30px;font-size:17px;border-radius:9px}
+.resource-pickup-entry.item-pickup-entry b{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:6px;min-width:0;white-space:normal}
+.resource-pickup-entry.item-pickup-entry b strong{margin:0;font-size:11px}
+.resource-pickup-entry.item-pickup-entry .pickup-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f5f7fb;font-size:10px}
+.resource-pickup-entry.item-pickup-entry .pickup-kind{grid-column:2;display:block;margin-top:-2px;color:#7f8b9d;font-size:8px;letter-spacing:.1em;text-transform:uppercase}
+
+/* Arrastar itens para os slots 4 e 5. */
+#supportEquipRow .support-equip-slot{position:relative;transition:.16s transform,.16s border-color,.16s background,.16s box-shadow;user-select:none}
+#supportEquipRow .support-equip-slot[draggable="true"]{cursor:grab}
+#supportEquipRow .support-equip-slot[draggable="true"]:active{cursor:grabbing}
+#supportEquipRow .support-equip-slot.support-drag-valid{transform:translateY(-2px);border-color:rgba(88,242,162,.62)!important;background:rgba(88,242,162,.075)!important;box-shadow:inset 0 0 0 1px rgba(88,242,162,.18),0 0 24px rgba(88,242,162,.1)}
+#supportEquipRow .support-equip-slot.support-drag-invalid{border-color:rgba(255,83,108,.62)!important;background:rgba(255,83,108,.07)!important;animation:supportReject .28s ease}
+#supportEquipRow .support-equip-slot.support-drag-source{opacity:.5;transform:scale(.97)}
+#inventoryGrid .inv-slot.support-return-valid{border-color:rgba(92,236,255,.62)!important;background:rgba(92,236,255,.075)!important;box-shadow:inset 0 0 0 1px rgba(92,236,255,.18),0 0 20px rgba(92,236,255,.1)}
+@keyframes supportReject{0%,100%{transform:translateX(0)}35%{transform:translateX(-4px)}70%{transform:translateX(4px)}}
+
+/* Mercador: estrutura limpa, compacta e organizada. */
+#merchantScreen{background:radial-gradient(circle at 16% 12%,rgba(255,209,102,.08),transparent 28%),linear-gradient(160deg,rgba(2,4,7,.9),rgba(1,2,4,.98))}
+#merchantScreen .store-panel{width:min(1160px,96vw)!important;max-height:94vh!important;padding:24px!important;border-radius:25px!important;background:linear-gradient(160deg,rgba(15,18,24,.98),rgba(6,8,12,.985))!important;border:1px solid rgba(255,255,255,.09)!important;overflow:auto}
+#merchantScreen .store-panel::before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(125deg,rgba(255,209,102,.05),transparent 34%,rgba(92,236,255,.025));}
+#merchantScreen .topline{position:relative;z-index:1;margin-bottom:15px;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,.07)}
+#merchantScreen .topline .kicker{color:#ffd166}
+#merchantScreen .topline h2{font-size:clamp(30px,4vw,52px);line-height:.95}
+#merchantScreen .topline .lead{display:none!important}
+#merchantScreen .currency{padding:8px 11px;border-radius:12px;background:rgba(255,255,255,.035);font-size:11px}
+#merchantScreen .store-tabs{position:relative;z-index:1;display:inline-flex;gap:5px;margin:0 0 16px;padding:4px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.025)}
+#merchantScreen .store-tab{min-width:116px;padding:10px 17px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#7f8b9d!important;font-size:10px!important;font-weight:950;letter-spacing:.12em;text-transform:uppercase}
+#merchantScreen .store-tab.active{transform:none!important;background:linear-gradient(135deg,rgba(255,209,102,.16),rgba(255,209,102,.06))!important;color:#ffe6a8!important;box-shadow:inset 0 0 0 1px rgba(255,209,102,.2)}
+#merchantContent{position:relative;z-index:1}
+#merchantScreen .merchant-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 2px 11px}
+#merchantScreen .merchant-section-head b{font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+#merchantScreen .merchant-section-head span{font-size:9px;color:#778396;letter-spacing:.1em;text-transform:uppercase}
+#merchantScreen .merchant-buy-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+#merchantScreen .merchant-product{position:relative;display:grid;grid-template-columns:68px minmax(0,1fr);grid-template-rows:1fr auto;gap:10px 12px;min-height:150px;padding:14px;border:1px solid rgba(255,255,255,.075);border-radius:18px;background:linear-gradient(150deg,rgba(255,255,255,.045),rgba(255,255,255,.018));overflow:hidden;transition:.16s transform,.16s border-color,.16s background}
+#merchantScreen .merchant-product:hover{transform:translateY(-2px);border-color:rgba(255,209,102,.22);background:linear-gradient(150deg,rgba(255,209,102,.055),rgba(255,255,255,.02))}
+#merchantScreen .merchant-product::after{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--product-color,#ffd166);opacity:.75}
+#merchantScreen .merchant-product-icon{grid-row:1/3;display:grid;place-items:center;width:68px;height:68px;align-self:start;border-radius:16px;border:1px solid rgba(255,255,255,.07);background:radial-gradient(circle,rgba(255,255,255,.075),rgba(255,255,255,.02));font-size:31px;filter:drop-shadow(0 0 10px color-mix(in srgb,var(--product-color,#ffd166) 34%,transparent))}
+#merchantScreen .merchant-product-copy{min-width:0}
+#merchantScreen .merchant-product h3{margin:1px 0 0;font-size:13px;line-height:1.18;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#merchantScreen .merchant-product p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:7px 0 0;color:#8c98aa;font-size:10px;line-height:1.45}
+#merchantScreen .merchant-product-meta{margin-top:7px;color:#687487;font-size:8px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#merchantScreen .merchant-product-buy{display:flex;align-items:center;justify-content:space-between;gap:8px;align-self:end}
+#merchantScreen .merchant-price{display:inline-flex;align-items:center;gap:5px;color:#ffd166;font-size:11px;font-weight:950}
+#merchantScreen .merchant-product .btn{width:auto!important;min-width:92px;padding:9px 13px!important;border-radius:11px!important;text-align:center!important;font-size:9px!important}
+
+/* Munições do Mercador integradas à mesma identidade. */
+#merchantScreen .ammo-supply-section{margin-top:17px;padding-top:15px;border-top:1px solid rgba(255,255,255,.07)}
+#merchantScreen .ammo-supply-head{margin-bottom:10px!important}
+#merchantScreen .ammo-supply-head b{font-size:11px!important;letter-spacing:.16em!important}
+#merchantScreen .ammo-supply-head div span{display:none!important}
+#merchantScreen .ammo-supply-head>span{color:#778396!important;font-size:9px!important;letter-spacing:.1em!important;text-transform:uppercase}
+#merchantScreen .ammo-supply-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important}
+#merchantScreen .ammo-offer{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:82px;padding:11px 12px!important;border-radius:16px!important;background:linear-gradient(145deg,rgba(20,28,38,.72),rgba(6,9,14,.9))!important}
+#merchantScreen .ammo-offer .ammo-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:rgba(92,236,255,.06);font-size:23px!important}
+#merchantScreen .ammo-offer b{margin:0!important;font-size:10px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#merchantScreen .ammo-offer small{display:none!important}
+#merchantScreen .ammo-offer button{width:auto!important;min-width:92px;margin:0!important;padding:9px 11px!important;border-radius:10px!important;white-space:nowrap}
+
+/* Venda em lista: mais itens visíveis, preço e estado legíveis. */
+#merchantScreen .merchant-sell-list{display:grid;gap:7px}
+#merchantScreen .merchant-sell-row{display:grid;grid-template-columns:48px minmax(0,1fr) minmax(110px,auto) 108px;align-items:center;gap:12px;padding:10px 11px;border:1px solid rgba(255,255,255,.065);border-radius:15px;background:rgba(255,255,255,.025);transition:.15s border-color,.15s background,.15s transform}
+#merchantScreen .merchant-sell-row:hover{transform:translateX(2px);border-color:rgba(255,209,102,.18);background:rgba(255,209,102,.035)}
+#merchantScreen .merchant-sell-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);font-size:22px}
+#merchantScreen .merchant-sell-copy{min-width:0}
+#merchantScreen .merchant-sell-copy b{display:block;font-size:11px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#merchantScreen .merchant-sell-copy span{display:block;margin-top:4px;color:#778396;font-size:8px;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#merchantScreen .merchant-sell-value{display:flex;justify-content:flex-end;gap:6px;color:#ffd166;font-size:11px;font-weight:950;white-space:nowrap}
+#merchantScreen .merchant-sell-row .btn{padding:9px 11px!important;border-radius:10px!important;text-align:center!important;font-size:9px!important}
+#merchantScreen .merchant-empty{display:grid;place-items:center;min-height:180px;border:1px dashed rgba(255,255,255,.09);border-radius:18px;color:#778396;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+
+@media(max-width:950px){
+ #merchantScreen .merchant-buy-grid,#merchantScreen .ammo-supply-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #merchantScreen .merchant-sell-row{grid-template-columns:44px minmax(0,1fr) 98px}.merchant-sell-value{display:none!important}
+}
+@media(max-width:640px){
+ #resourcePickupFeed{right:8px;top:220px;max-width:72vw!important}.resource-pickup-entry.item-pickup-entry{min-width:180px}
+ #merchantScreen .store-panel{padding:15px!important}.merchant-buy-grid,#merchantScreen .ammo-supply-grid{grid-template-columns:1fr!important}
+ #merchantScreen .merchant-product{grid-template-columns:56px minmax(0,1fr)}#merchantScreen .merchant-product-icon{width:56px;height:56px}
+ #merchantScreen .merchant-sell-row{grid-template-columns:42px minmax(0,1fr) 82px;gap:8px;padding:8px}.merchant-sell-icon{width:38px!important;height:38px!important}
+}
