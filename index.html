@@ -77,7 +77,8 @@
 <link href="assets/css/audio-interface-patch.css" rel="stylesheet"/>
 <link href="assets/css/combat-arsenal-patch.css" rel="stylesheet"/>
 <link href="assets/css/interface-controls-repair-patch.css" rel="stylesheet"/>
-<link href="assets/css/performance-boss-flashlight-patch.css" rel="stylesheet"/></head>
+<link href="assets/css/performance-boss-flashlight-patch.css" rel="stylesheet"/><link rel="stylesheet" href="assets/css/support-grenade-powerups-patch.css"/>
+</head>
 <body>
 <canvas id="game"></canvas>
 <div class="hidden" id="hud">
@@ -224,7 +225,7 @@ function returnMenu(){game.running=false;game.paused=false;game.shopOpen=false;h
 const formatTime=s=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 canvas.addEventListener('mousemove',e=>{game.mouse.x=e.clientX;game.mouse.y=e.clientY});canvas.addEventListener('mousedown',e=>{if(e.button===0){audio.ensure();game.mouse.down=true}});addEventListener('mouseup',()=>game.mouse.down=false);canvas.addEventListener('contextmenu',e=>e.preventDefault());
 const touch={move:{active:false,x:0,y:0},aim:{active:false,x:0,y:0}};function setupStick(id,target){const z=$(id),knob=z.querySelector('.stick-knob');function set(e){const t=e.touches?e.touches[0]:e,r=z.getBoundingClientRect(),dx=t.clientX-(r.left+r.width/2),dy=t.clientY-(r.top+r.height/2),m=Math.min(42,Math.hypot(dx,dy)),a=Math.atan2(dy,dx);target.x=Math.cos(a)*m/42;target.y=Math.sin(a)*m/42;target.active=true;knob.style.transform=`translate(${Math.cos(a)*m}px,${Math.sin(a)*m}px)`}function end(){target.active=false;target.x=target.y=0;knob.style.transform=''}z.addEventListener('touchstart',e=>{e.preventDefault();set(e)},{passive:false});z.addEventListener('touchmove',e=>{e.preventDefault();set(e)},{passive:false});z.addEventListener('touchend',end)}setupStick('#moveStick',touch.move);setupStick('#aimStick',touch.aim);$$('.mobile-btn').forEach(b=>b.addEventListener('touchstart',e=>{e.preventDefault();if(!game.running||game.paused)return;const a=b.dataset.action;a==='q'?game.player.abilityQ():a==='e'?game.player.abilityE():a==='r'?game.player.ultimate():game.player.dash()},{passive:false}));
-function drawMenu(){const c=$('#menuCanvas'),x=c.getContext('2d'),w=c.width,h=c.height;if($('#mainMenu').classList.contains('hidden')){setTimeout(()=>requestAnimationFrame(drawMenu),250);return}const t=performance.now()/1000;x.clearRect(0,0,w,h);const bg=x.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#070a12');bg.addColorStop(1,'#15151c');x.fillStyle=bg;x.fillRect(0,0,w,h);for(let i=0;i<80;i++){const px=(i*97+t*18*(i%3+1))%w,py=(i*53+t*8)%h;x.fillStyle=`rgba(190,220,255,${.02+(i%5)*.008})`;x.fillRect(px,py,1.5,8)}x.fillStyle='rgba(25,30,40,.9)';for(let i=0;i<6;i++){const bx=i*150-30,hh=120+(i%3)*48;x.fillRect(bx,h-hh,120,hh);x.fillStyle='rgba(255,53,88,.025)';for(let j=0;j<3;j++)x.fillRect(bx+18+j*30,h-hh+24,12,18);x.fillStyle='rgba(25,30,40,.9)'}x.fillStyle='rgba(0,0,0,.45)';x.fillRect(0,h-78,w,78);x.save();x.translate(w*.62,h*.63);x.fillStyle='rgba(0,0,0,.4)';x.beginPath();x.ellipse(0,88,115,20,0,0,TAU);x.fill();x.rotate(-.18);x.shadowBlur=40;x.shadowColor='#ff3558';x.fillStyle='#1a2230';x.strokeStyle='#ff3558';x.lineWidth=4;x.beginPath();x.roundRect(-42,-68,84,130,22);x.fill();x.stroke();x.fillStyle='#dce6ef';x.beginPath();x.arc(0,-88,25,0,TAU);x.fill();x.fillStyle='#0d121a';x.fillRect(-22,48,16,49);x.fillRect(7,48,16,49);x.fillStyle='#5cecff';x.beginPath();x.moveTo(24,-22);x.lineTo(210,-82);x.lineTo(210,26);x.lineTo(24,11);x.closePath();x.fill();x.globalAlpha=.15;x.fillStyle='#fff';x.beginPath();x.moveTo(35,-16);x.lineTo(180,-63);x.lineTo(180,-35);x.lineTo(35,3);x.closePath();x.fill();x.restore();for(let i=0;i<7;i++){const ex=68+i*80+Math.sin(t*1.4+i)*8,ey=h-104+Math.cos(t*1.5+i)*6;x.shadowBlur=18;x.shadowColor='#ff102d';x.fillStyle='rgba(255,22,45,.95)';x.beginPath();x.arc(ex,ey,4.5,0,TAU);x.arc(ex+15,ey,4.5,0,TAU);x.fill();x.shadowBlur=0}const fog=x.createLinearGradient(0,h*.56,0,h);fog.addColorStop(0,'rgba(255,255,255,0)');fog.addColorStop(1,'rgba(155,165,185,.07)');x.fillStyle=fog;x.fillRect(0,h*.55,w,h*.45);requestAnimationFrame(drawMenu)}
+function drawMenu(){const c=$('#menuCanvas');if(!c)return;const x=c.getContext('2d'),w=c.width,h=c.height;if($('#mainMenu').classList.contains('hidden')){setTimeout(()=>requestAnimationFrame(drawMenu),250);return}const t=performance.now()/1000;x.clearRect(0,0,w,h);const bg=x.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#070a12');bg.addColorStop(1,'#15151c');x.fillStyle=bg;x.fillRect(0,0,w,h);for(let i=0;i<80;i++){const px=(i*97+t*18*(i%3+1))%w,py=(i*53+t*8)%h;x.fillStyle=`rgba(190,220,255,${.02+(i%5)*.008})`;x.fillRect(px,py,1.5,8)}x.fillStyle='rgba(25,30,40,.9)';for(let i=0;i<6;i++){const bx=i*150-30,hh=120+(i%3)*48;x.fillRect(bx,h-hh,120,hh);x.fillStyle='rgba(255,53,88,.025)';for(let j=0;j<3;j++)x.fillRect(bx+18+j*30,h-hh+24,12,18);x.fillStyle='rgba(25,30,40,.9)'}x.fillStyle='rgba(0,0,0,.45)';x.fillRect(0,h-78,w,78);x.save();x.translate(w*.62,h*.63);x.fillStyle='rgba(0,0,0,.4)';x.beginPath();x.ellipse(0,88,115,20,0,0,TAU);x.fill();x.rotate(-.18);x.shadowBlur=40;x.shadowColor='#ff3558';x.fillStyle='#1a2230';x.strokeStyle='#ff3558';x.lineWidth=4;x.beginPath();x.roundRect(-42,-68,84,130,22);x.fill();x.stroke();x.fillStyle='#dce6ef';x.beginPath();x.arc(0,-88,25,0,TAU);x.fill();x.fillStyle='#0d121a';x.fillRect(-22,48,16,49);x.fillRect(7,48,16,49);x.fillStyle='#5cecff';x.beginPath();x.moveTo(24,-22);x.lineTo(210,-82);x.lineTo(210,26);x.lineTo(24,11);x.closePath();x.fill();x.globalAlpha=.15;x.fillStyle='#fff';x.beginPath();x.moveTo(35,-16);x.lineTo(180,-63);x.lineTo(180,-35);x.lineTo(35,3);x.closePath();x.fill();x.restore();for(let i=0;i<7;i++){const ex=68+i*80+Math.sin(t*1.4+i)*8,ey=h-104+Math.cos(t*1.5+i)*6;x.shadowBlur=18;x.shadowColor='#ff102d';x.fillStyle='rgba(255,22,45,.95)';x.beginPath();x.arc(ex,ey,4.5,0,TAU);x.arc(ex+15,ey,4.5,0,TAU);x.fill();x.shadowBlur=0}const fog=x.createLinearGradient(0,h*.56,0,h);fog.addColorStop(0,'rgba(255,255,255,0)');fog.addColorStop(1,'rgba(155,165,185,.07)');x.fillStyle=fog;x.fillRect(0,h*.55,w,h*.45);requestAnimationFrame(drawMenu)}
 buildClasses();buildMeta();syncSettings();drawMenu();
 </script>
 <style id="arsenalOverhaulCSS">
@@ -313,7 +314,8 @@ const CONSUMABLE_DEFS={
  ammoPack:{name:'Caixa de Munição',icon:'📦',desc:'Abre a seleção e recupera 18% da reserva máxima somente da arma escolhida.',value:20,use(p){const w=currentWeapon();if(w&&w.def.kind!=='melee')w.reserve=Math.min(w.maxReserve,w.reserve+Math.ceil(w.maxReserve*.18))}},
  stim:{name:'Estimulante Veloz',icon:'💉',desc:'Aumenta velocidade e cadência por 24 segundos.',value:32,use(p){p.tempBoost=Math.max(p.tempBoost||0,24);p.tempBoostApplied=true}},
  battery:{name:'Bateria de Lanterna',icon:'🔋',desc:'Recupera 20% da carga da lanterna.',value:28,use(){game.flashlight.battery=Math.min(game.flashlight.maxBattery||100,(game.flashlight.battery||0)+20);window.__flashlightBatteryFeedback?.(20)}},
- necroVial:{name:'Frasco de Sangue Necrótico',icon:'🧪',desc:'Material raro usado pelo Especialista.',value:25,use(){game.blood+=4}}
+ necroVial:{name:'Frasco de Sangue Necrótico',icon:'🧪',desc:'Material raro usado pelo Especialista.',value:25,use(){game.blood+=4}},
+ grenade:{name:'Granada de Fragmentação',icon:'💣',desc:'Explosivo de uso único para slots de suporte. Causa uma grande explosão e empurra infectados.',value:54,use(){}}
 };
 
 function makeWeapon(baseId,rarity='bronze'){
@@ -1014,7 +1016,7 @@ buildClasses=function(){oldBuildClasses();document.querySelectorAll('[data-portr
 drawPortrait=function(c,key,t=0){const x=c.getContext('2d'),w=c.width,h=c.height,d=CLASSES[key];x.clearRect(0,0,w,h);const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,'#07121b');g.addColorStop(1,'#14101a');x.fillStyle=g;x.fillRect(0,0,w,h);x.strokeStyle='rgba(98,233,255,.055)';for(let i=0;i<10;i++){x.beginPath();x.moveTo(i*w/10,0);x.lineTo(i*w/10,h);x.stroke()}for(let i=0;i<6;i++){x.beginPath();x.moveTo(0,i*h/6);x.lineTo(w,i*h/6);x.stroke()}const fake={armorSlots:{},weaponSlots:[{def:{kind:key==='reaper'?'shotgun':'rifle'},rarity:key==='tempest'?'gold':key==='reaper'?'unique':'diamond'}],activeWeapon:0,classKey:key,classColor:d.color,walk:t*3,recoil:0,ultTime:0};x.save();x.translate(w*.53,h*.52);x.scale(2.2,2.2);drawTopDownBody(x,fake,0,0,1,-.08,false);x.restore();x.fillStyle='rgba(255,255,255,.055)';x.font='900 52px system-ui';x.fillText(d.name.toUpperCase(),14,h-12);x.fillStyle=d.color;x.fillRect(0,0,5,h)};
 
 const oldDrawMenu=drawMenu;
-drawMenu=function(){const c=$('#menuCanvas'),x=c.getContext('2d'),w=c.width,h=c.height;if($('#mainMenu').classList.contains('hidden')){setTimeout(()=>requestAnimationFrame(drawMenu),250);return}const t=performance.now()/1000;x.clearRect(0,0,w,h);const bg=x.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#08111a');bg.addColorStop(1,'#140c13');x.fillStyle=bg;x.fillRect(0,0,w,h);x.strokeStyle='rgba(98,233,255,.045)';for(let i=0;i<14;i++){x.beginPath();x.moveTo(i*w/14,0);x.lineTo(i*w/14,h);x.stroke()}for(let i=0;i<9;i++){x.beginPath();x.moveTo(0,i*h/9);x.lineTo(w,i*h/9);x.stroke()}for(let i=0;i<22;i++){const bx=(i*137)%w,by=(i*83)%h,bw=70+(i%4)*35,bh=40+(i%3)*30;x.fillStyle=i%2?'#121a23':'#18212b';x.fillRect(bx,by,bw,bh);x.fillStyle='rgba(255,54,93,.04)';x.fillRect(bx+8,by+8,bw-16,6)}x.fillStyle='#232832';for(let i=0;i<8;i++){const px=45+i*104,py=h-70+(i%2)*12;x.save();x.translate(px,py);x.rotate((i%3-.8)*.12);x.fillRect(-42,-18,84,36);x.fillStyle='#090d12';x.beginPath();x.arc(-24,18,10,0,TAU);x.arc(24,18,10,0,TAU);x.fill();x.restore()}const fake={armorSlots:{chest:{baseId:'soldier',rarity:'diamond',broken:false},helmet:{baseId:'tacticalHelmet',rarity:'diamond',broken:false}},weaponSlots:[{def:{kind:'rifle'},rarity:'diamond'}],activeWeapon:0,classKey:'vanguard',classColor:'#62e9ff',walk:t*5,recoil:Math.max(0,Math.sin(t*4))*.3,ultTime:0};x.save();x.translate(w*.62,h*.52);x.scale(3.4,3.4);drawTopDownBody(x,fake,0,0,1,-.18,false);x.restore();const gx=w*.62,gy=h*.52;x.save();x.translate(gx,gy);x.rotate(-.18);const beam=x.createLinearGradient(30,0,290,0);beam.addColorStop(0,'rgba(98,233,255,.18)');beam.addColorStop(1,'rgba(98,233,255,0)');x.fillStyle=beam;x.beginPath();x.moveTo(25,-20);x.lineTo(310,-90);x.lineTo(310,90);x.lineTo(25,20);x.closePath();x.fill();x.restore();for(let i=0;i<7;i++){const ex=90+i*93+Math.sin(t*1.4+i)*7,ey=95+(i%3)*48;x.fillStyle='#ff284e';x.shadowBlur=17;x.shadowColor='#ff284e';x.beginPath();x.arc(ex,ey,3.4,0,TAU);x.arc(ex+13,ey,3.4,0,TAU);x.fill();x.shadowBlur=0}requestAnimationFrame(drawMenu)};
+drawMenu=function(){const c=$('#menuCanvas');if(!c)return;const x=c.getContext('2d'),w=c.width,h=c.height;if($('#mainMenu').classList.contains('hidden')){setTimeout(()=>requestAnimationFrame(drawMenu),250);return}const t=performance.now()/1000;x.clearRect(0,0,w,h);const bg=x.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#08111a');bg.addColorStop(1,'#140c13');x.fillStyle=bg;x.fillRect(0,0,w,h);x.strokeStyle='rgba(98,233,255,.045)';for(let i=0;i<14;i++){x.beginPath();x.moveTo(i*w/14,0);x.lineTo(i*w/14,h);x.stroke()}for(let i=0;i<9;i++){x.beginPath();x.moveTo(0,i*h/9);x.lineTo(w,i*h/9);x.stroke()}for(let i=0;i<22;i++){const bx=(i*137)%w,by=(i*83)%h,bw=70+(i%4)*35,bh=40+(i%3)*30;x.fillStyle=i%2?'#121a23':'#18212b';x.fillRect(bx,by,bw,bh);x.fillStyle='rgba(255,54,93,.04)';x.fillRect(bx+8,by+8,bw-16,6)}x.fillStyle='#232832';for(let i=0;i<8;i++){const px=45+i*104,py=h-70+(i%2)*12;x.save();x.translate(px,py);x.rotate((i%3-.8)*.12);x.fillRect(-42,-18,84,36);x.fillStyle='#090d12';x.beginPath();x.arc(-24,18,10,0,TAU);x.arc(24,18,10,0,TAU);x.fill();x.restore()}const fake={armorSlots:{chest:{baseId:'soldier',rarity:'diamond',broken:false},helmet:{baseId:'tacticalHelmet',rarity:'diamond',broken:false}},weaponSlots:[{def:{kind:'rifle'},rarity:'diamond'}],activeWeapon:0,classKey:'vanguard',classColor:'#62e9ff',walk:t*5,recoil:Math.max(0,Math.sin(t*4))*.3,ultTime:0};x.save();x.translate(w*.62,h*.52);x.scale(3.4,3.4);drawTopDownBody(x,fake,0,0,1,-.18,false);x.restore();const gx=w*.62,gy=h*.52;x.save();x.translate(gx,gy);x.rotate(-.18);const beam=x.createLinearGradient(30,0,290,0);beam.addColorStop(0,'rgba(98,233,255,.18)');beam.addColorStop(1,'rgba(98,233,255,0)');x.fillStyle=beam;x.beginPath();x.moveTo(25,-20);x.lineTo(310,-90);x.lineTo(310,90);x.lineTo(25,20);x.closePath();x.fill();x.restore();for(let i=0;i<7;i++){const ex=90+i*93+Math.sin(t*1.4+i)*7,ey=95+(i%3)*48;x.fillStyle='#ff284e';x.shadowBlur=17;x.shadowColor='#ff284e';x.beginPath();x.arc(ex,ey,3.4,0,TAU);x.arc(ex+13,ey,3.4,0,TAU);x.fill();x.shadowBlur=0}requestAnimationFrame(drawMenu)};
 
 const title=document.querySelector('#mainMenu .version');if(title)title.textContent='Top-Down Overhaul';const lead=document.querySelector('#mainMenu .lead');if(lead)lead.textContent='Um survival horror top-down reconstruído para movimento preciso, colisão justa, equipamentos visíveis, munição por categoria e interfaces inspiradas em terminais de uma cidade em colapso.';
 const features=document.querySelectorAll('#mainMenu .feature');if(features[0])features[0].innerHTML='<b>Movimento preciso</b><span>Colisão circular, deslizamento em paredes e dash que para no impacto.</span>';if(features[1])features[1].innerHTML='<b>Arsenal universal</b><span>Todas as armas escalam dano, pente e durabilidade em cada raridade.</span>';if(features[2])features[2].innerHTML='<b>Equipamento visível</b><span>O modelo top-down muda imediatamente conforme capacete, peitoral, pernas e botas.</span>';
@@ -1401,6 +1403,7 @@ let menuCanvasLoopStarted=false;
 drawMenu=function(){
   if(menuCanvasLoopStarted)return;menuCanvasLoopStarted=true;
   const frame=()=>{
+    if(window.__deadSignalFocusedMenu)return;
     const c=document.getElementById('menuCanvas');if(c){if(c.width!==1280)c.width=1280;if(c.height!==720)c.height=720;const g=c.getContext('2d');const t=performance.now()/1000;g.clearRect(0,0,c.width,c.height);drawMenuFrame(g,c.width,c.height,t)}
     requestAnimationFrame(frame);
   };frame();
@@ -1526,211 +1529,440 @@ setTimeout(()=>{drawCanvasPaperdoll();DBG.renderWeaponHUD?.()},100);
 <script src="assets/js/combat-arsenal-patch.js"></script>
 <script src="assets/js/interface-controls-repair-patch.js"></script>
 <script src="assets/js/performance-boss-flashlight-patch.js"></script>
-<style id="mainMenuMegaRemakeCSS">
-#mainMenu{padding:0!important;background:
-  radial-gradient(circle at 14% 18%,rgba(255,53,88,.15),transparent 30%),
-  radial-gradient(circle at 82% 16%,rgba(92,236,255,.09),transparent 24%),
-  linear-gradient(180deg,#03060b,#020409 58%,#010307)}
-#mainMenu .panel{width:100vw!important;height:100vh!important;max-height:none!important;overflow:hidden!important;border:0!important;border-radius:0!important;padding:clamp(18px,2.4vw,34px)!important;background:
-  linear-gradient(135deg,rgba(255,255,255,.02),transparent 36%),
-  linear-gradient(110deg,#05080d 0%,#070b11 42%,#090c12 42.2%,#05070c 100%)!important;box-shadow:none!important}
-#mainMenu .panel::before{display:none!important}
-#mainMenu .menu-remake-shell{position:relative;display:grid;grid-template-columns:minmax(0,1.18fr) minmax(340px,.82fr);gap:clamp(18px,2vw,26px);height:100%}
-#mainMenu .menu-remake-shell::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(180deg,transparent 0 82px,rgba(255,255,255,.018) 82px 83px);opacity:.45;mix-blend-mode:screen}
-#mainMenu .menu-remake-left,#mainMenu .menu-remake-right{position:relative;z-index:1;min-width:0}
-#mainMenu .menu-remake-left{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:14px;min-height:0}
-#mainMenu .menu-remake-right{display:grid;grid-template-rows:auto auto 1fr;gap:14px;min-height:0}
-#mainMenu .menu-remake-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 2px}
-#mainMenu .menu-remake-topbar .kicker{font-size:10px!important;letter-spacing:.28em!important;color:#ff526f!important}
-#mainMenu .menu-remake-topbar .version{font-size:10px!important;padding:7px 12px!important;background:rgba(255,209,102,.08)!important;border:1px solid rgba(255,209,102,.22)!important;color:#ffd166!important}
-#mainMenu .menu-remake-head{display:grid;gap:12px;padding:14px 0 4px;border-top:1px solid rgba(255,255,255,.06)}
-#mainMenu .menu-remake-titlewrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:end}
-#mainMenu h1{margin:0!important;font-size:clamp(66px,8vw,142px)!important;line-height:.8!important;letter-spacing:.02em!important;text-transform:uppercase;text-shadow:0 18px 56px rgba(0,0,0,.5)}
-#mainMenu h1 .outline{color:transparent!important;-webkit-text-stroke:1px rgba(255,255,255,.62)!important;text-shadow:0 0 30px rgba(255,53,88,.16)!important}
-#mainMenu .menu-remake-badges{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;align-self:start}
-#mainMenu .menu-remake-badge{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#c9d2de;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
-#mainMenu .menu-remake-badge i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#5cecff;box-shadow:0 0 14px currentColor;color:inherit}
-#mainMenu .menu-remake-badge.red i{background:#ff3558}
-#mainMenu .menu-remake-badge.gold i{background:#ffd166}
-#mainMenu .menu-remake-leadwrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
-#mainMenu .lead{max-width:760px!important;margin:0!important;color:#98a5b8!important;font-size:14px!important;line-height:1.75!important}
-#mainMenu .menu-remake-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;min-width:320px}
-#mainMenu .menu-remake-summary .summary-card{padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.02));min-height:88px}
-#mainMenu .menu-remake-summary b{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
-#mainMenu .menu-remake-summary span{display:block;margin-top:6px;font-size:11px;color:#8390a3;line-height:1.45}
-#mainMenu .menu-remake-heroWrap{position:relative;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:14px}
-#mainMenu .hero{height:100%!important;min-height:380px!important;margin:0!important;border-radius:26px!important;border:1px solid rgba(255,255,255,.08)!important;overflow:hidden!important;background:#05080d!important;box-shadow:inset 0 0 120px rgba(0,0,0,.7),0 24px 70px rgba(0,0,0,.38)!important}
-#mainMenu .hero::before{content:"LIVE FEED // SECTOR 07"!important;position:absolute;left:18px;top:16px;z-index:6;padding:7px 10px;border-radius:999px;background:rgba(3,6,10,.78)!important;border:1px solid rgba(92,236,255,.24)!important;border-left:3px solid #5cecff!important;color:#cbf8ff!important;font-size:10px!important;letter-spacing:.18em!important}
-#mainMenu #menuCanvas{position:absolute;inset:0;width:100%!important;height:100%!important}
-#mainMenu .hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.16) 45%,rgba(0,0,0,.45) 100%),repeating-linear-gradient(180deg,rgba(255,255,255,.013) 0 1px,transparent 1px 4px)}
-#mainMenu .hero-copy{left:18px!important;bottom:18px!important;z-index:6!important;max-width:320px;padding:13px 14px!important;border-radius:16px!important;border:1px solid rgba(255,255,255,.08)!important;border-left:3px solid #ff3558!important;background:rgba(4,7,12,.72)!important;backdrop-filter:blur(10px)}
-#mainMenu .hero-copy b{font-size:10px!important;letter-spacing:.16em!important}
-#mainMenu .hero-copy span{font-size:11px!important;line-height:1.5!important;color:#98a5b8!important}
-#mainMenu .menu-features{position:absolute!important;left:16px;right:16px;top:58px;z-index:6;display:flex!important;flex-wrap:wrap;gap:8px;margin:0!important;pointer-events:none}
-#mainMenu .feature{min-width:128px;max-width:165px;padding:10px 11px!important;border-radius:14px!important;border:1px solid rgba(255,255,255,.08)!important;background:rgba(4,7,12,.62)!important;backdrop-filter:blur(8px)!important}
-#mainMenu .feature b{display:block;font-size:9px!important;letter-spacing:.14em!important}
-#mainMenu .feature span{display:block!important;margin-top:5px;font-size:10px!important;line-height:1.45!important;color:#8c99ab!important}
-#mainMenu .menu-remake-sidecards{display:grid;gap:14px;min-height:0}
-#mainMenu .menu-panel-card{border:1px solid rgba(255,255,255,.08);border-radius:24px;background:linear-gradient(180deg,rgba(12,17,25,.96),rgba(6,9,14,.96));box-shadow:0 22px 60px rgba(0,0,0,.32);overflow:hidden}
-#mainMenu .menu-panel-card .card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 13px;border-bottom:1px solid rgba(255,255,255,.06)}
-#mainMenu .menu-panel-card .card-head b{font-size:11px;letter-spacing:.16em;text-transform:uppercase}
-#mainMenu .menu-panel-card .card-head span{font-size:10px;color:#748195;letter-spacing:.12em;text-transform:uppercase}
-#mainMenu .menu-actions{padding:12px;display:grid;gap:10px}
-#mainMenu .menu-actions .btn{display:grid;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;gap:12px;min-height:74px;padding:14px 16px!important;border-radius:18px!important;text-align:left!important;font-size:13px!important;letter-spacing:.08em!important;background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.09)!important;box-shadow:none!important;transform:none!important}
-#mainMenu .menu-actions .btn:hover{background:rgba(255,255,255,.07)!important;border-color:rgba(255,255,255,.18)!important;transform:translateY(-2px)!important}
-#mainMenu .menu-actions .btn.primary{background:linear-gradient(135deg,rgba(255,53,88,.95),rgba(159,12,46,.94))!important;border-color:#ff637f!important;box-shadow:0 18px 42px rgba(255,53,88,.22)!important}
-#mainMenu .menu-actions .btn .menu-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);font-size:19px;color:#dfe7f1}
-#mainMenu .menu-actions .btn.primary .menu-icon{background:rgba(255,255,255,.14)}
-#mainMenu .menu-actions .menu-copy{display:grid;gap:4px;min-width:0}
-#mainMenu .menu-actions .menu-copy strong{font-size:12px;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#mainMenu .menu-actions .menu-copy small{font-size:10px;letter-spacing:.04em;color:#8390a3;text-transform:none;line-height:1.45}
-#mainMenu .menu-actions .btn.primary .menu-copy small{color:rgba(255,255,255,.83)}
-#mainMenu .menu-actions .btn .menu-arrow{font-size:18px;color:#7c899b}
-#mainMenu .menu-actions .btn.primary .menu-arrow{color:#fff}
-#mainMenu .menu-brief{padding:14px 16px 16px;display:grid;gap:10px}
-#mainMenu .menu-brief-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-#mainMenu .mini-panel{padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.025)}
-#mainMenu .mini-panel b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.12em}
-#mainMenu .mini-panel span{display:block;margin-top:6px;font-size:10px;color:#7f8b9c;line-height:1.5}
-#mainMenu .controls-note{padding:14px 16px!important;border-radius:16px!important;border:1px solid rgba(255,255,255,.06)!important;background:rgba(255,255,255,.025)!important;color:#96a3b7!important;font-size:11px!important;line-height:1.65!important}
-#mainMenu .menu-tipline{display:flex;align-items:center;gap:8px;color:#ffd166;font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
-#mainMenu .menu-tipline i{display:block;width:8px;height:8px;border-radius:50%;background:#ffd166;box-shadow:0 0 12px #ffd166}
-#mainMenu .menu-bottom-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-#mainMenu .menu-bottom-strip .strip-card{padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02))}
-#mainMenu .menu-bottom-strip .strip-card b{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
-#mainMenu .menu-bottom-strip .strip-card span{display:block;margin-top:5px;color:#8490a1;font-size:10px;line-height:1.5}
-#mainMenu .menu-corner-accent{position:absolute;right:-35px;top:-35px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,53,88,.18),transparent 68%);pointer-events:none;filter:blur(2px)}
-@media (max-width:1200px){
-  #mainMenu .menu-remake-shell{grid-template-columns:minmax(0,1fr) 320px}
-  #mainMenu .menu-remake-leadwrap,#mainMenu .menu-remake-heroWrap{grid-template-columns:1fr}
-  #mainMenu .menu-remake-summary{min-width:0}
+
+<style id="mainMenuFocusedReworkCSS">
+#mainMenu{
+  padding:0!important;
+  background:#020306!important;
 }
-@media (max-width:860px){
+#mainMenu .panel{
+  width:100vw!important;
+  height:100vh!important;
+  max-height:none!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-radius:0!important;
+  padding:clamp(18px,2.5vw,42px)!important;
+  background:
+    radial-gradient(circle at 20% 14%,rgba(255,42,76,.13),transparent 30%),
+    radial-gradient(circle at 76% 76%,rgba(53,198,225,.07),transparent 32%),
+    linear-gradient(135deg,#05080d 0%,#080b11 54%,#030509 100%)!important;
+  box-shadow:none!important;
+}
+#mainMenu .panel::before{display:none!important}
+#mainMenu .focused-menu-shell{
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) clamp(270px,24vw,350px);
+  grid-template-rows:auto minmax(0,1fr);
+  column-gap:clamp(22px,3vw,52px);
+  row-gap:clamp(14px,2vh,24px);
+  width:100%;
+  height:100%;
+}
+#mainMenu .focused-menu-shell::before{
+  content:"";
+  position:absolute;
+  inset:-40px;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(180deg,transparent 0 72px,rgba(255,255,255,.014) 72px 73px),
+    linear-gradient(90deg,transparent 0 76%,rgba(255,255,255,.025) 76% 76.1%,transparent 76.1%);
+  opacity:.6;
+}
+#mainMenu .focused-title{
+  grid-column:1;
+  grid-row:1;
+  align-self:end;
+  margin:0;
+  padding-left:clamp(2px,.5vw,8px);
+  font-size:clamp(66px,8vw,142px)!important;
+  line-height:.77!important;
+  letter-spacing:.035em!important;
+  font-weight:1000;
+  text-transform:uppercase;
+  color:#f5f7fb;
+  text-shadow:0 16px 55px rgba(0,0,0,.66),0 0 38px rgba(255,44,78,.09);
+  white-space:nowrap;
+}
+#mainMenu .focused-title .outline{
+  color:#b71436!important;
+  -webkit-text-stroke:1px rgba(255,103,128,.72)!important;
+  text-shadow:0 0 34px rgba(255,36,75,.25)!important;
+}
+#mainMenu .focused-art-frame{
+  grid-column:1;
+  grid-row:2;
+  position:relative;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:clamp(18px,2vw,30px);
+  background:#05070b;
+  box-shadow:
+    inset 0 0 120px rgba(0,0,0,.55),
+    0 30px 90px rgba(0,0,0,.5),
+    0 0 0 1px rgba(255,53,88,.03);
+}
+#mainMenu .focused-art-frame::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:3;
+  pointer-events:none;
+  border-radius:inherit;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.025),transparent 24%,transparent 74%,rgba(0,0,0,.36)),
+    repeating-linear-gradient(180deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px);
+  mix-blend-mode:screen;
+}
+#mainMenu .focused-art-frame::after{
+  content:"";
+  position:absolute;
+  inset:10px;
+  z-index:4;
+  pointer-events:none;
+  border:1px solid rgba(255,255,255,.035);
+  border-radius:calc(clamp(18px,2vw,30px) - 8px);
+}
+#mainMenu #menuCanvasCinematic{
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:100%;
+  background:#05070b;
+  cursor:default;
+}
+#mainMenu .focused-actions{
+  grid-column:2;
+  grid-row:1 / 3;
+  align-self:center;
+  display:grid;
+  gap:12px;
+  width:100%;
+  padding:clamp(18px,2vw,28px);
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:26px;
+  background:
+    linear-gradient(180deg,rgba(15,20,29,.93),rgba(5,8,13,.95)),
+    radial-gradient(circle at 50% 0,rgba(255,53,88,.08),transparent 40%);
+  box-shadow:0 32px 90px rgba(0,0,0,.48);
+  backdrop-filter:blur(14px);
+}
+#mainMenu .focused-actions::before{
+  content:"";
+  display:block;
+  height:3px;
+  margin:0 4px 9px;
+  border-radius:99px;
+  background:linear-gradient(90deg,#ff3558,rgba(255,53,88,.12) 58%,transparent);
+  box-shadow:0 0 16px rgba(255,53,88,.24);
+}
+#mainMenu .focused-actions .btn{
+  position:relative;
+  display:grid;
+  grid-template-columns:44px minmax(0,1fr) 18px;
+  align-items:center;
+  gap:13px;
+  min-height:72px;
+  padding:13px 15px!important;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.09)!important;
+  border-radius:17px!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.052),rgba(255,255,255,.026))!important;
+  color:#e8edf4;
+  text-align:left!important;
+  font-size:12px!important;
+  font-weight:1000!important;
+  letter-spacing:.12em!important;
+  text-transform:uppercase;
+  box-shadow:0 12px 28px rgba(0,0,0,.22)!important;
+  transform:none!important;
+  transition:transform .17s ease,border-color .17s ease,background .17s ease,box-shadow .17s ease!important;
+}
+#mainMenu .focused-actions .btn::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(105deg,transparent 0 55%,rgba(255,255,255,.06) 72%,transparent 88%);
+  transform:translateX(-120%);
+  transition:transform .42s ease;
+}
+#mainMenu .focused-actions .btn:hover{
+  transform:translateX(-5px)!important;
+  border-color:rgba(255,255,255,.22)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.04))!important;
+  box-shadow:0 18px 38px rgba(0,0,0,.34)!important;
+}
+#mainMenu .focused-actions .btn:hover::before{transform:translateX(120%)}
+#mainMenu .focused-actions .btn.primary{
+  min-height:82px;
+  color:white;
+  border-color:rgba(255,103,128,.78)!important;
+  background:linear-gradient(135deg,#ff3558,#9e0d32 76%)!important;
+  box-shadow:0 18px 45px rgba(255,38,77,.24)!important;
+}
+#mainMenu .focused-actions .btn.primary:hover{
+  background:linear-gradient(135deg,#ff4968,#b6123b 76%)!important;
+  box-shadow:0 22px 52px rgba(255,38,77,.35)!important;
+}
+#mainMenu .focused-actions .menu-icon{
+  display:grid;
+  place-items:center;
+  width:42px;
+  height:42px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  background:rgba(255,255,255,.055);
+  font-size:19px;
+  color:#cbd5df;
+  text-shadow:0 0 14px currentColor;
+}
+#mainMenu .focused-actions .btn.primary .menu-icon{
+  background:rgba(255,255,255,.13);
+  color:#fff;
+}
+#mainMenu .focused-actions .menu-label{
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+#mainMenu .focused-actions .menu-arrow{
+  font-size:22px;
+  color:#6f7b8a;
+  transition:transform .17s ease,color .17s ease;
+}
+#mainMenu .focused-actions .btn:hover .menu-arrow{transform:translateX(3px);color:#fff}
+#settingsScreen .resolution-setting select{
+  width:min(180px,45vw);
+  padding:9px 11px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  background:#111722;
+  color:#f5f7fb;
+  font-weight:850;
+  cursor:pointer;
+  outline:none;
+}
+#settingsScreen .resolution-setting select:focus{border-color:rgba(92,236,255,.45);box-shadow:0 0 0 3px rgba(92,236,255,.08)}
+@media(max-width:920px){
   #mainMenu .panel{overflow:auto!important;padding:14px!important}
-  #mainMenu .menu-remake-shell{height:auto;grid-template-columns:1fr}
-  #mainMenu .menu-remake-left,#mainMenu .menu-remake-right{min-height:auto}
-  #mainMenu .menu-remake-titlewrap,#mainMenu .menu-remake-leadwrap{grid-template-columns:1fr}
-  #mainMenu .menu-remake-badges{justify-content:flex-start}
-  #mainMenu .menu-remake-summary,#mainMenu .menu-bottom-strip,#mainMenu .menu-brief-grid{grid-template-columns:1fr}
-  #mainMenu .menu-remake-heroWrap{grid-template-columns:1fr}
-  #mainMenu .hero{min-height:330px!important}
-  #mainMenu .menu-actions .btn{grid-template-columns:40px minmax(0,1fr) auto;min-height:66px}
+  #mainMenu .focused-menu-shell{grid-template-columns:1fr;grid-template-rows:auto minmax(340px,58vh) auto;height:auto;min-height:100%}
+  #mainMenu .focused-title{grid-column:1;grid-row:1;font-size:clamp(54px,13vw,90px)!important}
+  #mainMenu .focused-art-frame{grid-column:1;grid-row:2;min-height:340px}
+  #mainMenu .focused-actions{grid-column:1;grid-row:3;align-self:auto;grid-template-columns:1fr 1fr;padding:14px;border-radius:20px}
+  #mainMenu .focused-actions::before{grid-column:1/-1}
+  #mainMenu .focused-actions .btn{min-height:64px}
+  #mainMenu .focused-actions .btn.primary{min-height:70px}
+}
+@media(max-width:560px){
+  #mainMenu .focused-title{font-size:clamp(44px,13vw,68px)!important}
+  #mainMenu .focused-art-frame{min-height:300px}
+  #mainMenu .focused-actions{grid-template-columns:1fr}
 }
 </style>
-<script id="mainMenuMegaRemakeJS">
+<script id="mainMenuFocusedReworkJS">
 (()=>{
+  'use strict';
   const main=document.getElementById('mainMenu');
-  if(!main) return;
-  const panel=main.querySelector('.panel');
-  if(!panel || panel.dataset.menuMegaRemake==='1') return;
-  const title=panel.querySelector('h1');
-  const kicker=panel.querySelector('.kicker');
-  const version=panel.querySelector('.version');
-  const lead=panel.querySelector('.lead');
-  const hero=panel.querySelector('.hero');
-  const heroCopy=hero?.querySelector('.hero-copy');
-  const features=[...panel.querySelectorAll('.feature')];
-  const controls=panel.querySelector('.controls-note');
-  const playBtn=document.getElementById('playBtn');
-  const armoryBtn=document.getElementById('armoryBtn');
-  const settingsBtn=document.getElementById('settingsBtn');
-  const howBtn=document.getElementById('howBtn');
-  if(!(title&&kicker&&version&&lead&&hero&&controls&&playBtn&&armoryBtn&&settingsBtn&&howBtn)) return;
+  const panel=main?.querySelector('.panel');
+  if(!main||!panel||panel.dataset.focusedRework==='1')return;
 
-  panel.dataset.menuMegaRemake='1';
-  title.innerHTML='DEAD <span class="outline">SIGNAL</span>';
-  kicker.textContent='Dead Signal // Protocolo Nightfall';
-  version.textContent='Main Menu Remake';
-  lead.textContent='Survival horror top-down com noites brutais, recursos limitados, operadores únicos e um arsenal pesado em uma cidade tomada pelo colapso.';
-  if(heroCopy) heroCopy.innerHTML='<b>O ESCURO VÊ PRIMEIRO</b><span>Gerencie munição, preserve a lanterna e sobreviva tempo suficiente para ver o amanhecer.</span>';
-  const featureData=[
-    ['Lanterna dinâmica','A visão depende da bateria e do feixe.'],
-    ['Boss nights','Ondas especiais terminam só quando o chefe cai.'],
-    ['Arsenal vivo','Cada classe e arma muda o ritmo da partida.']
+  const buttons=[
+    [document.getElementById('playBtn'),'▶','Iniciar expedição'],
+    [document.getElementById('armoryBtn'),'▥','Arsenal permanente'],
+    [document.getElementById('settingsBtn'),'⚙','Configurações'],
+    [document.getElementById('howBtn'),'?','Como jogar']
   ];
-  features.forEach((el,i)=>{ const d=featureData[i]; if(!d) return; el.innerHTML=`<b>${d[0]}</b><span>${d[1]}</span>`; });
-  controls.textContent='WASD mover • Mouse mirar/atirar • Q habilidade • E ultimate • R recarrega • F interage • Scroll troca armas • ESC pausa';
+  if(buttons.some(([button])=>!button))return;
 
-  const decorate=(btn,icon,title,desc)=>{ btn.innerHTML=`<span class="menu-icon">${icon}</span><span class="menu-copy"><strong>${title}</strong><small>${desc}</small></span><span class="menu-arrow">›</span>`; };
-  decorate(playBtn,'▶','Iniciar expedição','Entrar na zona hostil e sobreviver à próxima noite.');
-  decorate(armoryBtn,'▥','Arsenal permanente','Melhorias e progressão persistente do refúgio.');
-  decorate(settingsBtn,'⚙','Configurações','Áudio, qualidade, controles e preferências.');
-  decorate(howBtn,'?','Como jogar','Resumo rápido das regras e da sobrevivência.');
+  panel.dataset.focusedRework='1';window.__deadSignalFocusedMenu=true;
+  const shell=document.createElement('div');shell.className='focused-menu-shell';
+  const title=document.createElement('h1');title.className='focused-title';title.innerHTML='DEAD <span class="outline">SIGNAL</span>';
+  const artFrame=document.createElement('div');artFrame.className='focused-art-frame';
+  const art=document.createElement('canvas');art.id='menuCanvasCinematic';art.width=1280;art.height=720;art.setAttribute('aria-label','Cena animada de Dead Signal');
+  artFrame.appendChild(art);
+  const actions=document.createElement('nav');actions.className='focused-actions';actions.setAttribute('aria-label','Menu principal');
+  for(const [button,icon,label] of buttons){
+    button.innerHTML=`<span class="menu-icon" aria-hidden="true">${icon}</span><span class="menu-label">${label}</span><span class="menu-arrow" aria-hidden="true">›</span>`;
+    actions.appendChild(button);
+  }
+  shell.append(title,artFrame,actions);
+  panel.replaceChildren(shell);
 
-  const shell=document.createElement('div'); shell.className='menu-remake-shell';
-  const left=document.createElement('div'); left.className='menu-remake-left';
-  const right=document.createElement('div'); right.className='menu-remake-right';
+  const oldCanvas=document.getElementById('menuCanvas');
+  if(oldCanvas){oldCanvas.removeAttribute('id');oldCanvas.remove()}
+  try{drawMenu=()=>{}}catch{}
 
-  const topbar=document.createElement('div'); topbar.className='menu-remake-topbar'; topbar.append(kicker,version);
-  const head=document.createElement('div'); head.className='menu-remake-head';
-  const titleWrap=document.createElement('div'); titleWrap.className='menu-remake-titlewrap';
-  const badges=document.createElement('div'); badges.className='menu-remake-badges';
-  badges.innerHTML=`
-    <span class="menu-remake-badge red"><i></i>Noites hostis</span>
-    <span class="menu-remake-badge"><i></i>Combate tático</span>
-    <span class="menu-remake-badge gold"><i></i>Loot e progressão</span>`;
-  titleWrap.append(title,badges);
+  const g=art.getContext('2d',{alpha:false});
+  const Wc=1280,Hc=720,TAU2=Math.PI*2;
+  const clamp2=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const rr=(ctx,x,y,w,h,r)=>{ctx.beginPath();ctx.roundRect(x,y,w,h,r)};
+  const ellipse=(ctx,x,y,rx,ry,fill)=>{ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU2);ctx.fillStyle=fill;ctx.fill()};
+  const line=(ctx,x1,y1,x2,y2,color,width=1)=>{ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()};
 
-  const leadWrap=document.createElement('div'); leadWrap.className='menu-remake-leadwrap';
-  const summary=document.createElement('div'); summary.className='menu-remake-summary';
-  summary.innerHTML=`
-    <div class="summary-card"><b>Sobreviva</b><span>Hordas, chefes e escassez crescente a cada noite.</span></div>
-    <div class="summary-card"><b>Administre</b><span>Use oficinas, comerciantes e munição com cautela.</span></div>
-    <div class="summary-card"><b>Evolua</b><span>Operadores únicos, builds e recompensas de longo prazo.</span></div>`;
-  leadWrap.append(lead,summary);
-  head.append(titleWrap,leadWrap);
+  const staticLayer=document.createElement('canvas');staticLayer.width=Wc;staticLayer.height=Hc;
+  const bg=staticLayer.getContext('2d',{alpha:false});
+  const cinematicImage=new Image();let cinematicReady=false;
+  cinematicImage.decoding='async';
+  cinematicImage.onload=()=>{cinematicReady=true};
+  cinematicImage.onerror=()=>{cinematicReady=false};
+  cinematicImage.src='assets/images/menu-cinematic.webp';
+  function buildStaticScene(){
+    const sky=bg.createLinearGradient(0,0,0,Hc);sky.addColorStop(0,'#07101a');sky.addColorStop(.48,'#171019');sky.addColorStop(1,'#030507');bg.fillStyle=sky;bg.fillRect(0,0,Wc,Hc);
+    const redGlow=bg.createRadialGradient(890,190,20,890,190,410);redGlow.addColorStop(0,'rgba(161,24,52,.24)');redGlow.addColorStop(.55,'rgba(72,12,31,.08)');redGlow.addColorStop(1,'transparent');bg.fillStyle=redGlow;bg.fillRect(420,0,860,620);
+    const moon=bg.createRadialGradient(1000,112,4,1000,112,82);moon.addColorStop(0,'rgba(236,245,246,.88)');moon.addColorStop(.4,'rgba(189,205,208,.22)');moon.addColorStop(1,'transparent');bg.fillStyle=moon;bg.fillRect(900,10,200,200);ellipse(bg,1000,112,42,42,'rgba(206,218,219,.45)');
+    // Distant skyline.
+    for(let layer=0;layer<3;layer++){
+      const base=390+layer*42,alpha=.45+layer*.18;
+      for(let i=0;i<18;i++){
+        const x=i*82-layer*37,w=58+(i*17+layer*13)%58,h=90+(i*61+layer*37)%210;
+        bg.fillStyle=`rgba(${10+layer*3},${14+layer*4},${19+layer*5},${alpha})`;bg.fillRect(x,base-h,w,h);
+        bg.fillStyle=layer===2?'rgba(255,49,82,.045)':'rgba(150,187,198,.028)';
+        for(let yy=base-h+18;yy<base-14;yy+=25)for(let xx=x+12;xx<x+w-8;xx+=21)if(((xx+yy+i*9)%7)<2)bg.fillRect(xx,yy,5,9);
+        if(i%5===0){line(bg,x+w*.5,base-h,x+w*.5,base-h-42,'rgba(92,112,120,.26)',2);ellipse(bg,x+w*.5,base-h-45,3,3,'rgba(255,53,88,.38)')}
+      }
+    }
+    // Broken highway and ground.
+    bg.fillStyle='#050709';bg.beginPath();bg.moveTo(0,470);bg.lineTo(1280,420);bg.lineTo(1280,720);bg.lineTo(0,720);bg.closePath();bg.fill();
+    bg.fillStyle='#111318';bg.beginPath();bg.moveTo(0,545);bg.lineTo(1280,480);bg.lineTo(1280,720);bg.lineTo(0,720);bg.closePath();bg.fill();
+    line(bg,0,596,1280,535,'rgba(223,202,140,.17)',5);line(bg,0,602,1280,541,'rgba(0,0,0,.65)',8);
+    for(let i=0;i<22;i++){const x=(i*127)%1280,y=555+(i%7)*23;bg.save();bg.translate(x,y);bg.rotate((i%5-2)*.12);bg.fillStyle=i%2?'#202329':'#171a1f';bg.fillRect(-22,-4,44+(i%4)*15,8);bg.restore()}
+    // Wrecked car.
+    bg.save();bg.translate(905,522);bg.rotate(-.08);bg.fillStyle='#151a20';rr(bg,-105,-32,210,58,16);bg.fill();bg.fillStyle='#0b0e12';rr(bg,-58,-62,118,42,15);bg.fill();bg.strokeStyle='rgba(135,151,160,.18)';bg.lineWidth=3;bg.stroke();ellipse(bg,-70,28,25,25,'#08090b');ellipse(bg,70,28,25,25,'#08090b');ellipse(bg,-70,28,10,10,'#30343b');ellipse(bg,70,28,10,10,'#30343b');bg.fillStyle='rgba(255,53,88,.12)';bg.fillRect(72,-17,27,8);bg.restore();
+    // Street lights.
+    for(const [x,y,s] of [[110,420,.9],[710,390,.72],[1160,370,.62]]){line(bg,x,y,x,y-180*s,'#1a2026',8*s);line(bg,x,y-180*s,x+52*s,y-180*s,'#1a2026',7*s);ellipse(bg,x+56*s,y-177*s,10*s,6*s,'rgba(255,209,102,.48)');const glow=bg.createRadialGradient(x+56*s,y-177*s,0,x+56*s,y-177*s,90*s);glow.addColorStop(0,'rgba(255,209,102,.13)');glow.addColorStop(1,'transparent');bg.fillStyle=glow;bg.fillRect(x-35*s,y-265*s,180*s,180*s)}
+  }
+  buildStaticScene();
 
-  const heroWrap=document.createElement('div'); heroWrap.className='menu-remake-heroWrap';
-  heroWrap.append(hero);
-  const sideInfo=document.createElement('div'); sideInfo.className='menu-panel-card';
-  sideInfo.innerHTML=`
-    <div class="card-head"><b>Leitura rápida</b><span>Visão geral</span></div>
-    <div class="menu-brief">
-      <div class="menu-tipline"><i></i>Sistema de sobrevivência ativo</div>
-      <div class="menu-brief-grid">
-        <div class="mini-panel"><b>Dia e Noite</b><span>O dia traz respiro. A noite cobra recursos e precisão.</span></div>
-        <div class="mini-panel"><b>Classes</b><span>Vanguard, Tempest e Reaper mudam completamente o combate.</span></div>
-        <div class="mini-panel"><b>Lojas</b><span>Mercador e especialista oferecem estoques randômicos por dia.</span></div>
-        <div class="mini-panel"><b>Boss Drops</b><span>Chefes entregam itens raros, recursos e recompensas especiais.</span></div>
-      </div>
-    </div>`;
-  heroWrap.append(sideInfo);
+  function drawFlashlight(ctx,t){
+    const flicker=.92+Math.sin(t*12)*.025+Math.sin(t*4.1)*.02;
+    ctx.save();ctx.globalCompositeOperation='screen';
+    const beam=ctx.createLinearGradient(455,410,1110,355);beam.addColorStop(0,`rgba(181,245,255,${.29*flicker})`);beam.addColorStop(.5,`rgba(85,219,240,${.15*flicker})`);beam.addColorStop(1,'rgba(55,178,210,0)');ctx.fillStyle=beam;ctx.beginPath();ctx.moveTo(447,393);ctx.lineTo(1175,255);ctx.lineTo(1180,492);ctx.lineTo(452,426);ctx.closePath();ctx.fill();
+    const core=ctx.createLinearGradient(450,405,1040,370);core.addColorStop(0,`rgba(225,253,255,${.19*flicker})`);core.addColorStop(1,'rgba(138,245,255,0)');ctx.fillStyle=core;ctx.beginPath();ctx.moveTo(452,402);ctx.lineTo(1085,330);ctx.lineTo(1090,416);ctx.lineTo(453,417);ctx.closePath();ctx.fill();ctx.restore();
+  }
+  function drawZombie(ctx,x,y,s,t,alpha=1,boss=false){
+    ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.globalAlpha=alpha;
+    ctx.fillStyle=boss?'#111319':'#14191c';ctx.beginPath();ctx.ellipse(0,78,boss?72:43,boss?118:84,-.03,0,TAU2);ctx.fill();
+    ctx.fillStyle=boss?'#2a2928':'#343634';ctx.beginPath();ctx.arc(-5,-20,boss?36:25,0,TAU2);ctx.fill();
+    ctx.fillStyle=boss?'#15171a':'#202427';ctx.beginPath();ctx.moveTo(-35,40);ctx.lineTo(-67,155);ctx.lineTo(-28,164);ctx.lineTo(-4,64);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(33,42);ctx.lineTo(69,150);ctx.lineTo(31,161);ctx.lineTo(4,65);ctx.closePath();ctx.fill();
+    const sway=Math.sin(t*1.4+x*.01)*7;ctx.strokeStyle='#292e31';ctx.lineWidth=boss?18:12;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-28,36);ctx.lineTo(-64+sway,116);ctx.moveTo(28,36);ctx.lineTo(62+sway,122);ctx.stroke();
+    const eyeAlpha=.42+.16*Math.sin(t*2.3+x);ctx.shadowBlur=boss?20:12;ctx.shadowColor='#ff2449';ctx.fillStyle=`rgba(255,42,75,${eyeAlpha})`;ellipse(ctx,-14,-23,boss?5:3.2,boss?4:2.7,ctx.fillStyle);ellipse(ctx,8,-23,boss?5:3.2,boss?4:2.7,ctx.fillStyle);ctx.shadowBlur=0;
+    ctx.restore();
+  }
+  function drawSurvivor(ctx,t){
+    ctx.save();ctx.translate(310,445);ctx.rotate(-.035);
+    // Shadow.
+    ellipse(ctx,10,154,126,28,'rgba(0,0,0,.48)');
+    // Legs.
+    ctx.fillStyle='#111820';rr(ctx,-66,68,49,120,18);ctx.fill();rr(ctx,6,68,49,120,18);ctx.fill();ctx.fillStyle='#070b10';rr(ctx,-78,164,70,28,10);ctx.fill();rr(ctx,-2,164,70,28,10);ctx.fill();
+    // Backpack.
+    ctx.fillStyle='#151d24';rr(ctx,-112,-80,70,130,24);ctx.fill();ctx.strokeStyle='#3b4a54';ctx.lineWidth=3;ctx.stroke();
+    // Torso armor.
+    const armor=ctx.createLinearGradient(-88,-100,72,86);armor.addColorStop(0,'#303c45');armor.addColorStop(.5,'#172028');armor.addColorStop(1,'#0c1117');ctx.fillStyle=armor;ctx.beginPath();ctx.moveTo(-78,-85);ctx.quadraticCurveTo(-102,-45,-88,48);ctx.lineTo(-54,96);ctx.lineTo(58,90);ctx.lineTo(82,22);ctx.quadraticCurveTo(88,-52,48,-86);ctx.closePath();ctx.fill();ctx.strokeStyle='#54646f';ctx.lineWidth=4;ctx.stroke();
+    // Chest straps and plates.
+    ctx.fillStyle='#0c1218';rr(ctx,-53,-62,95,112,14);ctx.fill();ctx.strokeStyle='rgba(134,158,171,.32)';ctx.lineWidth=2;ctx.stroke();for(let i=0;i<3;i++){ctx.fillStyle='#202b33';rr(ctx,-43+i*31,-38,23,56,5);ctx.fill();ctx.strokeStyle='#53616a';ctx.stroke()}
+    // Head and hood.
+    ctx.fillStyle='#111820';ctx.beginPath();ctx.arc(-3,-122,50,0,TAU2);ctx.fill();ctx.fillStyle='#b67c61';ctx.beginPath();ctx.arc(8,-122,34,0,TAU2);ctx.fill();ctx.fillStyle='#17191b';ctx.beginPath();ctx.arc(2,-134,38,Math.PI,TAU2);ctx.lineTo(37,-121);ctx.quadraticCurveTo(4,-142,-30,-117);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#090c10';rr(ctx,-14,-131,58,25,10);ctx.fill();ctx.strokeStyle='#5cecff';ctx.lineWidth=2;ctx.stroke();ctx.shadowBlur=14;ctx.shadowColor='#5cecff';line(ctx,-4,-119,30,-119,'rgba(186,248,255,.85)',2);ctx.shadowBlur=0;
+    // Arms holding rifle.
+    ctx.strokeStyle='#25323b';ctx.lineWidth=25;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(54,-48);ctx.lineTo(119,-8);ctx.moveTo(-53,-38);ctx.lineTo(68,2);ctx.stroke();ctx.strokeStyle='#b67c61';ctx.lineWidth=15;ctx.beginPath();ctx.moveTo(108,-6);ctx.lineTo(144,4);ctx.moveTo(57,1);ctx.lineTo(94,11);ctx.stroke();
+    // Rifle.
+    ctx.save();ctx.translate(66,-6);ctx.rotate(-.08);ctx.fillStyle='#0b1015';rr(ctx,-18,-16,205,31,8);ctx.fill();ctx.strokeStyle='#667783';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle='#293640';rr(ctx,46,-25,76,18,5);ctx.fill();ctx.fillStyle='#111820';rr(ctx,17,10,44,54,8);ctx.fill();ctx.fillStyle='#768994';ctx.fillRect(179,-9,68,8);ctx.fillStyle='#d7edf2';ctx.fillRect(239,-8,13,6);ctx.restore();
+    // Red shoulder light.
+    ctx.shadowBlur=18;ctx.shadowColor='#ff3558';ellipse(ctx,-74,-64,7,7,'#ff3558');ctx.shadowBlur=0;
+    ctx.restore();
+  }
+  function drawRain(ctx,t){
+    ctx.save();ctx.lineWidth=1.3;ctx.strokeStyle='rgba(164,195,208,.15)';
+    for(let i=0;i<105;i++){const x=(i*113+t*230*(1+(i%4)*.12))%1340-30,y=(i*67+t*410*(1+(i%5)*.08))%780-30,len=12+(i%5)*5;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-5,y+len);ctx.stroke()}
+    ctx.restore();
+  }
+  function drawFog(ctx,t){
+    ctx.save();for(let i=0;i<5;i++){const x=((i*311+t*(10+i*2))%1580)-180,y=500+(i%3)*62;const fog=ctx.createRadialGradient(x,y,0,x,y,190);fog.addColorStop(0,'rgba(174,190,194,.045)');fog.addColorStop(1,'transparent');ctx.fillStyle=fog;ctx.fillRect(x-220,y-110,440,220)}ctx.restore();
+  }
+  let last=0;
+  function frame(now){
+    requestAnimationFrame(frame);
+    if(now-last<33)return;last=now;
+    if(main.classList.contains('hidden'))return;
+    const t=now/1000;
+    if(cinematicReady){
+      const zoom=1.018+Math.sin(t*.32)*.0025,dw=Wc*zoom,dh=Hc*zoom;
+      const ox=-(dw-Wc)/2+Math.sin(t*.18)*4,oy=-(dh-Hc)/2+Math.cos(t*.2)*2;
+      g.drawImage(cinematicImage,ox,oy,dw,dh);
+      // Animated lighting layered over the cinematic artwork.
+      g.save();g.globalCompositeOperation='screen';
+      const pulse=.78+Math.sin(t*2.2)*.08;
+      const blue=g.createRadialGradient(410,510,20,410,510,470);blue.addColorStop(0,`rgba(91,220,255,${.085*pulse})`);blue.addColorStop(.55,`rgba(48,150,215,${.025*pulse})`);blue.addColorStop(1,'transparent');g.fillStyle=blue;g.fillRect(0,120,900,600);
+      const red=g.createRadialGradient(770,170,8,770,170,300);red.addColorStop(0,`rgba(255,38,67,${.11+Math.sin(t*2.7)*.018})`);red.addColorStop(1,'transparent');g.fillStyle=red;g.fillRect(470,0,620,500);
+      g.restore();
+      // Subtle glows on eyes without overexposing the image.
+      g.save();g.globalCompositeOperation='screen';
+      for(const [x,y,r,a] of [[771,157,7,.28],[672,598,3.2,.22],[711,601,3.2,.22],[840,602,3.2,.2],[962,555,3,.18],[1050,516,3,.18]]){g.shadowBlur=r*4;g.shadowColor='#ff2449';ellipse(g,x,y,r,r,`rgba(255,45,75,${a+.05*Math.sin(t*2.4+x)})`)}g.shadowBlur=0;g.restore();
+    }else{
+      g.drawImage(staticLayer,0,0);
+      g.save();for(let i=0;i<7;i++){const x=((i*239+t*(5+i))%1580)-180,y=72+(i%3)*52;g.fillStyle=`rgba(89,101,109,${.022+i*.004})`;g.beginPath();g.ellipse(x,y,180+(i%3)*45,27+(i%2)*10,0,0,TAU2);g.fill()}g.restore();
+      drawFlashlight(g,t);
+      drawZombie(g,1040,350,1.28,t,.7,true);drawZombie(g,885,442,.82,t,.9,false);drawZombie(g,735,455,.7,t,.82,false);drawZombie(g,1165,472,.72,t,.78,false);drawSurvivor(g,t);
+    }
+    drawRain(g,t);drawFog(g,t);
+    // Sparks and embers.
+    g.save();for(let i=0;i<24;i++){const x=(i*137+t*(12+i%4*5))%1280,y=620-((i*51+t*(18+i%3*9))%260),a=.18+(i%5)*.05;g.fillStyle=i%4===0?`rgba(255,61,91,${a})`:`rgba(255,183,98,${a*.65})`;g.beginPath();g.arc(x,y,1+(i%3)*.5,0,TAU2);g.fill()}g.restore();
+    const vignette=g.createRadialGradient(610,340,170,640,360,780);vignette.addColorStop(0,'transparent');vignette.addColorStop(.68,'rgba(0,0,0,.12)');vignette.addColorStop(1,'rgba(0,0,0,.78)');g.fillStyle=vignette;g.fillRect(0,0,Wc,Hc);
+    // Subtle red edge lighting.
+    const edge=g.createLinearGradient(0,0,1280,0);edge.addColorStop(0,'rgba(255,34,70,.12)');edge.addColorStop(.22,'transparent');edge.addColorStop(1,'rgba(20,85,105,.07)');g.fillStyle=edge;g.fillRect(0,0,Wc,Hc);
+  }
+  requestAnimationFrame(frame);
 
-  const bottomStrip=document.createElement('div'); bottomStrip.className='menu-bottom-strip';
-  bottomStrip.innerHTML=`
-    <div class="strip-card"><b>Identidade visual</b><span>Mesmo clima sombrio, agora com composição mais limpa e impacto maior.</span></div>
-    <div class="strip-card"><b>Foco visual</b><span>Hierarquia clara entre título, arte principal e ações do jogador.</span></div>
-    <div class="strip-card"><b>Navegação direta</b><span>Entradas principais organizadas em um painel único e mais elegante.</span></div>`;
-
-  left.append(topbar,head,heroWrap,bottomStrip);
-
-  const actionsCard=document.createElement('div'); actionsCard.className='menu-panel-card';
-  actionsCard.innerHTML=`<div class="card-head"><b>Operações</b><span>Acesso principal</span></div>`;
-  const actions=document.createElement('div'); actions.className='menu-actions';
-  actions.append(playBtn,armoryBtn,settingsBtn,howBtn);
-  actionsCard.append(actions);
-
-  const controlsCard=document.createElement('div'); controlsCard.className='menu-panel-card';
-  controlsCard.innerHTML=`<div class="card-head"><b>Controles</b><span>Atalhos de campo</span></div>`;
-  controlsCard.append(controls);
-
-  const signalCard=document.createElement('div'); signalCard.className='menu-panel-card';
-  signalCard.innerHTML=`
-    <div class="card-head"><b>Situação</b><span>Canal de transmissão</span></div>
-    <div class="menu-brief">
-      <div class="mini-panel"><b>Sinal ativo</b><span>Exploração top-down, recursos escassos, chefes e pressão constante em um mapa urbano em ruínas.</span></div>
-      <div class="mini-panel"><b>Objetivo</b><span>Entrar, sobreviver, extrair valor do amanhecer e aguentar uma noite mais pesada que a anterior.</span></div>
-    </div>
-    <div class="menu-corner-accent"></div>`;
-
-  right.append(actionsCard,controlsCard,signalCard);
-
-  panel.innerHTML='';
-  shell.append(left,right);
-  panel.append(shell);
-  if(features.length){ hero.append(...features); }
+  // Render resolution settings. This changes the actual game canvas backing resolution
+  // while preserving the viewport coordinates and controls.
+  const RESOLUTIONS=['800x600','1024x768','1280x720','1366x768','1600x900','1920x1080','2560x1440'];
+  const currentClosest=()=>{
+    const sw=Math.max(800,Math.round((window.screen?.width||innerWidth)*(window.devicePixelRatio||1)));
+    const sh=Math.max(600,Math.round((window.screen?.height||innerHeight)*(window.devicePixelRatio||1)));
+    return RESOLUTIONS.reduce((best,item)=>{
+      const [w,h]=item.split('x').map(Number),[bw,bh]=best.split('x').map(Number);
+      return Math.abs(w-sw)+Math.abs(h-sh)<Math.abs(bw-sw)+Math.abs(bh-sh)?item:best;
+    },'1366x768');
+  };
+  if(typeof save!=='undefined'&&save.settings){save.settings.resolution??=currentClosest()}
+  const applyRenderResolution=()=>{
+    if(typeof canvas==='undefined'||typeof ctx==='undefined')return;
+    const value=save?.settings?.resolution||currentClosest();
+    const [rw,rh]=value.split('x').map(Number);
+    if(!Number.isFinite(rw)||!Number.isFinite(rh))return;
+    W=innerWidth;H=innerHeight;DPR=Math.max(rw/Math.max(W,1),rh/Math.max(H,1));
+    if(canvas.width!==rw)canvas.width=rw;
+    if(canvas.height!==rh)canvas.height=rh;
+    canvas.style.width=W+'px';canvas.style.height=H+'px';
+    ctx.setTransform(rw/Math.max(W,1),0,0,rh/Math.max(H,1),0,0);
+  };
+  window.__applyDeadSignalResolution=applyRenderResolution;
+  const settingsGrid=document.querySelector('#settingsScreen .settings-grid');
+  if(settingsGrid&&!document.getElementById('resolutionSelect')){
+    const setting=document.createElement('div');setting.className='setting resolution-setting';
+    const label=document.createElement('span');label.textContent='Resolução';
+    const select=document.createElement('select');select.id='resolutionSelect';select.setAttribute('aria-label','Resolução de renderização');
+    for(const value of RESOLUTIONS){const option=document.createElement('option');option.value=value;option.textContent=value;select.appendChild(option)}
+    select.value=save.settings.resolution;
+    select.addEventListener('change',()=>{save.settings.resolution=select.value;persist();applyRenderResolution()});
+    setting.append(label,select);settingsGrid.appendChild(setting);
+  }
+  if(typeof syncSettings==='function'){
+    const previousSync=syncSettings;
+    syncSettings=function(){previousSync();const select=document.getElementById('resolutionSelect');if(select)select.value=save.settings.resolution||currentClosest()};
+  }
+  addEventListener('resize',()=>requestAnimationFrame(applyRenderResolution));
+  applyRenderResolution();
 })();
 </script>
 
+<script src="assets/js/support-grenade-powerups-patch.js"></script>
 </body>
 </html>
