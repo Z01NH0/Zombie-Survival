@@ -1,8 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport"/>
 <title>Dead Signal: Nightfall Reborn</title>
 <style>
 :root{--bg:#05060a;--panel:rgba(8,11,18,.93);--panel2:rgba(15,20,31,.9);--line:rgba(255,255,255,.1);--text:#f5f7fb;--muted:#99a4b8;--red:#ff3558;--red2:#b81437;--cyan:#5cecff;--gold:#ffd166;--green:#58f2a2;--purple:#9d7cff;--shadow:0 30px 90px rgba(0,0,0,.58)}
@@ -19,7 +20,6 @@
 #mobileControls{display:none;position:fixed;inset:0;z-index:20;pointer-events:none}.stick-zone{position:absolute;width:122px;height:122px;border:1px solid rgba(255,255,255,.12);border-radius:50%;background:rgba(255,255,255,.035);pointer-events:auto;bottom:28px}.stick-zone.left{left:25px}.stick-zone.right{right:25px}.stick-knob{position:absolute;left:50%;top:50%;margin:-25px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22)}.mobile-skills{position:absolute;right:20px;bottom:170px;display:grid;grid-template-columns:repeat(2,52px);gap:9px;pointer-events:auto}.mobile-btn{height:52px;border-radius:50%;border:1px solid var(--line);background:rgba(5,8,14,.78);font-weight:1000}.mobile-btn.ult{border-color:rgba(255,209,102,.45)}
 @media(max-width:840px){.menu-shell{grid-template-columns:1fr}.hero{min-height:230px;height:34vh}.menu-features,.cards,.shop-grid,.choice-grid,.manual-grid,.upgrade-grid,.settings-grid{grid-template-columns:1fr}.panel{padding:18px}.bars{width:58vw}.bossbar{top:116px;width:75vw}.phase-panel{min-width:140px}.phase-big{font-size:19px}.hud-bottom{bottom:13px}.skill{width:52px;height:52px;border-radius:12px}.skill.ultimate{width:61px;height:61px}.skill .glyph{font-size:20px}.left-bottom{bottom:148px}.mini-wrap{width:104px;height:104px}.flashlight-info{display:none}.stats-grid{grid-template-columns:repeat(2,1fr)}#mobileControls{display:block}canvas{cursor:default}}
 </style>
-
 <style id="caprichoFinalStyle">
 #skillE{display:none!important}
 .hud-top{left:18px;right:18px;top:14px;align-items:flex-start}
@@ -74,52 +74,51 @@
 .shop-feedback.bad{border-color:rgba(255,83,108,.35);color:#ff6e81}
 @media(max-width:1100px){#weaponHud{width:250px}#resourceStack{top:494px}.inventory-layout{grid-template-columns:1fr}.paperdoll,.inventory-center,.inventory-side{min-height:220px}.survivor-model{height:320px!important;min-height:320px}.mini-wrap{width:120px;height:120px}.phase-panel{top:142px}}
 </style>
-
-<link rel="stylesheet" href="assets/css/audio-interface-patch.css">
-<link rel="stylesheet" href="assets/css/combat-arsenal-patch.css">
-<link rel="stylesheet" href="assets/css/interface-controls-repair-patch.css">
-</head>
+<link href="assets/css/audio-interface-patch.css" rel="stylesheet"/>
+<link href="assets/css/combat-arsenal-patch.css" rel="stylesheet"/>
+<link href="assets/css/interface-controls-repair-patch.css" rel="stylesheet"/>
+<link href="assets/css/performance-boss-flashlight-patch.css" rel="stylesheet"/></head>
 <body>
 <canvas id="game"></canvas>
-<div id="hud" class="hidden">
-  <div class="hud-top">
-    <div class="hud-panel bars">
-      <div class="bar-row"><span>Vida</span><div class="bar"><div id="hpFill" class="fill hp"></div></div><span id="hpText">100/100</span></div>
-      <div class="bar-row" style="margin-top:7px"><span>Escudo</span><div class="bar"><div id="shieldFill" class="fill shield"></div></div><span id="shieldText">0/0</span></div>
-      <div class="bar-row" style="margin-top:7px"><span>Nível</span><div class="bar"><div id="xpFill" class="fill xp"></div></div><span id="levelText">1</span></div>
-    </div>
-    <div id="bossBar" class="hud-panel bossbar hidden"><div id="bossName" class="name">ABOMINAÇÃO</div><div class="bar"><div id="bossFill" class="fill bossfill"></div></div></div>
-    <div class="hud-panel phase-panel"><div id="phaseLabel" class="phase-label">Sinal hostil</div><div id="phaseText" class="phase-big">NOITE 1</div><div id="phaseTimer" class="phase-timer">01:15</div><div class="scrap">Sucata: <b id="scrapText">0</b></div></div>
-  </div>
-  <div id="notice" class="notice"></div>
-  <div class="left-bottom"><div id="combo" class="combo">x0 <small>COMBO</small></div><div id="contracts" class="hud-panel contracts"></div></div>
-  <div class="hud-bottom">
-    <div id="skillDash" class="skill ready"><span class="key">ESPAÇO</span><span class="glyph">➤</span><span class="label">Esquiva</span><div class="cdcover"></div><span class="cdtext"></span></div>
-    <div id="skillQ" class="skill ready"><span class="key">Q</span><span id="glyphQ" class="glyph">✦</span><span id="labelQ" class="label">Especial I</span><div class="cdcover"></div><span class="cdtext"></span></div>
-    <div id="skillE" class="skill ready"><span class="key">E</span><span id="glyphE" class="glyph">◉</span><span id="labelE" class="label">Especial II</span><div class="cdcover"></div><span class="cdtext"></span></div>
-    <div id="skillR" class="skill ultimate"><div class="ult-ring"></div><span class="key">R</span><span id="glyphR" class="glyph">☄</span><span class="label">Ultimate</span><div class="cdcover"></div><span class="cdtext"></span></div>
-  </div>
-  <div class="mini-wrap"><canvas id="mini" width="150" height="150"></canvas></div>
-  <div class="flashlight-info">🔦 <b>Lanterna tática</b><br>olhos vermelhos permanecem visíveis</div>
-  <div id="vignette" class="vignette"></div>
+<div class="hidden" id="hud">
+<div class="hud-top">
+<div class="hud-panel bars">
+<div class="bar-row"><span>Vida</span><div class="bar"><div class="fill hp" id="hpFill"></div></div><span id="hpText">100/100</span></div>
+<div class="bar-row" style="margin-top:7px"><span>Escudo</span><div class="bar"><div class="fill shield" id="shieldFill"></div></div><span id="shieldText">0/0</span></div>
+<div class="bar-row" style="margin-top:7px"><span>Nível</span><div class="bar"><div class="fill xp" id="xpFill"></div></div><span id="levelText">1</span></div>
 </div>
-<div id="mobileControls"><div id="moveStick" class="stick-zone left"><div class="stick-knob"></div></div><div id="aimStick" class="stick-zone right"><div class="stick-knob"></div></div><div class="mobile-skills"><button class="mobile-btn" data-action="q">Q</button><button class="mobile-btn" data-action="e">E</button><button class="mobile-btn" data-action="dash">➤</button><button class="mobile-btn ult" data-action="r">R</button></div></div>
-<section id="mainMenu" class="screen"><div class="panel"><div class="menu-shell"><div class="menu-left"><div class="menu-title-row"><div class="kicker">Dead Signal protocol</div><div class="version">Nightfall 2.5D</div></div><h1>DEAD <span class="outline">SIGNAL</span></h1><p class="lead">Uma reconstrução de terror e sobrevivência: atravesse noites quase cegas, revele infectados com a lanterna, sobreviva até o amanhecer e use a loja para preparar a próxima incursão.</p><div class="hero"><canvas id="menuCanvas" width="820" height="430"></canvas><div class="hero-copy"><b>Nem tudo no escuro está morto.</b><span>A mira é sua única fonte segura de visão.</span></div></div><div class="menu-features"><div class="feature"><b>Lanterna real</b><span>Corpos só aparecem dentro do feixe. Olhos denunciam movimentos no escuro.</span></div><div class="feature"><b>Amanhecer</b><span>A ameaça recua, a luz retorna e a loja abre antes da próxima noite.</span></div><div class="feature"><b>Mapa 2.5D</b><span>Fachadas, sombras, destroços, postes, veículos e profundidade por camadas.</span></div></div></div><div class="menu-side"><button id="playBtn" class="btn primary">Iniciar expedição</button><button id="armoryBtn" class="btn">Arsenal permanente</button><button id="settingsBtn" class="btn">Configurações</button><button id="howBtn" class="btn">Como jogar</button><div class="controls-note">WASD mover • Mouse mirar/atirar • Q habilidade • E ultimate • R recarrega • F interage • Scroll troca armas • ESC pausa.</div></div></div></div></section>
-<section id="classScreen" class="screen hidden"><div class="panel"><div class="topline"><div><div class="kicker">Seleção de sobrevivente</div><h2>OPERADORES</h2></div><button class="close" data-close="classScreen">×</button></div><div id="classCards" class="cards"></div><div class="section-title">Nível de ameaça</div><div id="difficultyCards" class="cards"></div><div class="footer-actions"><button id="startBtn" class="btn primary">Entrar na zona</button></div></div></section>
-<section id="armoryScreen" class="screen hidden"><div class="panel"><div class="topline"><div><div class="kicker">Progresso persistente</div><h2>ARSENAL DO REFÚGIO</h2></div><div style="display:flex;gap:10px;align-items:center"><span class="currency">◆ <span id="coreCount">0</span> NÚCLEOS</span><button class="close" data-close="armoryScreen">×</button></div></div><div id="metaGrid" class="upgrade-grid"></div></div></section>
-<section id="settingsScreen" class="screen hidden"><div class="panel" style="width:min(740px,95vw)"><div class="topline"><div><div class="kicker">Ajustes da experiência</div><h2>CONFIGURAÇÕES</h2></div><button class="close" data-close="settingsScreen">×</button></div><div class="settings-grid"><div class="setting"><span>Música procedural</span><button id="musicToggle" class="switch on"></button></div><div class="setting"><span>Efeitos sonoros</span><button id="sfxToggle" class="switch on"></button></div><div class="setting"><span>Tremor de tela</span><button id="shakeToggle" class="switch on"></button></div><div class="setting"><span>Números de dano</span><button id="numberToggle" class="switch on"></button></div><div class="setting"><span>Volume geral</span><input id="volumeRange" class="range" type="range" min="0" max="1" step=".05"></div><div class="setting"><span>Qualidade visual</span><select id="qualitySelect" style="background:#151a25;color:white;border:1px solid var(--line);border-radius:10px;padding:8px"><option value="high">Alta</option><option value="medium">Média</option><option value="low">Baixa</option></select></div></div></div></section>
-<section id="howScreen" class="screen hidden"><div class="panel" style="width:min(900px,95vw)"><div class="topline"><div><div class="kicker">Manual de campo</div><h2>COMO SOBREVIVER</h2></div><button class="close" data-close="howScreen">×</button></div><div class="manual-grid"><div class="card"><div class="manual-icon">🔦</div><h3>Visibilidade</h3><p>Na noite, o cenário fica quase completamente escuro. Aponte a mira para revelar os corpos. Os olhos vermelhos continuam visíveis e indicam a direção do perigo.</p></div><div class="card"><div class="manual-icon">🌅</div><h3>Amanhecer</h3><p>Ao fim do cronômetro, os infectados recuam. Aproveite a luz e compre melhorias na loja antes da próxima noite.</p></div><div class="card"><div class="manual-icon">⚡</div><h3>Habilidades</h3><p>Use Q e E para controlar hordas. O dash concede invulnerabilidade curta. A ultimate carrega causando dano e eliminando elites.</p></div></div></div></section>
-<section id="shopScreen" class="screen hidden"><div class="panel" style="width:min(1020px,96vw)"><div class="topline"><div><div class="kicker">A luz voltou por alguns instantes</div><h2>LOJA DO AMANHECER</h2><p class="lead" style="margin-top:8px">Compre melhorias instantâneas e prepare-se. A loja fecha quando a próxima noite começa.</p></div><div style="display:flex;gap:10px;align-items:center"><span class="currency">⚙ <span id="shopScrap">0</span> SUCATA</span><button id="closeShopBtn" class="close">×</button></div></div><div id="shopGrid" class="shop-grid"></div><div class="shop-footer"><div class="countdown"><small>Próximo anoitecer</small><b id="shopTimer">00:25</b></div><div style="display:flex;gap:10px"><button id="rerollBtn" class="btn">Renovar estoque</button><button id="leaveShopBtn" class="btn primary">Voltar para a zona</button></div></div></div></section>
-<section id="upgradeScreen" class="screen hidden"><div class="panel" style="width:min(1040px,95vw)"><div class="topline"><div><div class="kicker">Mutação de combate</div><h2>ESCOLHA UMA EVOLUÇÃO</h2></div></div><div id="choiceGrid" class="choice-grid"></div></div></section>
-<section id="pauseScreen" class="screen hidden"><div class="panel" style="width:min(680px,94vw);text-align:center"><div class="kicker">Operação suspensa</div><h2>PAUSADO</h2><p class="lead" style="margin:12px auto 18px">Respire. A escuridão continua esperando.</p><div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap"><button id="resumeBtn" class="btn primary">Continuar</button><button id="pauseSettingsBtn" class="btn">Configurações</button><button id="quitBtn" class="btn">Encerrar expedição</button></div></div></section>
-<section id="gameOverScreen" class="screen hidden"><div class="panel" style="width:min(720px,94vw);text-align:center"><div class="kicker">Sinal perdido</div><h2>FIM DA EXPEDIÇÃO</h2><div id="runStats" class="stats-grid"></div><div class="currency" style="margin-bottom:18px">◆ <span id="earnedCores">0</span> NÚCLEOS OBTIDOS</div><div style="display:flex;justify-content:center;gap:10px"><button id="retryBtn" class="btn primary">Tentar novamente</button><button id="menuBtn" class="btn">Menu principal</button></div></div></section>
+<div class="hud-panel bossbar hidden" id="bossBar"><div class="name" id="bossName">ABOMINAÇÃO</div><div class="bar"><div class="fill bossfill" id="bossFill"></div></div></div>
+<div class="hud-panel phase-panel"><div class="phase-label" id="phaseLabel">Sinal hostil</div><div class="phase-big" id="phaseText">NOITE 1</div><div class="phase-timer" id="phaseTimer">01:15</div><div class="scrap">Sucata: <b id="scrapText">0</b></div></div>
+</div>
+<div class="notice" id="notice"></div>
+<div class="left-bottom"><div class="combo" id="combo">x0 <small>COMBO</small></div><div class="hud-panel contracts" id="contracts"></div></div>
+<div class="hud-bottom">
+<div class="skill ready" id="skillDash"><span class="key">ESPAÇO</span><span class="glyph">➤</span><span class="label">Esquiva</span><div class="cdcover"></div><span class="cdtext"></span></div>
+<div class="skill ready" id="skillQ"><span class="key">Q</span><span class="glyph" id="glyphQ">✦</span><span class="label" id="labelQ">Especial I</span><div class="cdcover"></div><span class="cdtext"></span></div>
+<div class="skill ready" id="skillE"><span class="key">E</span><span class="glyph" id="glyphE">◉</span><span class="label" id="labelE">Especial II</span><div class="cdcover"></div><span class="cdtext"></span></div>
+<div class="skill ultimate" id="skillR"><div class="ult-ring"></div><span class="key">R</span><span class="glyph" id="glyphR">☄</span><span class="label">Ultimate</span><div class="cdcover"></div><span class="cdtext"></span></div>
+</div>
+<div class="mini-wrap"><canvas height="150" id="mini" width="150"></canvas></div>
+<div class="flashlight-info">🔦 <b>Lanterna tática</b><br/>olhos vermelhos permanecem visíveis</div>
+<div class="vignette" id="vignette"></div>
+</div>
+<div id="mobileControls"><div class="stick-zone left" id="moveStick"><div class="stick-knob"></div></div><div class="stick-zone right" id="aimStick"><div class="stick-knob"></div></div><div class="mobile-skills"><button class="mobile-btn" data-action="q">Q</button><button class="mobile-btn" data-action="e">E</button><button class="mobile-btn" data-action="dash">➤</button><button class="mobile-btn ult" data-action="r">R</button></div></div>
+<section class="screen" id="mainMenu"><div class="panel"><div class="menu-shell"><div class="menu-left"><div class="menu-title-row"><div class="kicker">Dead Signal protocol</div><div class="version">Nightfall 2.5D</div></div><h1>DEAD <span class="outline">SIGNAL</span></h1><p class="lead">Uma reconstrução de terror e sobrevivência: atravesse noites quase cegas, revele infectados com a lanterna, sobreviva até o amanhecer e use a loja para preparar a próxima incursão.</p><div class="hero"><canvas height="430" id="menuCanvas" width="820"></canvas><div class="hero-copy"><b>Nem tudo no escuro está morto.</b><span>A mira é sua única fonte segura de visão.</span></div></div><div class="menu-features"><div class="feature"><b>Lanterna real</b><span>Corpos só aparecem dentro do feixe. Olhos denunciam movimentos no escuro.</span></div><div class="feature"><b>Amanhecer</b><span>A ameaça recua, a luz retorna e a loja abre antes da próxima noite.</span></div><div class="feature"><b>Mapa 2.5D</b><span>Fachadas, sombras, destroços, postes, veículos e profundidade por camadas.</span></div></div></div><div class="menu-side"><button class="btn primary" id="playBtn">Iniciar expedição</button><button class="btn" id="armoryBtn">Arsenal permanente</button><button class="btn" id="settingsBtn">Configurações</button><button class="btn" id="howBtn">Como jogar</button><div class="controls-note">WASD mover • Mouse mirar/atirar • Q habilidade • E ultimate • R recarrega • F interage • Scroll troca armas • ESC pausa.</div></div></div></div></section>
+<section class="screen hidden" id="classScreen"><div class="panel"><div class="topline"><div><div class="kicker">Seleção de sobrevivente</div><h2>OPERADORES</h2></div><button class="close" data-close="classScreen">×</button></div><div class="cards" id="classCards"></div><div class="section-title">Nível de ameaça</div><div class="cards" id="difficultyCards"></div><div class="footer-actions"><button class="btn primary" id="startBtn">Entrar na zona</button></div></div></section>
+<section class="screen hidden" id="armoryScreen"><div class="panel"><div class="topline"><div><div class="kicker">Progresso persistente</div><h2>ARSENAL DO REFÚGIO</h2></div><div style="display:flex;gap:10px;align-items:center"><span class="currency">◆ <span id="coreCount">0</span> NÚCLEOS</span><button class="close" data-close="armoryScreen">×</button></div></div><div class="upgrade-grid" id="metaGrid"></div></div></section>
+<section class="screen hidden" id="settingsScreen"><div class="panel" style="width:min(740px,95vw)"><div class="topline"><div><div class="kicker">Ajustes da experiência</div><h2>CONFIGURAÇÕES</h2></div><button class="close" data-close="settingsScreen">×</button></div><div class="settings-grid"><div class="setting"><span>Música procedural</span><button class="switch on" id="musicToggle"></button></div><div class="setting"><span>Efeitos sonoros</span><button class="switch on" id="sfxToggle"></button></div><div class="setting"><span>Tremor de tela</span><button class="switch on" id="shakeToggle"></button></div><div class="setting"><span>Números de dano</span><button class="switch on" id="numberToggle"></button></div><div class="setting"><span>Volume geral</span><input class="range" id="volumeRange" max="1" min="0" step=".05" type="range"/></div><div class="setting"><span>Qualidade visual</span><select id="qualitySelect" style="background:#151a25;color:white;border:1px solid var(--line);border-radius:10px;padding:8px"><option value="high">Alta</option><option value="medium">Média</option><option value="low">Baixa</option></select></div></div></div></section>
+<section class="screen hidden" id="howScreen"><div class="panel" style="width:min(900px,95vw)"><div class="topline"><div><div class="kicker">Manual de campo</div><h2>COMO SOBREVIVER</h2></div><button class="close" data-close="howScreen">×</button></div><div class="manual-grid"><div class="card"><div class="manual-icon">🔦</div><h3>Visibilidade</h3><p>Na noite, o cenário fica quase completamente escuro. Aponte a mira para revelar os corpos. Os olhos vermelhos continuam visíveis e indicam a direção do perigo.</p></div><div class="card"><div class="manual-icon">🌅</div><h3>Amanhecer</h3><p>Ao fim do cronômetro, os infectados recuam. Aproveite a luz e compre melhorias na loja antes da próxima noite.</p></div><div class="card"><div class="manual-icon">⚡</div><h3>Habilidades</h3><p>Use Q e E para controlar hordas. O dash concede invulnerabilidade curta. A ultimate carrega causando dano e eliminando elites.</p></div></div></div></section>
+<section class="screen hidden" id="shopScreen"><div class="panel" style="width:min(1020px,96vw)"><div class="topline"><div><div class="kicker">A luz voltou por alguns instantes</div><h2>LOJA DO AMANHECER</h2><p class="lead" style="margin-top:8px">Compre melhorias instantâneas e prepare-se. A loja fecha quando a próxima noite começa.</p></div><div style="display:flex;gap:10px;align-items:center"><span class="currency">⚙ <span id="shopScrap">0</span> SUCATA</span><button class="close" id="closeShopBtn">×</button></div></div><div class="shop-grid" id="shopGrid"></div><div class="shop-footer"><div class="countdown"><small>Próximo anoitecer</small><b id="shopTimer">00:25</b></div><div style="display:flex;gap:10px"><button class="btn" id="rerollBtn">Renovar estoque</button><button class="btn primary" id="leaveShopBtn">Voltar para a zona</button></div></div></div></section>
+<section class="screen hidden" id="upgradeScreen"><div class="panel" style="width:min(1040px,95vw)"><div class="topline"><div><div class="kicker">Mutação de combate</div><h2>ESCOLHA UMA EVOLUÇÃO</h2></div></div><div class="choice-grid" id="choiceGrid"></div></div></section>
+<section class="screen hidden" id="pauseScreen"><div class="panel" style="width:min(680px,94vw);text-align:center"><div class="kicker">Operação suspensa</div><h2>PAUSADO</h2><p class="lead" style="margin:12px auto 18px">Respire. A escuridão continua esperando.</p><div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap"><button class="btn primary" id="resumeBtn">Continuar</button><button class="btn" id="pauseSettingsBtn">Configurações</button><button class="btn" id="quitBtn">Encerrar expedição</button></div></div></section>
+<section class="screen hidden" id="gameOverScreen"><div class="panel" style="width:min(720px,94vw);text-align:center"><div class="kicker">Sinal perdido</div><h2>FIM DA EXPEDIÇÃO</h2><div class="stats-grid" id="runStats"></div><div class="currency" style="margin-bottom:18px">◆ <span id="earnedCores">0</span> NÚCLEOS OBTIDOS</div><div style="display:flex;justify-content:center;gap:10px"><button class="btn primary" id="retryBtn">Tentar novamente</button><button class="btn" id="menuBtn">Menu principal</button></div></div></section>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],TAU=Math.PI*2,rand=(a,b)=>a+Math.random()*(b-a),pick=a=>a[(Math.random()*a.length)|0],clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t,dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const canvas=$('#game'),ctx=canvas.getContext('2d',{alpha:false}),mini=$('#mini'),mctx=mini.getContext('2d');let W=innerWidth,H=innerHeight,DPR=Math.min(devicePixelRatio||1,2);
 function resize(){W=innerWidth;H=innerHeight;DPR=Math.min(devicePixelRatio||1,2);canvas.width=W*DPR;canvas.height=H*DPR;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0)}addEventListener('resize',resize);resize();
 const STORE_KEY='dead_signal_nightfall_v1';
 const defaults={cores:0,meta:{vitality:0,power:0,mobility:0,armor:0,focus:0,fortune:0},settings:{music:true,sfx:true,shake:true,numbers:true,volume:.62,quality:'high'}};
-let save=(()=>{try{return Object.assign(structuredClone(defaults),JSON.parse(localStorage.getItem(STORE_KEY)||'{}'))}catch{return structuredClone(defaults)}})();save.meta=Object.assign({},defaults.meta,save.meta||{});save.settings=Object.assign({},defaults.settings,save.settings||{});const persist=()=>localStorage.setItem(STORE_KEY,JSON.stringify(save));
+let save=(()=>{try{return Object.assign(structuredClone(defaults),JSON.parse(localStorage.getItem(STORE_KEY)||'{}'))}catch{return structuredClone(defaults)}})();save.meta=Object.assign({},defaults.meta,save.meta||{});save.settings=Object.assign({},defaults.settings,save.settings||{});const persist=()=>{try{localStorage.setItem(STORE_KEY,JSON.stringify(save))}catch(err){console.warn('[Dead Signal] Salvamento local indisponível nesta sessão.',err)}};
 function show(id){$$('.screen').forEach(s=>s.classList.add('hidden'));$('#'+id).classList.remove('hidden')}function overlay(id){$('#'+id).classList.remove('hidden')}function hide(id){$('#'+id)?.classList.add('hidden')}
 const CLASSES={
  vanguard:{name:'Vanguard',role:'Defesa e impacto',color:'#5cecff',hp:150,speed:220,damage:20,fireRate:.19,projectileSpeed:850,glyphs:['⬡','✹','☄'],labels:['Bastião','Ruptura','Queda orbital'],desc:'Soldado blindado com escudo cinético, controle de multidão e ataques orbitais.',stats:[88,62,50]},
@@ -250,18 +249,14 @@ buildClasses();buildMeta();syncSettings();drawMenu();
 #specialistScreen .store-panel{padding-left:150px}#specialistScreen .store-tabs{position:absolute;left:18px;top:138px;width:116px;display:flex;flex-direction:column;border-bottom:0;padding:0;margin:0}#specialistScreen .store-tab{border-radius:14px 5px 5px 14px;text-align:left}#specialistScreen .store-tab.active{transform:translateX(7px)}
 @media(max-width:920px){#specialistScreen .store-panel{padding-left:18px}#specialistScreen .store-tabs{position:static;width:auto;flex-direction:row;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}#specialistScreen .store-tab{border-radius:12px}#specialistScreen .store-tab.active{transform:none}.inventory-layout{grid-template-columns:1fr}.inventory-side{min-height:220px}.inventory-grid{grid-template-columns:repeat(4,1fr)}.weapon-slot-hud{width:130px}.weapon-slot-hud .wname{font-size:9px}.store-grid{grid-template-columns:1fr 1fr}.bench-layout{grid-template-columns:1fr}.hud-bottom{bottom:107px}.weapon-hud{max-width:96vw}.resource-stack{display:none}}
 </style>
-
-<div id="weaponHud" class="weapon-hud hidden"></div>
-<div id="resourceStack" class="resource-stack hidden"><div class="resource-chip">🩸 Sangue Necrótico: <b id="bloodHud">0</b></div><div class="resource-chip">🎒 Inventário: <b id="inventoryCountHud">0/30</b></div></div>
-<div id="interactPrompt" class="interact-prompt"><kbd>E</kbd><span id="interactText">Interagir</span></div>
-<div id="dialogBox" class="dialog-box hidden"><div id="dialogName" class="dialog-name">Sobrevivente</div><div id="dialogText" class="dialog-text"></div></div>
-<div id="lootToast" class="loot-toast"></div>
-
-<section id="inventoryScreen" class="screen hidden"><div class="panel inventory-panel"><div class="topline"><div><div class="kicker">Gerenciamento de equipamento</div><h2>INVENTÁRIO</h2></div><button id="closeInventoryBtn" class="close">×</button></div><div class="inventory-layout"><div class="paperdoll"><div class="survivor-model"></div><div id="armorEquipGrid" class="equipment-grid"></div></div><div class="inventory-center"><div id="weaponEquipRow" class="weapon-equip-row"></div><div class="section-title" style="margin-top:0">Mochila</div><div id="inventoryGrid" class="inventory-grid"></div></div><div class="inventory-side"><div class="kicker">Scanner portátil</div><div id="scanContent"><h3 class="scan-title">Selecione um item</h3><p class="scan-desc">Clique em um item para usar, equipar, soltar ou consultar suas informações detalhadas.</p></div><div id="itemActionArea" class="item-actions"></div></div></div></div></section>
-
-<section id="merchantScreen" class="screen hidden"><div class="panel store-panel"><div class="topline"><div><div class="kicker">Mercador itinerante</div><h2>BAZAR DO AMANHECER</h2><p class="lead" style="margin-top:8px">Suprimentos, ferramentas e ofertas estranhas encontradas entre as ruínas.</p></div><div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap"><span class="currency">⚙ <span id="merchantScrap">0</span></span><span class="currency" style="color:#ff6881;border-color:rgba(255,53,88,.25);background:rgba(255,53,88,.06)">🩸 <span id="merchantBlood">0</span></span><button id="closeMerchantBtn" class="close">×</button></div></div><div class="store-tabs"><button class="store-tab active" data-merchant-tab="buy">Comprar</button><button class="store-tab" data-merchant-tab="sell">Vender</button></div><div id="merchantContent"></div></div></section>
-
-<section id="specialistScreen" class="screen hidden"><div class="panel store-panel"><div class="topline"><div><div class="kicker">Especialista em armamentos</div><h2>OFICINA DO TRABUCO</h2><p class="lead" style="margin-top:8px">Armas, armaduras, reparos e fusões de equipamento.</p></div><div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap"><span class="currency">⚙ <span id="specialistScrap">0</span></span><span class="currency" style="color:#ff6881;border-color:rgba(255,53,88,.25);background:rgba(255,53,88,.06)">🩸 <span id="specialistBlood">0</span></span><button id="closeSpecialistBtn" class="close">×</button></div></div><div class="store-tabs"><button class="store-tab active" data-special-tab="stock">Loja</button><button class="store-tab" data-special-tab="repair">Reparação</button><button class="store-tab" data-special-tab="fusion">Aprimoramento</button></div><div id="specialistContent"></div></div></section>
+<div class="weapon-hud hidden" id="weaponHud"></div>
+<div class="resource-stack hidden" id="resourceStack"><div class="resource-chip">🩸 Sangue Necrótico: <b id="bloodHud">0</b></div><div class="resource-chip">🎒 Inventário: <b id="inventoryCountHud">0/30</b></div></div>
+<div class="interact-prompt" id="interactPrompt"><kbd>E</kbd><span id="interactText">Interagir</span></div>
+<div class="dialog-box hidden" id="dialogBox"><div class="dialog-name" id="dialogName">Sobrevivente</div><div class="dialog-text" id="dialogText"></div></div>
+<div class="loot-toast" id="lootToast"></div>
+<section class="screen hidden" id="inventoryScreen"><div class="panel inventory-panel"><div class="topline"><div><div class="kicker">Gerenciamento de equipamento</div><h2>INVENTÁRIO</h2></div><button class="close" id="closeInventoryBtn">×</button></div><div class="inventory-layout"><div class="paperdoll"><div class="survivor-model"></div><div class="equipment-grid" id="armorEquipGrid"></div></div><div class="inventory-center"><div class="weapon-equip-row" id="weaponEquipRow"></div><div class="section-title" style="margin-top:0">Mochila</div><div class="inventory-grid" id="inventoryGrid"></div></div><div class="inventory-side"><div class="kicker">Scanner portátil</div><div id="scanContent"><h3 class="scan-title">Selecione um item</h3><p class="scan-desc">Clique em um item para usar, equipar, soltar ou consultar suas informações detalhadas.</p></div><div class="item-actions" id="itemActionArea"></div></div></div></div></section>
+<section class="screen hidden" id="merchantScreen"><div class="panel store-panel"><div class="topline"><div><div class="kicker">Mercador itinerante</div><h2>BAZAR DO AMANHECER</h2><p class="lead" style="margin-top:8px">Suprimentos, ferramentas e ofertas estranhas encontradas entre as ruínas.</p></div><div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap"><span class="currency">⚙ <span id="merchantScrap">0</span></span><span class="currency" style="color:#ff6881;border-color:rgba(255,53,88,.25);background:rgba(255,53,88,.06)">🩸 <span id="merchantBlood">0</span></span><button class="close" id="closeMerchantBtn">×</button></div></div><div class="store-tabs"><button class="store-tab active" data-merchant-tab="buy">Comprar</button><button class="store-tab" data-merchant-tab="sell">Vender</button></div><div id="merchantContent"></div></div></section>
+<section class="screen hidden" id="specialistScreen"><div class="panel store-panel"><div class="topline"><div><div class="kicker">Especialista em armamentos</div><h2>OFICINA DO TRABUCO</h2><p class="lead" style="margin-top:8px">Armas, armaduras, reparos e fusões de equipamento.</p></div><div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap"><span class="currency">⚙ <span id="specialistScrap">0</span></span><span class="currency" style="color:#ff6881;border-color:rgba(255,53,88,.25);background:rgba(255,53,88,.06)">🩸 <span id="specialistBlood">0</span></span><button class="close" id="closeSpecialistBtn">×</button></div></div><div class="store-tabs"><button class="store-tab active" data-special-tab="stock">Loja</button><button class="store-tab" data-special-tab="repair">Reparação</button><button class="store-tab" data-special-tab="fusion">Aprimoramento</button></div><div id="specialistContent"></div></div></section>
 <script id="arsenalOverhaulJS">
 (function(){
 'use strict';
@@ -315,9 +310,9 @@ const ARMOR_DEFS={
 const CONSUMABLE_DEFS={
  medkit:{name:'Kit Médico',icon:'🩹',desc:'Recupera 42% da vida máxima.',value:20,use(p){p.heal(p.maxHp*.42)}},
  fieldDressing:{name:'Bandagem de Campo',icon:'🩸',desc:'Recupera 18% da vida máxima.',value:8,use(p){p.heal(p.maxHp*.18)}},
- ammoPack:{name:'Caixa de Munição',icon:'📦',desc:'Abre a seleção de armas e recupera 45% da reserva máxima somente da arma escolhida.',value:22,use(p){const w=currentWeapon();if(w&&w.def.kind!=='melee')w.reserve=Math.min(w.maxReserve,w.reserve+Math.ceil(w.maxReserve*.45))}},
+ ammoPack:{name:'Caixa de Munição',icon:'📦',desc:'Abre a seleção e recupera 18% da reserva máxima somente da arma escolhida.',value:20,use(p){const w=currentWeapon();if(w&&w.def.kind!=='melee')w.reserve=Math.min(w.maxReserve,w.reserve+Math.ceil(w.maxReserve*.18))}},
  stim:{name:'Estimulante Veloz',icon:'💉',desc:'Aumenta velocidade e cadência por 24 segundos.',value:32,use(p){p.tempBoost=Math.max(p.tempBoost||0,24);p.tempBoostApplied=true}},
- battery:{name:'Bateria de Lanterna',icon:'🔋',desc:'Amplia permanentemente a lanterna nesta expedição.',value:34,use(){game.flashlight.range+=35;game.flashlight.arc=Math.min(.82,game.flashlight.arc+.02)}},
+ battery:{name:'Bateria de Lanterna',icon:'🔋',desc:'Recupera 10% da carga da lanterna.',value:28,use(){game.flashlight.battery=Math.min(game.flashlight.maxBattery||100,(game.flashlight.battery||0)+10);window.__flashlightBatteryFeedback?.(10)}},
  necroVial:{name:'Frasco de Sangue Necrótico',icon:'🧪',desc:'Material raro usado pelo Especialista.',value:25,use(){game.blood+=4}}
 };
 
@@ -552,9 +547,7 @@ function openSpecialist(){game.paused=true;game.shopOpen=true;game.modal='specia
 $('#closeMerchantBtn').onclick=()=>closeModal('merchantScreen');$('#closeSpecialistBtn').onclick=()=>closeModal('specialistScreen');
 $$('[data-merchant-tab]').forEach(b=>b.onclick=()=>renderMerchant(b.dataset.merchantTab));$$('[data-special-tab]').forEach(b=>b.onclick=()=>renderSpecialist(b.dataset.specialTab));
 function syncStoreResources(){$('#merchantScrap').textContent=Math.floor(game.scrap);$('#merchantBlood').textContent=Math.floor(game.blood||0);$('#specialistScrap').textContent=Math.floor(game.scrap);$('#specialistBlood').textContent=Math.floor(game.blood||0)}
-function buildMerchantStock(){if(game.merchantStockDay===game.night&&game.merchantStock?.length)return;game.merchantStockDay=game.night;game.merchantStock=[
- {kind:'item',item:makeConsumable('medkit',1),price:20+game.night*2},{kind:'item',item:makeConsumable('ammoPack',1),price:24+game.night*2},{kind:'item',item:makeConsumable('stim',1),price:31+game.night*3},{kind:'item',item:makeConsumable('battery',1),price:35+game.night*3},{kind:'item',item:makeWeapon(pick(['kitchen','crowbar','axe']),Math.random()<.2?'silver':'bronze'),price:36+game.night*4},{kind:'buff',id:'fortune',name:'Amuleto de Fortuna',icon:'🍀',desc:'+8% de chance de melhores drops nesta expedição.',price:48+game.night*5,buy(){game.runFortune=(game.runFortune||0)+.08}}
- ]}
+function buildMerchantStock(){if(game.merchantStockDay===game.night&&game.merchantStock?.length)return;game.merchantStockDay=game.night;const prices={medkit:20,fieldDressing:10,stim:31,battery:18,necroVial:54},support=['medkit','fieldDressing','stim','battery','necroVial'].sort(()=>Math.random()-.5).slice(0,3);game.merchantStock=support.map(id=>({kind:'item',item:makeConsumable(id,1),price:Math.round(prices[id]+game.night*(id==='battery'?2.2:id==='necroVial'?4:2.5))}));game.merchantStock.push({kind:'item',item:makeWeapon(pick(['kitchen','crowbar','axe']),Math.random()<.2?'silver':'bronze'),price:36+game.night*4},{kind:'buff',id:'fortune',name:'Amuleto de Fortuna',icon:'🍀',desc:'+8% de chance de melhores drops nesta expedição.',price:48+game.night*5,buy(){game.runFortune=(game.runFortune||0)+.08}})}
 function buildSpecialistStock(){if(game.specialistStockDay===game.night&&game.specialistStock?.length)return;game.specialistStockDay=game.night;game.specialistStock=[];for(let i=0;i<6;i++){const rare=randomRarity(),item=Math.random()<.68?randomWeapon(rare):randomArmor(rare);game.specialistStock.push({item,price:Math.round(item.value*(1.2+game.night*.045))})}}
 function renderMerchant(tab='buy'){
  syncStoreResources();$$('[data-merchant-tab]').forEach(b=>b.classList.toggle('active',b.dataset.merchantTab===tab));const box=$('#merchantContent');
@@ -681,13 +674,13 @@ randomRarity=function(allowUnique=false){
 };
 LootCrate.prototype.breakOpen=function(){
  if(this.dead)return;this.dead=true;burst(this.x,this.y,'#ffd166',24,260,5);shockwave(this.x,this.y,'#ffd166',92,.42,5);audio.noise(.18,.15);screenShake(5);
- const roll=Math.random();let drops=[];
+ const roll=Math.random(),ammoChance=selectedDifficulty==='nightmare'?.08:selectedDifficulty==='survivor'?.20:.14;let drops=[];
  if(roll<.18)drops=[randomWeapon()];
  else if(roll<.32)drops=[randomArmor()];
  else if(roll<.61)drops=[makeConsumable(pick(['medkit','fieldDressing','battery']))];
- else if(roll<.79)drops=[makeConsumable('ammoPack'),makeConsumable('fieldDressing')];
- else if(roll<.93)drops=[makeConsumable('necroVial',1)];
- else if(roll<.992)drops=[Math.random()<.58?randomWeapon('silver'):randomArmor('silver')];
+ else if(roll<.61+ammoChance)drops=[makeConsumable('ammoPack'),makeConsumable('fieldDressing')];
+ else if(roll<.91)drops=[makeConsumable('necroVial',1)];
+ else if(roll<.988)drops=[Math.random()<.58?randomWeapon('silver'):randomArmor('silver')];
  else drops=[Math.random()<.65?randomWeapon('gold'):randomArmor('gold'),makeConsumable('necroVial',1)];
  drops.forEach((item,i)=>game.pickups.push(new GearPickup(this.x+(i-(drops.length-1)/2)*30,this.y,item)));game.scrap+=3+(rand(0,5)|0);
 };
@@ -695,7 +688,7 @@ Enemy.prototype.die=function(){
  if(this.dead)return;const elite=this.elite,x=this.x,y=this.y,isBoss=this instanceof Boss;oldEnemyDie.call(this);if(isBoss)return;
  const bloodChance=elite?.22:.075;if(Math.random()<bloodChance){const amount=elite?(rand(2,5)|0):1;game.blood+=amount;transactionFeedback(`+${amount} sangue necrótico`,'blood','🩸')}
  if(Math.random()<(elite?.032:.0045)){const item=Math.random()<.54?randomArmor():randomWeapon();game.pickups.push(new GearPickup(x,y,item))}
- if(Math.random()<.035)game.pickups.push(new GearPickup(x+rand(-12,12),y+rand(-12,12),makeConsumable(pick(['fieldDressing','ammoPack']))));
+ const supplyChance=selectedDifficulty==='nightmare'?.012:selectedDifficulty==='survivor'?.045:.028;if(Math.random()<supplyChance)game.pickups.push(new GearPickup(x+rand(-12,12),y+rand(-12,12),makeConsumable(pick(['fieldDressing','ammoPack']))));
 };
 Boss.prototype.die=function(){
  if(this.dead)return;const beforeMulti=game.player?.multishot||0;oldBossDie.call(this);if(game.player)game.player.multishot=beforeMulti;
@@ -794,7 +787,6 @@ window.__arsenalDebug={makeWeapon,makeArmor,makeConsumable,spawnLootCrate,openIn
 if(game.running&&game.player&&!game.player.weaponSlots)initPlayerSystems(game.player);
 })();
 </script>
-
 <style id="topDownOverhaulCSS">
 :root{
   --ui-ink:#05070b;--ui-steel:#101720;--ui-steel2:#192431;--ui-edge:rgba(183,224,236,.16);
@@ -885,21 +877,25 @@ const rarityData={
  bronze:{dmg:1,mag:1,dur:1},silver:{dmg:1.24,mag:1.25,dur:1.18},gold:{dmg:1.58,mag:1.5,dur:1.42},diamond:{dmg:2.05,mag:2,dur:1.78},platinum:{dmg:2.7,mag:2.5,dur:2.2},unique:{dmg:3.65,mag:3,dur:2.85}
 };
 const ammoDefs={
- handgun:{name:'Munição de Pistola',icon:'▰',desc:'Escolha uma pistola, arma dupla ou revólver para receber estes cartuchos.',kinds:['pistol','dual','revolver'],ratio:.42,flat:24},
- light:{name:'Munição Leve',icon:'▥',desc:'Escolha uma submetralhadora ou fuzil de assalto para receber estes carregadores.',kinds:['smg','rifle'],ratio:.38,flat:55},
- shells:{name:'Cartuchos de Escopeta',icon:'▤',desc:'Escolha uma escopeta para receber estes cartuchos reforçados.',kinds:['shotgun'],ratio:.36,flat:24},
- precision:{name:'Munição de Precisão',icon:'◆',desc:'Escolha a P-AWP, a besta ou outra arma de precisão para receber estes projéteis.',kinds:['sniper'],ratio:.34,flat:10},
- rockets:{name:'Mísseis Compactos',icon:'▲',desc:'Escolha uma Killer Bee compatível para receber estas ogivas estabilizadas.',kinds:['launcher'],ratio:.5,flat:3}
+ handgun:{name:'Munição de Pistola',icon:'▰',desc:'Para pistolas, armas duplas e revólveres.',kinds:['pistol','dual','revolver'],ratio:.357,flat:20},
+ light:{name:'Munição Leve',icon:'▥',desc:'Para submetralhadoras e fuzis de assalto convencionais.',kinds:['smg','rifle'],excludeBaseIds:['nailgun'],ratio:.323,flat:47},
+ shells:{name:'Cartuchos de Escopeta',icon:'▤',desc:'Para todas as escopetas.',kinds:['shotgun'],ratio:.306,flat:20},
+ precision:{name:'Munição de Precisão',icon:'◆',desc:'Exclusiva para fuzis de precisão; não inclui bestas.',kinds:['sniper'],excludeBaseIds:['crossbow'],ratio:.289,flat:9},
+ rockets:{name:'Mísseis Compactos',icon:'▲',desc:'Para lança-foguetes e plataformas explosivas.',kinds:['launcher'],ratio:.425,flat:2},
+ arrows:{name:'Flechas Reforçadas',icon:'➶',desc:'Exclusivas para a Silent Fang e outras armas de flecha.',baseIds:['crossbow'],ratio:.30,flat:8},
+ nails:{name:'Pregos Industriais',icon:'⌁',desc:'Exclusivos para a Nailstorm e outras pregadoras.',baseIds:['nailgun'],ratio:.25,flat:40}
 };
 let ammoUid=1;
 function makeAmmoPack(type,count=1){
- const a=ammoDefs[type];
- return{uid:`ammo${Date.now().toString(36)}${ammoUid++}`,type:'consumable',baseId:`ammo_${type}`,rarity:'common',name:a.name,count,value:type==='rockets'?35:type==='precision'?25:18,fusion:false,def:{name:a.name,icon:a.icon,desc:a.desc,use(){replenishAmmo(type)}}};
+ const a=ammoDefs[type];if(!a)return null;
+ const value={rockets:35,precision:25,arrows:24,nails:22}[type]||18;
+ return{uid:`ammo${Date.now().toString(36)}${ammoUid++}`,type:'consumable',baseId:`ammo_${type}`,rarity:'common',name:a.name,count,value,fusion:false,def:{name:a.name,icon:a.icon,desc:a.desc,use(){replenishAmmo(type)}}};
 }
 function allOwnedWeapons(){const p=game.player;if(!p)return[];return[...(p.weaponSlots||[]),...(p.inventory||[])].filter(i=>i?.type==='weapon')}
-function replenishAmmo(type){const a=ammoDefs[type];let gained=0;for(const w of allOwnedWeapons()){if(!a.kinds.includes(w.def.kind))continue;const add=Math.max(a.flat,Math.round(w.maxReserve*a.ratio)),before=w.reserve;w.reserve=Math.min(w.maxReserve,w.reserve+add);gained+=w.reserve-before}notice(gained?`${a.name}: +${gained} NA RESERVA`:`VOCÊ NÃO POSSUI UMA ARMA COMPATÍVEL`);updateHUD()}
+function ammoMatchesWeapon(a,w){if(!a||!w?.def)return false;if(a.baseIds?.includes(w.baseId))return true;if(a.excludeBaseIds?.includes(w.baseId))return false;return a.kinds?.includes(w.def.kind)||false}
+function replenishAmmo(type){const a=ammoDefs[type];let gained=0;for(const w of allOwnedWeapons()){if(!ammoMatchesWeapon(a,w))continue;const add=Math.max(a.flat,Math.round(w.maxReserve*a.ratio)),before=w.reserve;w.reserve=Math.min(w.maxReserve,w.reserve+add);gained+=w.reserve-before}notice(gained?`${a.name}: +${gained} NA RESERVA`:`VOCÊ NÃO POSSUI UMA ARMA COMPATÍVEL`);updateHUD()}
 function addInventoryItem(item){const p=game.player;if(!p)return false;if(item.type==='consumable'){const stack=p.inventory.find(x=>x?.type==='consumable'&&x.baseId===item.baseId);if(stack){stack.count=(stack.count||1)+(item.count||1);return true}}const i=p.inventory.findIndex(x=>!x);if(i<0){notice('INVENTÁRIO CHEIO');return false}p.inventory[i]=item;return true}
-function ammoCategoryForWeapon(w){if(!w?.def)return null;return Object.keys(ammoDefs).find(k=>ammoDefs[k].kinds.includes(w.def.kind))||null}
+function ammoCategoryForWeapon(w){if(!w?.def)return null;return Object.keys(ammoDefs).find(k=>ammoMatchesWeapon(ammoDefs[k],w))||null}
 function normalizeWeapon(w){if(!w||w.type!=='weapon'||w.baseId==='starter'||w.starterKnife)return;const r=rarityData[w.rarity]||rarityData.bronze,d=w.def;if(!d)return;const oldMax=w.maxDurability||d.durability*r.dur,oldDur=w.durability,ratio=Number.isFinite(oldMax)?clamp(oldDur/oldMax,0,1):1;w.damage=d.damage*r.dmg;w.magSize=Math.max(d.ammoCost||1,Math.round(d.mag*r.mag));w.maxReserve=Math.round(d.maxReserve*r.mag);w.mag=clamp(w.mag,0,w.magSize);w.reserve=clamp(w.reserve,0,w.maxReserve);w.maxDurability=Math.round(d.durability*r.dur);w.durability=Math.round(w.maxDurability*ratio);w.broken=w.durability<=0}
 function normalizeAllWeapons(){for(const w of allOwnedWeapons())normalizeWeapon(w);for(const list of [game.merchantStock,game.specialistStock])for(const s of list||[])normalizeWeapon(s?.item)}
 
@@ -990,10 +986,10 @@ class AmmoDrop{
  draw(){const a=ammoDefs[this.type];ctx.save();ctx.translate(this.x,this.y+Math.sin(game.time*4+this.phase)*5);ctx.fillStyle='rgba(5,9,14,.9)';ctx.strokeStyle='#65f0aa';ctx.lineWidth=2;ctx.shadowBlur=18;ctx.shadowColor='#65f0aa';ctx.beginPath();ctx.roundRect(-17,-17,34,34,4);ctx.fill();ctx.stroke();ctx.fillStyle='#65f0aa';ctx.font='900 19px ui-monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.icon,0,1);ctx.restore()}
 }
 const oldEnemyDie2=Enemy.prototype.die;
-Enemy.prototype.die=function(){if(this.dead)return;const elite=this.elite,x=this.x,y=this.y;oldEnemyDie2.call(this);const chance=elite?.30:.105;if(Math.random()<chance){const current=game.player?.weaponSlots?.[game.player.activeWeapon],preferred=ammoCategoryForWeapon(current),types=Object.keys(ammoDefs),type=preferred&&Math.random()<.64?preferred:types[(Math.random()*types.length)|0];game.pickups.push(new AmmoDrop(x+rand(-15,15),y+rand(-15,15),type))}};
+Enemy.prototype.die=function(){if(this.dead)return;const elite=this.elite,x=this.x,y=this.y;oldEnemyDie2.call(this);const scarcity=selectedDifficulty==='nightmare'?.48:selectedDifficulty==='survivor'?1.18:1,chance=(elite?.30:.105)*scarcity;if(Math.random()<chance){const current=game.player?.weaponSlots?.[game.player.activeWeapon],preferred=ammoCategoryForWeapon(current),types=Object.keys(ammoDefs),type=preferred&&Math.random()<.64?preferred:types[(Math.random()*types.length)|0];game.pickups.push(new AmmoDrop(x+rand(-15,15),y+rand(-15,15),type))}};
 
 const originalSpawnEnemy=spawnEnemy;
-spawnEnemy=function(){const alive=game.enemies.filter(e=>!e.dead).length,cap=game.night<=1?17:game.night===2?25:game.night===3?34:999;if(alive>=cap)return;const skip=game.night<=1?.48:game.night===2?.28:game.night===3?.12:0;if(Math.random()<skip)return;originalSpawnEnemy()};
+spawnEnemy=function(){const alive=game.enemies.filter(e=>!e.dead).length,bossWave=game.night%4===0,cap=bossWave&&game.bossNight!==game.night?29:30;if(alive>=cap)return;const skip=game.night<=1?.48:game.night===2?.28:game.night===3?.12:0;if(Math.random()<skip)return;originalSpawnEnemy()};
 
 function findNpcPosition(minPlayer,maxPlayer,avoid=null,minAvoid=850){for(let i=0;i<180;i++){let x,y;if(game.roads?.length&&Math.random()<.75){const road=game.roads[(Math.random()*game.roads.length)|0];x=rand(road.x+45,road.x+road.w-45);y=rand(road.y+45,road.y+road.h-45)}else{x=rand(80,WORLD.w-80);y=rand(80,WORLD.h-80)}const dp=Math.hypot(x-game.player.x,y-game.player.y);if(dp<minPlayer||dp>maxPlayer||isSolid(x,y,28))continue;if(avoid&&Math.hypot(x-avoid.x,y-avoid.y)<minAvoid)continue;return{x,y}}return findNearestOpen(game.player.x+minPlayer,game.player.y,24,300)}
 const previousStartDawn=startDawn;
@@ -1002,8 +998,9 @@ startDawn=function(){previousStartDawn();const merchant=game.npcs?.find(n=>n.typ
 const previousStartGame=startGame;
 startGame=function(){previousStartGame();const p=game.player;p.collisionRadius=13.5;let knife=DBG.makeWeapon('kitchen','bronze');knife.name='Faca de Sobrevivente';knife.starterKnife=true;knife.fusion=false;knife.value=0;knife.damage=31;knife.maxDurability=220;knife.durability=220;if(!p.weaponSlots[1])p.weaponSlots[1]=knife;else addInventoryItem(knife);normalizeAllWeapons();notice('NOITE 1 • PISTOLA E FACA DE SOBREVIVENTE EQUIPADAS');updateHUD();ensurePaperdoll();drawPaperdoll()};
 
-function storeAmmoPrice(type,specialist=false){const base={handgun:16,light:24,shells:22,precision:29,rockets:42}[type];return Math.round(base*(specialist?1.18:1)*(1+(game.night||1)*.035))}
-function injectAmmoStore(screen,content,mode){if(screen.classList.contains('hidden'))return;const active=screen.querySelector(mode==='merchant'?'[data-merchant-tab].active':'[data-special-tab].active');if(!active)return;if(mode==='merchant'&&active.dataset.merchantTab!=='buy')return;if(mode==='specialist'&&active.dataset.specialTab!=='stock')return;if(content.querySelector('.ammo-supply-section'))return;const section=document.createElement('div');section.className='ammo-supply-section';section.innerHTML=`<div class="ammo-supply-head"><div><b>Suprimentos balísticos</b><span>Pacotes separados por plataforma de arma</span></div><span>Estoque renovado a cada amanhecer</span></div><div class="ammo-supply-grid">${Object.entries(ammoDefs).map(([id,a])=>`<div class="ammo-offer"><div class="ammo-icon">${a.icon}</div><b>${a.name}</b><small>${a.desc}</small><button class="btn" data-ammo-buy="${id}">⚙ ${storeAmmoPrice(id,mode==='specialist')} comprar</button></div>`).join('')}</div>`;content.appendChild(section);section.querySelectorAll('[data-ammo-buy]').forEach(btn=>btn.onclick=()=>{const type=btn.dataset.ammoBuy,price=storeAmmoPrice(type,mode==='specialist');if(game.scrap<price){notice('SUCATA INSUFICIENTE');return}if(!addInventoryItem(makeAmmoPack(type)))return;game.scrap-=price;audio.ui();notice(`${ammoDefs[type].name.toUpperCase()} COMPRADA`);document.querySelectorAll('#merchantScrap,#specialistScrap').forEach(e=>e.textContent=Math.floor(game.scrap));updateHUD()})}
+function storeAmmoPrice(type,specialist=false){const base={handgun:16,light:24,shells:22,precision:29,rockets:42,arrows:26,nails:23}[type]||24;return Math.round(base*(specialist?1.18:1)*(1+(game.night||1)*.035))}
+function dailyAmmoSelection(mode){const day=game.night||1,key=mode==='merchant'?'__merchantAmmoStock':'__specialistAmmoStock',dayKey=`${key}Day`;if(game[dayKey]!==day||!Array.isArray(game[key])){let pool=Object.keys(ammoDefs).sort(()=>Math.random()-.5),stock=pool.slice(0,3);if(mode==='specialist'&&Array.isArray(game.__merchantAmmoStock)&&stock.join('|')===game.__merchantAmmoStock.join('|'))stock=pool.slice(1,4);game[key]=stock;game[dayKey]=day}return game[key]}
+function injectAmmoStore(screen,content,mode){if(screen.classList.contains('hidden'))return;const active=screen.querySelector(mode==='merchant'?'[data-merchant-tab].active':'[data-special-tab].active');if(!active)return;if(mode==='merchant'&&active.dataset.merchantTab!=='buy')return;if(mode==='specialist'&&active.dataset.specialTab!=='stock')return;if(content.querySelector('.ammo-supply-section'))return;const stock=dailyAmmoSelection(mode),section=document.createElement('div');section.className='ammo-supply-section';section.innerHTML=`<div class="ammo-supply-head"><div><b>Suprimentos do dia</b><span>Três tipos de munição sorteados a cada amanhecer</span></div><span>${mode==='merchant'?'Estoque do Mercador':'Estoque do Especialista'}</span></div><div class="ammo-supply-grid">${stock.map(id=>{const a=ammoDefs[id];return`<div class="ammo-offer"><div class="ammo-icon">${a.icon}</div><b>${a.name}</b><small>${a.desc}</small><button class="btn" data-ammo-buy="${id}">⚙ ${storeAmmoPrice(id,mode==='specialist')} comprar</button></div>`}).join('')}</div>`;content.appendChild(section);section.querySelectorAll('[data-ammo-buy]').forEach(btn=>btn.onclick=()=>{const type=btn.dataset.ammoBuy,price=storeAmmoPrice(type,mode==='specialist'),pack=makeAmmoPack(type);if(game.scrap<price){notice('SUCATA INSUFICIENTE');return}if(!pack||!addInventoryItem(pack))return;game.scrap-=price;audio.ui();notice(`${ammoDefs[type].name.toUpperCase()} COMPRADA`);document.querySelectorAll('#merchantScrap,#specialistScrap').forEach(e=>e.textContent=Math.floor(game.scrap));updateHUD()})}
 function observeStore(screenId,contentId,mode){const screen=document.getElementById(screenId),content=document.getElementById(contentId);if(!screen||!content)return;const run=()=>injectAmmoStore(screen,content,mode);new MutationObserver(run).observe(screen,{attributes:true,attributeFilter:['class']});new MutationObserver(run).observe(content,{childList:true,subtree:true});run()}
 
 function ensurePaperdoll(){const holder=document.querySelector('.survivor-model');if(!holder)return;let c=document.getElementById('paperdollCanvas');if(!c){holder.innerHTML='<canvas id="paperdollCanvas" width="620" height="760"></canvas>';c=document.getElementById('paperdollCanvas')}return c}
@@ -1184,11 +1181,9 @@ window.__drawInventoryPaperdoll=drawPaperdoll;
 const finalLead=document.querySelector('#mainMenu .lead');if(finalLead)finalLead.textContent='Survival horror reconstruído com arsenal detalhado, escudos por pontos, colisões justas, loot raro e uma interface limpa para combate e gerenciamento.';
 const finalTitle=document.querySelector('#mainMenu .version');if(finalTitle)finalTitle.textContent='Nightfall Reforged 3.0';
 /* === END CONSOLIDATED VISUAL PATCH === */
-window.__topDownDebug={makeAmmoPack,replenishAmmo,isSolid,findNearestOpen,drawPaperdoll,normalizeAllWeapons,movePlayer};
+window.__topDownDebug={makeAmmoPack,replenishAmmo,isSolid,findNearestOpen,drawPaperdoll,normalizeAllWeapons,movePlayer,ammoDefs,ammoCategoryForWeapon,ammoMatchesWeapon};
 })();
 </script>
-
-
 <style id="consolidatedReworkCSS">
 /* HUD final */
 #hud .hud-top{top:14px;left:16px;right:16px}.hud-top .bars{width:min(360px,32vw);padding:12px 14px}.bar-row{grid-template-columns:54px 1fr 70px}.bar-row>span:last-child{text-align:right}.shield-pips{display:flex;justify-content:flex-end;gap:4px}.shield-pips i{width:12px;height:8px;border-radius:3px;border:1px solid rgba(117,242,255,.35);background:rgba(117,242,255,.08);box-shadow:inset 0 0 8px rgba(117,242,255,.08)}.shield-pips i.on{background:#75f2ff;box-shadow:0 0 12px rgba(117,242,255,.7)}
@@ -1203,8 +1198,6 @@ window.__topDownDebug={makeAmmoPack,replenishAmmo,isSolid,findNearestOpen,drawPa
 @media(max-width:1100px){.inventory-layout{grid-template-columns:320px 1fr}.inventory-side{grid-column:1/-1}.survivor-model{height:390px!important;min-height:390px}#weaponHud{width:252px}.weapon-slot-hud{grid-template-columns:70px 1fr}.weapon-mini{width:68px}#resourceStack{width:252px;top:412px}}
 @media(max-width:840px){#weaponHud{left:10px;top:112px;width:190px;gap:5px}.weapon-slot-hud{min-height:66px;grid-template-columns:52px 1fr;padding:6px}.weapon-mini{width:50px;height:45px}.weapon-slot-hud .wname{font-size:9px}.weapon-slot-hud .wmeta{font-size:7px}.weapon-slot-hud .ammo{font-size:15px}.weapon-slot-hud .durbar{height:3px}#resourceStack{left:10px;top:330px;width:190px}.mini-wrap{width:105px;height:105px}.phase-panel{top:125px!important;width:92px!important;min-width:92px!important}.phase-panel .phase-big{font-size:29px}.inventory-layout{grid-template-columns:1fr}.survivor-model{height:320px!important;min-height:320px}.inventory-panel{overflow:auto}.left-bottom{display:none}.hud-top .bars{width:62vw}.skill{width:52px;height:52px}.skill.ultimate{width:60px;height:60px}}
 </style>
-
-
 <style id="canvasMenuAndCompactHudCSS">
 /* === Dead Signal Canvas Identity 3.1 === */
 #mainMenu .panel{
@@ -1272,7 +1265,6 @@ window.__topDownDebug={makeAmmoPack,replenishAmmo,isSolid,findNearestOpen,drawPa
  #weaponHud{left:8px!important;top:94px!important;width:174px!important;gap:4px!important}.weapon-slot-hud{min-height:52px!important;grid-template-columns:43px 1fr!important;padding:4px!important}.weapon-mini{width:41px!important;height:35px!important}.weapon-slot-hud .wname{font-size:8px!important}.weapon-slot-hud .wmeta{display:none}.weapon-slot-hud .ammo{font-size:12px!important}.weapon-slot-hud .durbar{height:3px!important}#resourceStack{left:8px!important;top:263px!important;width:174px!important}.resource-chip{font-size:7px!important;padding:5px!important}.skill{width:45px!important;height:45px!important}.skill.ultimate{width:53px!important;height:53px!important}.skill .glyph{font-size:17px!important}.skill .label{display:none}.mini-wrap{width:94px!important;height:94px!important}.phase-panel{top:113px!important;width:78px!important;min-width:78px!important}.phase-panel .phase-big{font-size:24px!important}.phase-panel .phase-timer{font-size:11px!important}.hud-top .bars{width:58vw!important}.survivor-model{height:360px!important;min-height:360px!important}
 }
 </style>
-
 <script id="canvasMenuAndCharacterRework">
 (()=>{
 'use strict';
@@ -1530,9 +1522,8 @@ setInterval(()=>{if(inv&&!inv.classList.contains('hidden'))drawCanvasPaperdoll()
 setTimeout(()=>{drawCanvasPaperdoll();DBG.renderWeaponHUD?.()},100);
 })();
 </script>
-
 <script src="assets/js/audio-interface-patch.js"></script>
 <script src="assets/js/combat-arsenal-patch.js"></script>
 <script src="assets/js/interface-controls-repair-patch.js"></script>
-</body>
+<script src="assets/js/performance-boss-flashlight-patch.js"></script></body>
 </html>
