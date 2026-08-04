@@ -124,7 +124,7 @@
   const readSource=event=>String(event.dataTransfer?.getData('text/plain')||'');
   const parseSource=value=>{const [source,key]=String(value||'').split(':');return{source,key:Number(key)}};
   const sourceItem=source=>{const p=player(),s=slots();if(!p||!s)return null;if(source.source==='inventory')return p.inventory?.[source.key]||null;if(source.source==='support')return s[source.key]||null;return null};
-  const refresh=()=>{DBG.renderInventory?.();DBG.renderWeaponHUD?.();updateHUD?.()};
+  const refresh=()=>{DBG.renderInventory?.();DBG.renderWeaponHUD?.()};
   const pulseInvalid=element=>{if(!element)return;element.classList.remove('support-drag-invalid');void element.offsetWidth;element.classList.add('support-drag-invalid');setTimeout(()=>element.classList.remove('support-drag-invalid'),360)};
   const clearDragMarks=()=>document.querySelectorAll('.support-drag-valid,.support-drag-invalid,.support-drag-source,.support-return-valid').forEach(el=>el.classList.remove('support-drag-valid','support-drag-invalid','support-drag-source','support-return-valid'));
 
@@ -181,52 +181,5 @@
   if(inventoryScreen)new MutationObserver(()=>requestAnimationFrame(enhanceSupportSlots)).observe(inventoryScreen,{childList:true,subtree:true});
   requestAnimationFrame(enhanceSupportSlots);
 
-  /* ================================================================
-     MERCADOR — COMPRA, MUNIÇÕES E VENDA REORGANIZADAS
-  ================================================================ */
-  const typeLabel=item=>item?.type==='weapon'?'Arma':item?.type==='armor'?'Armadura':item?.ammoType?'Munição':'Consumível';
-  const conditionLabel=item=>{
-    if(item?.type!=='weapon'&&item?.type!=='armor')return item?.count>1?`${item.count} unidades`:'Uso único';
-    const pct=Math.max(0,Math.min(100,Math.round(DBG.durabilityPct?.(item)??100)));return `${pct}% de condição`;
-  };
-  function merchantBuyMarkup(stock){
-    return `<div class="merchant-section-head"><b>Mercadorias</b><span>${stock.length} disponíveis</span></div><div class="store-grid merchant-buy-grid">${stock.map((entry,index)=>{
-      const item=entry.item,color=item?itemColor(item):'#ffd166',name=item?.name||entry.name,desc=item?itemDescription(item):entry.desc,meta=item?`${typeLabel(item)} • ${item.type==='weapon'||item.type==='armor'?rarityLabel(item):conditionLabel(item)}`:'Melhoria da expedição';
-      return `<article class="merchant-product" style="--product-color:${color}"><div class="merchant-product-icon">${item?.def?.icon||entry.icon||'◆'}</div><div class="merchant-product-copy"><h3 style="color:${color}">${name}</h3><p>${desc||''}</p><div class="merchant-product-meta">${meta}</div></div><div class="merchant-product-buy"><span class="merchant-price">⚙ ${entry.price}</span><button class="btn primary" data-merchant-buy="${index}">Comprar</button></div></article>`
-    }).join('')}</div>`;
-  }
-  function merchantSellMarkup(items){
-    if(!items.length)return '<div class="merchant-empty">Nenhum item disponível para venda</div>';
-    return `<div class="merchant-section-head"><b>Venda</b><span>${items.length} itens</span></div><div class="merchant-sell-list">${items.map((ref,index)=>{
-      const item=ref.item,color=itemColor(item),price=sellPrice(item),meta=`${typeLabel(item)} • ${conditionLabel(item)}`;
-      return `<article class="merchant-sell-row"><div class="merchant-sell-icon" style="color:${color}">${item.def?.icon||'◆'}</div><div class="merchant-sell-copy"><b style="color:${color}">${item.name}</b><span>${meta}</span></div><div class="merchant-sell-value">⚙ ${price}</div><button class="btn" data-sell="${index}">Vender</button></article>`
-    }).join('')}</div>`;
-  }
-  const previousRenderMerchant=renderMerchant;
-  renderMerchant=function(tab='buy'){
-    syncStoreResources();
-    document.querySelectorAll('[data-merchant-tab]').forEach(button=>button.classList.toggle('active',button.dataset.merchantTab===tab));
-    const content=document.getElementById('merchantContent');if(!content)return;
-    if(tab==='buy'){
-      content.innerHTML=merchantBuyMarkup(game.merchantStock||[]);
-      content.querySelectorAll('[data-merchant-buy]').forEach(button=>button.onclick=()=>merchantBuy(Number(button.dataset.merchantBuy)));
-    }else{
-      const items=getAllOwned(false).filter(ref=>ref.item?.baseId!=='starter');
-      content.innerHTML=merchantSellMarkup(items);
-      content.querySelectorAll('[data-sell]').forEach(button=>button.onclick=()=>merchantSell(items[Number(button.dataset.sell)]));
-    }
-    requestAnimationFrame(polishAmmoSection);
-  };
-  function polishAmmoSection(){
-    const section=document.querySelector('#merchantScreen:not(.hidden) .ammo-supply-section');if(!section)return;
-    const title=section.querySelector('.ammo-supply-head b');if(title)title.textContent='Munições';
-    const tag=section.querySelector('.ammo-supply-head>span');if(tag)tag.textContent='Estoque diário';
-  }
-  const merchantContent=document.getElementById('merchantContent');
-  if(merchantContent)new MutationObserver(()=>requestAnimationFrame(polishAmmoSection)).observe(merchantContent,{childList:true,subtree:true});
-
-  /* Reabre a aba atual com o novo layout caso o patch carregue enquanto a loja está aberta. */
-  if(!document.getElementById('merchantScreen')?.classList.contains('hidden')){
-    const active=document.querySelector('[data-merchant-tab].active');renderMerchant(active?.dataset.merchantTab||'buy');
-  }
+  /* Loja reorganizada pelo vendor-overhaul-patch.js. */
 })();
