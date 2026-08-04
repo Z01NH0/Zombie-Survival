@@ -11,11 +11,25 @@
   const isSupport=item=>Boolean(item?.type==='consumable'&&supportIds.has(norm(item.baseId))&&!ammoWords.test(`${item.baseId||''} ${item.name||''}`));
 
   /* ================================================================
-     FEED DE TODAS AS COLETAS DO CHÃO
+     FEED DE TODAS AS COLETAS DO CHÃO — rastreamento centralizado
   ================================================================ */
   const liveEntries=new Map();
+  const reportedPickups=new WeakSet();
+  function ensurePickupFeed(){
+    let feed=document.getElementById('resourcePickupFeed');
+    if(feed)return feed;
+    feed=document.createElement('div');
+    feed.id='resourcePickupFeed';
+    feed.setAttribute('aria-live','polite');
+    document.body.appendChild(feed);
+    return feed;
+  }
+  function removeFeedState(key,state){
+    if(state?.element?.isConnected)state.element.remove();
+    if(liveEntries.get(key)===state)liveEntries.delete(key);
+  }
   function pushGroundPickup(label,amount=1,icon='◆',color='#58f2a2',kind='Item'){
-    const feed=document.getElementById('resourcePickupFeed');if(!feed)return;
+    const feed=ensurePickupFeed();
     const key=`${norm(label)}:${norm(kind)}`;
     const numeric=Math.max(1,Number(amount)||1);
     const previous=liveEntries.get(key);
@@ -23,19 +37,29 @@
       previous.amount+=numeric;
       previous.element.querySelector('.pickup-amount').textContent=`+${previous.amount}`;
       clearTimeout(previous.timer);
-      previous.element.classList.remove('pickup-refresh');void previous.element.offsetWidth;previous.element.classList.add('pickup-refresh');
-      previous.timer=setTimeout(()=>{previous.element.remove();liveEntries.delete(key)},2600);
+      previous.element.style.animation='none';
+      void previous.element.offsetWidth;
+      previous.element.style.animation='resourcePickupIn .2s ease-out,resourcePickupOut .3s 2.35s forwards';
+      previous.timer=setTimeout(()=>removeFeedState(key,previous),2750);
       return;
     }
     const entry=document.createElement('div');
     entry.className='resource-pickup-entry item-pickup-entry';
     entry.style.setProperty('--resource-color',color);
-    entry.innerHTML=`<span class="resource-icon">${icon}</span><b><strong class="pickup-amount">+${numeric}</strong><span class="pickup-name"></span><small class="pickup-kind"></small></b>`;
+    entry.innerHTML=`<span class="resource-icon"></span><b><strong class="pickup-amount">+${numeric}</strong><span class="pickup-name"></span><small class="pickup-kind"></small></b>`;
+    entry.querySelector('.resource-icon').textContent=icon;
     entry.querySelector('.pickup-name').textContent=label;
     entry.querySelector('.pickup-kind').textContent=kind;
     feed.appendChild(entry);
-    while(feed.children.length>5){const first=feed.firstElementChild;for(const [entryKey,state] of liveEntries)if(state.element===first)liveEntries.delete(entryKey);first?.remove()}
-    const state={element:entry,amount:numeric,timer:setTimeout(()=>{entry.remove();liveEntries.delete(key)},2600)};
+    while(feed.children.length>5){
+      const first=feed.firstElementChild;
+      for(const [entryKey,state] of liveEntries){
+        if(state.element===first){clearTimeout(state.timer);liveEntries.delete(entryKey);break}
+      }
+      first?.remove();
+    }
+    const state={element:entry,amount:numeric,timer:null};
+    state.timer=setTimeout(()=>removeFeedState(key,state),2750);
     liveEntries.set(key,state);
   }
   window.__deadSignalGroundPickup=pushGroundPickup;
@@ -45,27 +69,52 @@
     const amount=item.type==='consumable'?Math.max(1,Number(item.count)||1):1;
     pushGroundPickup(item.name||item.def?.name||'Item',amount,itemIcon(item),itemColor(item),itemKind(item));
   }
-  function wrapCollect(ClassRef,reporter){
-    if(!ClassRef?.prototype?.collect||ClassRef.prototype.collect.__groundFeedWrapped)return;
-    const original=ClassRef.prototype.collect;
-    function wrapped(...args){
-      const lifeBefore=this.life;
-      const result=original.apply(this,args);
-      const success=this.life===0||lifeBefore===undefined;
-      if(success)reporter(this,args[0]);
+  function reportPickup(pickup){
+    if(!pickup||reportedPickups.has(pickup))return;
+    reportedPickups.add(pickup);
+    if(pickup.item?.resource){
+      pushGroundPickup(pickup.label||'Fragmento do chefe',1,'☠',pickup.color||'#ffd166','Recurso especial');
+      return;
+    }
+    if(pickup.item){reportItem(pickup.item);return}
+    const ammoDefinition=typeof ammoDefs!=='undefined'?ammoDefs?.[pickup.type]:null;
+    if(ammoDefinition){
+      pushGroundPickup(ammoDefinition.name||'Munição',1,ammoDefinition.icon||'▰','#5cecff','Munição');
+      return;
+    }
+    const data={
+      xp:['Fragmento de experiência',1,'✦','#9d7cff','Experiência'],
+      heal:['Recuperação',1,'✚','#58f2a2','Cura'],
+      core:['Núcleo de energia',1,'◆','#ffd166','Recurso']
+    }[pickup.type];
+    if(data)pushGroundPickup(...data);
+  }
+
+  /*
+     O loop do jogador é a fonte de verdade: ele sabe exatamente quais pickups
+     saíram do chão. Isso evita depender de nomes de classes ou da ordem dos patches.
+  */
+  if(typeof Player!=='undefined'&&!Player.prototype.update.__universalPickupFeed){
+    const previousPlayerUpdate=Player.prototype.update;
+    function updateWithPickupFeed(...args){
+      const before=Array.isArray(game.pickups)?game.pickups.slice():[];
+      const result=previousPlayerUpdate.apply(this,args);
+      if(before.length){
+        const remaining=new Set(game.pickups||[]);
+        for(const pickup of before){
+          if(remaining.has(pickup))continue;
+          /* Coletas que falham são recolocadas no chão por setTimeout(0).
+             A confirmação atrasada separa sucesso real de inventário cheio. */
+          setTimeout(()=>{
+            if(!game.pickups?.includes(pickup))reportPickup(pickup);
+          },0);
+        }
+      }
       return result;
     }
-    wrapped.__groundFeedWrapped=true;ClassRef.prototype.collect=wrapped;
+    updateWithPickupFeed.__universalPickupFeed=true;
+    Player.prototype.update=updateWithPickupFeed;
   }
-  if(typeof GearPickup!=='undefined')wrapCollect(GearPickup,pickup=>reportItem(pickup.item));
-  if(typeof AmmoDrop!=='undefined')wrapCollect(AmmoDrop,pickup=>{
-    const defs=typeof ammoDefs!=='undefined'?ammoDefs:null,def=defs?.[pickup.type];
-    pushGroundPickup(def?.name||'Munição',1,def?.icon||'▰','#5cecff','Munição');
-  });
-  if(typeof Pickup!=='undefined')wrapCollect(Pickup,pickup=>{
-    const data={xp:['Fragmento de experiência',18,'✦','#9d7cff','Experiência'],heal:['Recuperação',1,'✚','#58f2a2','Cura'],core:['Núcleo de energia',1,'◆','#ffd166','Recurso']}[pickup.type];
-    if(data)pushGroundPickup(...data);
-  });
 
   /* ================================================================
      ARRASTAR E SOLTAR NOS SLOTS 4/5
