@@ -312,7 +312,7 @@ const CONSUMABLE_DEFS={
  fieldDressing:{name:'Bandagem de Campo',icon:'🩸',desc:'Recupera 18% da vida máxima.',value:8,use(p){p.heal(p.maxHp*.18)}},
  ammoPack:{name:'Caixa de Munição',icon:'📦',desc:'Abre a seleção e recupera 18% da reserva máxima somente da arma escolhida.',value:20,use(p){const w=currentWeapon();if(w&&w.def.kind!=='melee')w.reserve=Math.min(w.maxReserve,w.reserve+Math.ceil(w.maxReserve*.18))}},
  stim:{name:'Estimulante Veloz',icon:'💉',desc:'Aumenta velocidade e cadência por 24 segundos.',value:32,use(p){p.tempBoost=Math.max(p.tempBoost||0,24);p.tempBoostApplied=true}},
- battery:{name:'Bateria de Lanterna',icon:'🔋',desc:'Recupera 10% da carga da lanterna.',value:28,use(){game.flashlight.battery=Math.min(game.flashlight.maxBattery||100,(game.flashlight.battery||0)+10);window.__flashlightBatteryFeedback?.(10)}},
+ battery:{name:'Bateria de Lanterna',icon:'🔋',desc:'Recupera 20% da carga da lanterna.',value:28,use(){game.flashlight.battery=Math.min(game.flashlight.maxBattery||100,(game.flashlight.battery||0)+20);window.__flashlightBatteryFeedback?.(20)}},
  necroVial:{name:'Frasco de Sangue Necrótico',icon:'🧪',desc:'Material raro usado pelo Especialista.',value:25,use(){game.blood+=4}}
 };
 
@@ -889,7 +889,7 @@ let ammoUid=1;
 function makeAmmoPack(type,count=1){
  const a=ammoDefs[type];if(!a)return null;
  const value={rockets:35,precision:25,arrows:24,nails:22}[type]||18;
- return{uid:`ammo${Date.now().toString(36)}${ammoUid++}`,type:'consumable',baseId:`ammo_${type}`,rarity:'common',name:a.name,count,value,fusion:false,def:{name:a.name,icon:a.icon,desc:a.desc,use(){replenishAmmo(type)}}};
+ return{uid:`ammo${Date.now().toString(36)}${ammoUid++}`,type:'consumable',baseId:`ammo_${type}`,ammoType:type,rarity:'common',name:a.name,count,value,fusion:false,def:{name:a.name,icon:a.icon,desc:a.desc,use(){replenishAmmo(type)}}};
 }
 function allOwnedWeapons(){const p=game.player;if(!p)return[];return[...(p.weaponSlots||[]),...(p.inventory||[])].filter(i=>i?.type==='weapon')}
 function ammoMatchesWeapon(a,w){if(!a||!w?.def)return false;if(a.baseIds?.includes(w.baseId))return true;if(a.excludeBaseIds?.includes(w.baseId))return false;return a.kinds?.includes(w.def.kind)||false}
@@ -999,7 +999,7 @@ const previousStartGame=startGame;
 startGame=function(){previousStartGame();const p=game.player;p.collisionRadius=13.5;let knife=DBG.makeWeapon('kitchen','bronze');knife.name='Faca de Sobrevivente';knife.starterKnife=true;knife.fusion=false;knife.value=0;knife.damage=31;knife.maxDurability=220;knife.durability=220;if(!p.weaponSlots[1])p.weaponSlots[1]=knife;else addInventoryItem(knife);normalizeAllWeapons();notice('NOITE 1 • PISTOLA E FACA DE SOBREVIVENTE EQUIPADAS');updateHUD();ensurePaperdoll();drawPaperdoll()};
 
 function storeAmmoPrice(type,specialist=false){const base={handgun:16,light:24,shells:22,precision:29,rockets:42,arrows:26,nails:23}[type]||24;return Math.round(base*(specialist?1.18:1)*(1+(game.night||1)*.035))}
-function dailyAmmoSelection(mode){const day=game.night||1,key=mode==='merchant'?'__merchantAmmoStock':'__specialistAmmoStock',dayKey=`${key}Day`;if(game[dayKey]!==day||!Array.isArray(game[key])){let pool=Object.keys(ammoDefs).sort(()=>Math.random()-.5),stock=pool.slice(0,3);if(mode==='specialist'&&Array.isArray(game.__merchantAmmoStock)&&stock.join('|')===game.__merchantAmmoStock.join('|'))stock=pool.slice(1,4);game[key]=stock;game[dayKey]=day}return game[key]}
+function shuffledAmmoTypes(){const pool=Object.keys(ammoDefs);for(let i=pool.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[pool[i],pool[j]]=[pool[j],pool[i]]}return pool}function dailyAmmoSelection(mode){const day=game.night||1,key=mode==='merchant'?'__merchantAmmoStock':'__specialistAmmoStock',dayKey=`${key}Day`;if(game[dayKey]!==day||!Array.isArray(game[key])||game[key].length!==3){let stock=shuffledAmmoTypes().slice(0,3);if(mode==='specialist'&&Array.isArray(game.__merchantAmmoStock)){const merchantSet=[...game.__merchantAmmoStock].sort().join('|');for(let tries=0;tries<12&&[...stock].sort().join('|')===merchantSet;tries++)stock=shuffledAmmoTypes().slice(0,3)}game[key]=stock;game[dayKey]=day}return game[key]}
 function injectAmmoStore(screen,content,mode){if(screen.classList.contains('hidden'))return;const active=screen.querySelector(mode==='merchant'?'[data-merchant-tab].active':'[data-special-tab].active');if(!active)return;if(mode==='merchant'&&active.dataset.merchantTab!=='buy')return;if(mode==='specialist'&&active.dataset.specialTab!=='stock')return;if(content.querySelector('.ammo-supply-section'))return;const stock=dailyAmmoSelection(mode),section=document.createElement('div');section.className='ammo-supply-section';section.innerHTML=`<div class="ammo-supply-head"><div><b>Suprimentos do dia</b><span>Três tipos de munição sorteados a cada amanhecer</span></div><span>${mode==='merchant'?'Estoque do Mercador':'Estoque do Especialista'}</span></div><div class="ammo-supply-grid">${stock.map(id=>{const a=ammoDefs[id];return`<div class="ammo-offer"><div class="ammo-icon">${a.icon}</div><b>${a.name}</b><small>${a.desc}</small><button class="btn" data-ammo-buy="${id}">⚙ ${storeAmmoPrice(id,mode==='specialist')} comprar</button></div>`}).join('')}</div>`;content.appendChild(section);section.querySelectorAll('[data-ammo-buy]').forEach(btn=>btn.onclick=()=>{const type=btn.dataset.ammoBuy,price=storeAmmoPrice(type,mode==='specialist'),pack=makeAmmoPack(type);if(game.scrap<price){notice('SUCATA INSUFICIENTE');return}if(!pack||!addInventoryItem(pack))return;game.scrap-=price;audio.ui();notice(`${ammoDefs[type].name.toUpperCase()} COMPRADA`);document.querySelectorAll('#merchantScrap,#specialistScrap').forEach(e=>e.textContent=Math.floor(game.scrap));updateHUD()})}
 function observeStore(screenId,contentId,mode){const screen=document.getElementById(screenId),content=document.getElementById(contentId);if(!screen||!content)return;const run=()=>injectAmmoStore(screen,content,mode);new MutationObserver(run).observe(screen,{attributes:true,attributeFilter:['class']});new MutationObserver(run).observe(content,{childList:true,subtree:true});run()}
 
@@ -1525,5 +1525,212 @@ setTimeout(()=>{drawCanvasPaperdoll();DBG.renderWeaponHUD?.()},100);
 <script src="assets/js/audio-interface-patch.js"></script>
 <script src="assets/js/combat-arsenal-patch.js"></script>
 <script src="assets/js/interface-controls-repair-patch.js"></script>
-<script src="assets/js/performance-boss-flashlight-patch.js"></script></body>
+<script src="assets/js/performance-boss-flashlight-patch.js"></script>
+<style id="mainMenuMegaRemakeCSS">
+#mainMenu{padding:0!important;background:
+  radial-gradient(circle at 14% 18%,rgba(255,53,88,.15),transparent 30%),
+  radial-gradient(circle at 82% 16%,rgba(92,236,255,.09),transparent 24%),
+  linear-gradient(180deg,#03060b,#020409 58%,#010307)}
+#mainMenu .panel{width:100vw!important;height:100vh!important;max-height:none!important;overflow:hidden!important;border:0!important;border-radius:0!important;padding:clamp(18px,2.4vw,34px)!important;background:
+  linear-gradient(135deg,rgba(255,255,255,.02),transparent 36%),
+  linear-gradient(110deg,#05080d 0%,#070b11 42%,#090c12 42.2%,#05070c 100%)!important;box-shadow:none!important}
+#mainMenu .panel::before{display:none!important}
+#mainMenu .menu-remake-shell{position:relative;display:grid;grid-template-columns:minmax(0,1.18fr) minmax(340px,.82fr);gap:clamp(18px,2vw,26px);height:100%}
+#mainMenu .menu-remake-shell::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(180deg,transparent 0 82px,rgba(255,255,255,.018) 82px 83px);opacity:.45;mix-blend-mode:screen}
+#mainMenu .menu-remake-left,#mainMenu .menu-remake-right{position:relative;z-index:1;min-width:0}
+#mainMenu .menu-remake-left{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:14px;min-height:0}
+#mainMenu .menu-remake-right{display:grid;grid-template-rows:auto auto 1fr;gap:14px;min-height:0}
+#mainMenu .menu-remake-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 2px}
+#mainMenu .menu-remake-topbar .kicker{font-size:10px!important;letter-spacing:.28em!important;color:#ff526f!important}
+#mainMenu .menu-remake-topbar .version{font-size:10px!important;padding:7px 12px!important;background:rgba(255,209,102,.08)!important;border:1px solid rgba(255,209,102,.22)!important;color:#ffd166!important}
+#mainMenu .menu-remake-head{display:grid;gap:12px;padding:14px 0 4px;border-top:1px solid rgba(255,255,255,.06)}
+#mainMenu .menu-remake-titlewrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:end}
+#mainMenu h1{margin:0!important;font-size:clamp(66px,8vw,142px)!important;line-height:.8!important;letter-spacing:.02em!important;text-transform:uppercase;text-shadow:0 18px 56px rgba(0,0,0,.5)}
+#mainMenu h1 .outline{color:transparent!important;-webkit-text-stroke:1px rgba(255,255,255,.62)!important;text-shadow:0 0 30px rgba(255,53,88,.16)!important}
+#mainMenu .menu-remake-badges{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;align-self:start}
+#mainMenu .menu-remake-badge{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#c9d2de;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+#mainMenu .menu-remake-badge i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#5cecff;box-shadow:0 0 14px currentColor;color:inherit}
+#mainMenu .menu-remake-badge.red i{background:#ff3558}
+#mainMenu .menu-remake-badge.gold i{background:#ffd166}
+#mainMenu .menu-remake-leadwrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
+#mainMenu .lead{max-width:760px!important;margin:0!important;color:#98a5b8!important;font-size:14px!important;line-height:1.75!important}
+#mainMenu .menu-remake-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;min-width:320px}
+#mainMenu .menu-remake-summary .summary-card{padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.02));min-height:88px}
+#mainMenu .menu-remake-summary b{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+#mainMenu .menu-remake-summary span{display:block;margin-top:6px;font-size:11px;color:#8390a3;line-height:1.45}
+#mainMenu .menu-remake-heroWrap{position:relative;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:14px}
+#mainMenu .hero{height:100%!important;min-height:380px!important;margin:0!important;border-radius:26px!important;border:1px solid rgba(255,255,255,.08)!important;overflow:hidden!important;background:#05080d!important;box-shadow:inset 0 0 120px rgba(0,0,0,.7),0 24px 70px rgba(0,0,0,.38)!important}
+#mainMenu .hero::before{content:"LIVE FEED // SECTOR 07"!important;position:absolute;left:18px;top:16px;z-index:6;padding:7px 10px;border-radius:999px;background:rgba(3,6,10,.78)!important;border:1px solid rgba(92,236,255,.24)!important;border-left:3px solid #5cecff!important;color:#cbf8ff!important;font-size:10px!important;letter-spacing:.18em!important}
+#mainMenu #menuCanvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+#mainMenu .hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.16) 45%,rgba(0,0,0,.45) 100%),repeating-linear-gradient(180deg,rgba(255,255,255,.013) 0 1px,transparent 1px 4px)}
+#mainMenu .hero-copy{left:18px!important;bottom:18px!important;z-index:6!important;max-width:320px;padding:13px 14px!important;border-radius:16px!important;border:1px solid rgba(255,255,255,.08)!important;border-left:3px solid #ff3558!important;background:rgba(4,7,12,.72)!important;backdrop-filter:blur(10px)}
+#mainMenu .hero-copy b{font-size:10px!important;letter-spacing:.16em!important}
+#mainMenu .hero-copy span{font-size:11px!important;line-height:1.5!important;color:#98a5b8!important}
+#mainMenu .menu-features{position:absolute!important;left:16px;right:16px;top:58px;z-index:6;display:flex!important;flex-wrap:wrap;gap:8px;margin:0!important;pointer-events:none}
+#mainMenu .feature{min-width:128px;max-width:165px;padding:10px 11px!important;border-radius:14px!important;border:1px solid rgba(255,255,255,.08)!important;background:rgba(4,7,12,.62)!important;backdrop-filter:blur(8px)!important}
+#mainMenu .feature b{display:block;font-size:9px!important;letter-spacing:.14em!important}
+#mainMenu .feature span{display:block!important;margin-top:5px;font-size:10px!important;line-height:1.45!important;color:#8c99ab!important}
+#mainMenu .menu-remake-sidecards{display:grid;gap:14px;min-height:0}
+#mainMenu .menu-panel-card{border:1px solid rgba(255,255,255,.08);border-radius:24px;background:linear-gradient(180deg,rgba(12,17,25,.96),rgba(6,9,14,.96));box-shadow:0 22px 60px rgba(0,0,0,.32);overflow:hidden}
+#mainMenu .menu-panel-card .card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 13px;border-bottom:1px solid rgba(255,255,255,.06)}
+#mainMenu .menu-panel-card .card-head b{font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+#mainMenu .menu-panel-card .card-head span{font-size:10px;color:#748195;letter-spacing:.12em;text-transform:uppercase}
+#mainMenu .menu-actions{padding:12px;display:grid;gap:10px}
+#mainMenu .menu-actions .btn{display:grid;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;gap:12px;min-height:74px;padding:14px 16px!important;border-radius:18px!important;text-align:left!important;font-size:13px!important;letter-spacing:.08em!important;background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.09)!important;box-shadow:none!important;transform:none!important}
+#mainMenu .menu-actions .btn:hover{background:rgba(255,255,255,.07)!important;border-color:rgba(255,255,255,.18)!important;transform:translateY(-2px)!important}
+#mainMenu .menu-actions .btn.primary{background:linear-gradient(135deg,rgba(255,53,88,.95),rgba(159,12,46,.94))!important;border-color:#ff637f!important;box-shadow:0 18px 42px rgba(255,53,88,.22)!important}
+#mainMenu .menu-actions .btn .menu-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);font-size:19px;color:#dfe7f1}
+#mainMenu .menu-actions .btn.primary .menu-icon{background:rgba(255,255,255,.14)}
+#mainMenu .menu-actions .menu-copy{display:grid;gap:4px;min-width:0}
+#mainMenu .menu-actions .menu-copy strong{font-size:12px;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mainMenu .menu-actions .menu-copy small{font-size:10px;letter-spacing:.04em;color:#8390a3;text-transform:none;line-height:1.45}
+#mainMenu .menu-actions .btn.primary .menu-copy small{color:rgba(255,255,255,.83)}
+#mainMenu .menu-actions .btn .menu-arrow{font-size:18px;color:#7c899b}
+#mainMenu .menu-actions .btn.primary .menu-arrow{color:#fff}
+#mainMenu .menu-brief{padding:14px 16px 16px;display:grid;gap:10px}
+#mainMenu .menu-brief-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#mainMenu .mini-panel{padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.025)}
+#mainMenu .mini-panel b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.12em}
+#mainMenu .mini-panel span{display:block;margin-top:6px;font-size:10px;color:#7f8b9c;line-height:1.5}
+#mainMenu .controls-note{padding:14px 16px!important;border-radius:16px!important;border:1px solid rgba(255,255,255,.06)!important;background:rgba(255,255,255,.025)!important;color:#96a3b7!important;font-size:11px!important;line-height:1.65!important}
+#mainMenu .menu-tipline{display:flex;align-items:center;gap:8px;color:#ffd166;font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+#mainMenu .menu-tipline i{display:block;width:8px;height:8px;border-radius:50%;background:#ffd166;box-shadow:0 0 12px #ffd166}
+#mainMenu .menu-bottom-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#mainMenu .menu-bottom-strip .strip-card{padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02))}
+#mainMenu .menu-bottom-strip .strip-card b{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+#mainMenu .menu-bottom-strip .strip-card span{display:block;margin-top:5px;color:#8490a1;font-size:10px;line-height:1.5}
+#mainMenu .menu-corner-accent{position:absolute;right:-35px;top:-35px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,53,88,.18),transparent 68%);pointer-events:none;filter:blur(2px)}
+@media (max-width:1200px){
+  #mainMenu .menu-remake-shell{grid-template-columns:minmax(0,1fr) 320px}
+  #mainMenu .menu-remake-leadwrap,#mainMenu .menu-remake-heroWrap{grid-template-columns:1fr}
+  #mainMenu .menu-remake-summary{min-width:0}
+}
+@media (max-width:860px){
+  #mainMenu .panel{overflow:auto!important;padding:14px!important}
+  #mainMenu .menu-remake-shell{height:auto;grid-template-columns:1fr}
+  #mainMenu .menu-remake-left,#mainMenu .menu-remake-right{min-height:auto}
+  #mainMenu .menu-remake-titlewrap,#mainMenu .menu-remake-leadwrap{grid-template-columns:1fr}
+  #mainMenu .menu-remake-badges{justify-content:flex-start}
+  #mainMenu .menu-remake-summary,#mainMenu .menu-bottom-strip,#mainMenu .menu-brief-grid{grid-template-columns:1fr}
+  #mainMenu .menu-remake-heroWrap{grid-template-columns:1fr}
+  #mainMenu .hero{min-height:330px!important}
+  #mainMenu .menu-actions .btn{grid-template-columns:40px minmax(0,1fr) auto;min-height:66px}
+}
+</style>
+<script id="mainMenuMegaRemakeJS">
+(()=>{
+  const main=document.getElementById('mainMenu');
+  if(!main) return;
+  const panel=main.querySelector('.panel');
+  if(!panel || panel.dataset.menuMegaRemake==='1') return;
+  const title=panel.querySelector('h1');
+  const kicker=panel.querySelector('.kicker');
+  const version=panel.querySelector('.version');
+  const lead=panel.querySelector('.lead');
+  const hero=panel.querySelector('.hero');
+  const heroCopy=hero?.querySelector('.hero-copy');
+  const features=[...panel.querySelectorAll('.feature')];
+  const controls=panel.querySelector('.controls-note');
+  const playBtn=document.getElementById('playBtn');
+  const armoryBtn=document.getElementById('armoryBtn');
+  const settingsBtn=document.getElementById('settingsBtn');
+  const howBtn=document.getElementById('howBtn');
+  if(!(title&&kicker&&version&&lead&&hero&&controls&&playBtn&&armoryBtn&&settingsBtn&&howBtn)) return;
+
+  panel.dataset.menuMegaRemake='1';
+  title.innerHTML='DEAD <span class="outline">SIGNAL</span>';
+  kicker.textContent='Dead Signal // Protocolo Nightfall';
+  version.textContent='Main Menu Remake';
+  lead.textContent='Survival horror top-down com noites brutais, recursos limitados, operadores únicos e um arsenal pesado em uma cidade tomada pelo colapso.';
+  if(heroCopy) heroCopy.innerHTML='<b>O ESCURO VÊ PRIMEIRO</b><span>Gerencie munição, preserve a lanterna e sobreviva tempo suficiente para ver o amanhecer.</span>';
+  const featureData=[
+    ['Lanterna dinâmica','A visão depende da bateria e do feixe.'],
+    ['Boss nights','Ondas especiais terminam só quando o chefe cai.'],
+    ['Arsenal vivo','Cada classe e arma muda o ritmo da partida.']
+  ];
+  features.forEach((el,i)=>{ const d=featureData[i]; if(!d) return; el.innerHTML=`<b>${d[0]}</b><span>${d[1]}</span>`; });
+  controls.textContent='WASD mover • Mouse mirar/atirar • Q habilidade • E ultimate • R recarrega • F interage • Scroll troca armas • ESC pausa';
+
+  const decorate=(btn,icon,title,desc)=>{ btn.innerHTML=`<span class="menu-icon">${icon}</span><span class="menu-copy"><strong>${title}</strong><small>${desc}</small></span><span class="menu-arrow">›</span>`; };
+  decorate(playBtn,'▶','Iniciar expedição','Entrar na zona hostil e sobreviver à próxima noite.');
+  decorate(armoryBtn,'▥','Arsenal permanente','Melhorias e progressão persistente do refúgio.');
+  decorate(settingsBtn,'⚙','Configurações','Áudio, qualidade, controles e preferências.');
+  decorate(howBtn,'?','Como jogar','Resumo rápido das regras e da sobrevivência.');
+
+  const shell=document.createElement('div'); shell.className='menu-remake-shell';
+  const left=document.createElement('div'); left.className='menu-remake-left';
+  const right=document.createElement('div'); right.className='menu-remake-right';
+
+  const topbar=document.createElement('div'); topbar.className='menu-remake-topbar'; topbar.append(kicker,version);
+  const head=document.createElement('div'); head.className='menu-remake-head';
+  const titleWrap=document.createElement('div'); titleWrap.className='menu-remake-titlewrap';
+  const badges=document.createElement('div'); badges.className='menu-remake-badges';
+  badges.innerHTML=`
+    <span class="menu-remake-badge red"><i></i>Noites hostis</span>
+    <span class="menu-remake-badge"><i></i>Combate tático</span>
+    <span class="menu-remake-badge gold"><i></i>Loot e progressão</span>`;
+  titleWrap.append(title,badges);
+
+  const leadWrap=document.createElement('div'); leadWrap.className='menu-remake-leadwrap';
+  const summary=document.createElement('div'); summary.className='menu-remake-summary';
+  summary.innerHTML=`
+    <div class="summary-card"><b>Sobreviva</b><span>Hordas, chefes e escassez crescente a cada noite.</span></div>
+    <div class="summary-card"><b>Administre</b><span>Use oficinas, comerciantes e munição com cautela.</span></div>
+    <div class="summary-card"><b>Evolua</b><span>Operadores únicos, builds e recompensas de longo prazo.</span></div>`;
+  leadWrap.append(lead,summary);
+  head.append(titleWrap,leadWrap);
+
+  const heroWrap=document.createElement('div'); heroWrap.className='menu-remake-heroWrap';
+  heroWrap.append(hero);
+  const sideInfo=document.createElement('div'); sideInfo.className='menu-panel-card';
+  sideInfo.innerHTML=`
+    <div class="card-head"><b>Leitura rápida</b><span>Visão geral</span></div>
+    <div class="menu-brief">
+      <div class="menu-tipline"><i></i>Sistema de sobrevivência ativo</div>
+      <div class="menu-brief-grid">
+        <div class="mini-panel"><b>Dia e Noite</b><span>O dia traz respiro. A noite cobra recursos e precisão.</span></div>
+        <div class="mini-panel"><b>Classes</b><span>Vanguard, Tempest e Reaper mudam completamente o combate.</span></div>
+        <div class="mini-panel"><b>Lojas</b><span>Mercador e especialista oferecem estoques randômicos por dia.</span></div>
+        <div class="mini-panel"><b>Boss Drops</b><span>Chefes entregam itens raros, recursos e recompensas especiais.</span></div>
+      </div>
+    </div>`;
+  heroWrap.append(sideInfo);
+
+  const bottomStrip=document.createElement('div'); bottomStrip.className='menu-bottom-strip';
+  bottomStrip.innerHTML=`
+    <div class="strip-card"><b>Identidade visual</b><span>Mesmo clima sombrio, agora com composição mais limpa e impacto maior.</span></div>
+    <div class="strip-card"><b>Foco visual</b><span>Hierarquia clara entre título, arte principal e ações do jogador.</span></div>
+    <div class="strip-card"><b>Navegação direta</b><span>Entradas principais organizadas em um painel único e mais elegante.</span></div>`;
+
+  left.append(topbar,head,heroWrap,bottomStrip);
+
+  const actionsCard=document.createElement('div'); actionsCard.className='menu-panel-card';
+  actionsCard.innerHTML=`<div class="card-head"><b>Operações</b><span>Acesso principal</span></div>`;
+  const actions=document.createElement('div'); actions.className='menu-actions';
+  actions.append(playBtn,armoryBtn,settingsBtn,howBtn);
+  actionsCard.append(actions);
+
+  const controlsCard=document.createElement('div'); controlsCard.className='menu-panel-card';
+  controlsCard.innerHTML=`<div class="card-head"><b>Controles</b><span>Atalhos de campo</span></div>`;
+  controlsCard.append(controls);
+
+  const signalCard=document.createElement('div'); signalCard.className='menu-panel-card';
+  signalCard.innerHTML=`
+    <div class="card-head"><b>Situação</b><span>Canal de transmissão</span></div>
+    <div class="menu-brief">
+      <div class="mini-panel"><b>Sinal ativo</b><span>Exploração top-down, recursos escassos, chefes e pressão constante em um mapa urbano em ruínas.</span></div>
+      <div class="mini-panel"><b>Objetivo</b><span>Entrar, sobreviver, extrair valor do amanhecer e aguentar uma noite mais pesada que a anterior.</span></div>
+    </div>
+    <div class="menu-corner-accent"></div>`;
+
+  right.append(actionsCard,controlsCard,signalCard);
+
+  panel.innerHTML='';
+  shell.append(left,right);
+  panel.append(shell);
+  if(features.length){ hero.append(...features); }
+})();
+</script>
+
+</body>
 </html>
