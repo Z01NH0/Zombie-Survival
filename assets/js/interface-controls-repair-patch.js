@@ -28,57 +28,84 @@
     const machineTemplate = new Audio('assets/audio/efeitos/metralha-loop.wav');
     machineTemplate.preload = 'auto';
     audioManager.effects.machineGun = machineTemplate;
-    audioManager.__loopStops = audioManager.__loopStops || new Map();
-    audioManager.__loopRamps = audioManager.__loopRamps || new Map();
 
     const originalStartLoop = audioManager.startLoop.bind(audioManager);
     const originalStopLoop = audioManager.stopLoop.bind(audioManager);
+    const machineState = audioManager.__machineGunState = audioManager.__machineGunState || {
+      voice: null, wanted: false, playing: false, playPending: false, retryAt: 0, gain: 1, playbackRate: 1
+    };
+
+    function ensureMachineVoice(manager) {
+      if (machineState.voice) return machineState.voice;
+      const voice = new Audio(manager.effectDefs.machineGun.src);
+      voice.preload = 'auto';
+      voice.loop = true;
+      voice.addEventListener('playing', () => {
+        machineState.playing = true;
+        machineState.playPending = false;
+      });
+      voice.addEventListener('pause', () => {
+        machineState.playing = false;
+        machineState.playPending = false;
+        if (machineState.wanted) machineState.retryAt = 0;
+      });
+      voice.addEventListener('error', () => {
+        machineState.playing = false;
+        machineState.playPending = false;
+        machineState.retryAt = performance.now() + 450;
+      });
+      machineState.voice = voice;
+      manager.loopVoices.set('machineGun', voice);
+      return voice;
+    }
 
     audioManager.startLoop = function (name, options = {}) {
       if (name !== 'machineGun') return originalStartLoop(name, options);
-      if (!this.unlocked || !save?.settings?.sfx) return null;
-      const stopTimer = this.__loopStops.get(name);
-      if (stopTimer) {
-        clearTimeout(stopTimer);
-        this.__loopStops.delete(name);
+      if (!this.unlocked || !save?.settings?.sfx) {
+        machineState.wanted = false;
+        return null;
       }
-      this.__loopRamps.delete(name);
-      const target = clamp01(this.sfxVolume() * (this.effectDefs[name]?.gain || .58) * clamp01(options.gain ?? 1));
-      let voice = this.loopVoices.get(name);
-      if (voice) {
-        voice.volume = target;
-        voice.playbackRate = options.playbackRate || 1;
-        if (voice.paused) {
-          try { voice.currentTime = 0; } catch (_) {}
-          voice.play().catch(() => {
-            if (this.loopVoices.get(name) === voice) this.loopVoices.delete(name);
-          });
-        }
-        return voice;
+      machineState.wanted = true;
+      machineState.gain = clamp01(options.gain ?? 1);
+      machineState.playbackRate = Math.max(.55, Math.min(1.8, Number(options.playbackRate) || 1));
+      const voice = ensureMachineVoice(this);
+      voice.volume = clamp01(this.sfxVolume() * (this.effectDefs.machineGun?.gain || .58) * machineState.gain);
+      voice.playbackRate = machineState.playbackRate;
+
+      const now = performance.now();
+      if (!machineState.playing && !machineState.playPending && now >= machineState.retryAt) {
+        machineState.playPending = true;
+        try { if (voice.paused) voice.currentTime = 0; } catch (_) {}
+        let playResult;
+        try { playResult = voice.play(); }
+        catch (_) { playResult = Promise.reject(_); }
+        Promise.resolve(playResult).then(() => {
+          machineState.playing = true;
+          machineState.playPending = false;
+          machineState.retryAt = 0;
+          if (!machineState.wanted) this.stopLoop('machineGun');
+        }).catch(() => {
+          machineState.playing = false;
+          machineState.playPending = false;
+          machineState.retryAt = performance.now() + 350;
+        });
       }
-      voice = new Audio(this.effectDefs[name].src);
-      voice.preload = 'auto';
-      voice.loop = true;
-      voice.volume = target;
-      voice.playbackRate = options.playbackRate || 1;
-      this.loopVoices.set(name, voice);
-      voice.play().catch(() => {
-        if (this.loopVoices.get(name) === voice) this.loopVoices.delete(name);
-      });
       return voice;
     };
 
     audioManager.stopLoop = function (name) {
       if (name !== 'machineGun') return originalStopLoop(name);
-      const timer = this.__loopStops.get(name);
-      if (timer) clearTimeout(timer);
-      this.__loopStops.delete(name);
-      this.__loopRamps.delete(name);
-      const voice = this.loopVoices.get(name);
+      machineState.wanted = false;
+      machineState.playPending = false;
+      machineState.playing = false;
+      const voice = machineState.voice || this.loopVoices.get(name);
       if (!voice) return;
       voice.pause();
       try { voice.currentTime = 0; } catch (_) {}
-      if (this.loopVoices.get(name) === voice) this.loopVoices.delete(name);
+      // Keep one cached voice. Reusing it avoids day-music transitions creating
+      // and rejecting dozens of overlapping Audio elements every second.
+      machineState.voice = voice;
+      this.loopVoices.set(name, voice);
     };
   }
 
