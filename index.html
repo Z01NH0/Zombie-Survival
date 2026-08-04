@@ -831,7 +831,7 @@ drawBenchItem=function(item){const c=$('#benchItemCanvas');if(!c)return;const x=
 performRepair=function(){if(!repairSelection)return;const item=repairSelection.item,c=repairCost(item);if(game.scrap<c.scrap||game.blood<c.blood){notice('RECURSOS INSUFICIENTES');transactionFeedback('Recursos insuficientes','bad','!');return}game.scrap-=c.scrap;game.blood-=c.blood;const bench=$('#repairBench');bench?.classList.add('repairing');window.gameAudio?.play('repair');setTimeout(()=>{item.durability=item.maxDurability;item.broken=false;bench?.classList.remove('repairing');applyGearStats();renderRepair();renderWeaponHUD();renderInventory();syncStoreResources();transactionFeedback(`${item.name} reparado`,'success','🔧')},2050)};
 performFusion=function(){if(!fusionSelection)return;const c=fusionCost(fusionSelection);if(game.scrap<c.scrap||game.blood<c.blood){notice('RECURSOS INSUFICIENTES');transactionFeedback('Recursos insuficientes','bad','!');return}game.scrap-=c.scrap;game.blood-=c.blood;const result=fusionSelection.result;for(const it of [fusionSelection.a,fusionSelection.b]){const idx=game.player.inventory.findIndex(x=>x?.uid===it.uid);if(idx>=0)game.player.inventory[idx]=null}addToInventory(result,false);game.flash=.7;audio.ultimate();fusionSelection=null;renderFusion();renderInventory();syncStoreResources();transactionFeedback(`${result.name} criado`,'legendary','✦')};
 /* === END CONSOLIDATED ARSENAL PATCH === */
-window.__arsenalDebug={makeWeapon,makeArmor,makeConsumable,spawnLootCrate,openInventory,closeInventory,openMerchant,openSpecialist,renderSpecialist,renderMerchant,projectileHitsWorld,performFusion,performRepair,renderInventory,renderWeaponHUD,currentWeapon,weaponWear,showBrokenMessage,durabilityPct,itemColor,rarityById,rarityLabel,applyGearStats,syncStoreResources,reloadCurrent,switchWeapon,getAllOwned,sellPrice,addToInventory,transactionFeedback,blockedAt,drawBenchItem,renderRepair,renderFusion,selectItem,itemAction,repairCost,fusionCost,interact,closeModal};
+window.__arsenalDebug={makeWeapon,makeArmor,makeConsumable,spawnLootCrate,openInventory,closeInventory,openMerchant,openSpecialist,renderSpecialist,renderMerchant,projectileHitsWorld,performFusion,performRepair,renderInventory,renderWeaponHUD,currentWeapon,weaponWear,showBrokenMessage,durabilityPct,itemColor,rarityById,rarityLabel,applyGearStats,syncStoreResources,reloadCurrent,switchWeapon,getAllOwned,sellPrice,addToInventory,transactionFeedback,blockedAt,drawBenchItem,renderRepair,renderFusion,selectItem,itemAction,repairCost,fusionCost,interact,closeModal,NPC,nearestInteractable,buildMerchantStock,buildSpecialistStock,merchantBuy,merchantSell,specialistBuy,removeOwned};
 
 // Inicia a primeira renderização do HUD ampliado quando uma partida já estiver em andamento por hot reload.
 if(game.running&&game.player&&!game.player.weaponSlots)initPlayerSystems(game.player);
@@ -2030,7 +2030,9 @@ setTimeout(()=>{drawCanvasPaperdoll();DBG.renderWeaponHUD?.()},100);
 <script src="assets/js/support-grenade-powerups-patch.js"></script>
 <script src="assets/js/clean-feedback-patch.js"></script>
 <link rel="stylesheet" href="assets/css/collection-support-merchant-patch.css"/>
+<link rel="stylesheet" href="assets/css/vendor-overhaul-patch.css"/>
 <script src="assets/js/collection-support-merchant-patch.js"></script>
+<script src="assets/js/vendor-overhaul-patch.js"></script>
 <script src="assets/js/enemy-overhaul-patch.js"></script>
 </body>
 </html>
