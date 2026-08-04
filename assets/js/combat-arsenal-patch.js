@@ -15,16 +15,68 @@
   };
 
   const ammoCategories = {
-    handgun: { name: 'Munição de Pistola', icon: '▰', kinds: ['pistol', 'dual', 'revolver'], ratio: .42, flat: 24 },
-    light: { name: 'Munição Leve', icon: '▥', kinds: ['smg', 'rifle'], ratio: .38, flat: 55 },
-    shells: { name: 'Cartuchos de Escopeta', icon: '▤', kinds: ['shotgun'], ratio: .36, flat: 24 },
-    precision: { name: 'Munição de Precisão', icon: '◆', kinds: ['sniper'], ratio: .34, flat: 10 },
-    rockets: { name: 'Mísseis Compactos', icon: '▲', kinds: ['launcher'], ratio: .5, flat: 3 }
+    handgun: { name: 'Munição de Pistola', icon: '▰', kinds: ['pistol', 'dual', 'revolver'], ratio: .357, flat: 20 },
+    light: { name: 'Munição Leve', icon: '▥', kinds: ['smg', 'rifle'], excludeBaseIds: ['nailgun'], ratio: .323, flat: 47 },
+    shells: { name: 'Cartuchos de Escopeta', icon: '▤', kinds: ['shotgun'], ratio: .306, flat: 20 },
+    precision: { name: 'Munição de Precisão', icon: '◆', kinds: ['sniper'], excludeBaseIds: ['crossbow'], ratio: .289, flat: 9 },
+    rockets: { name: 'Mísseis Compactos', icon: '▲', kinds: ['launcher'], ratio: .425, flat: 2 },
+    arrows: { name: 'Flechas Reforçadas', icon: '➶', baseIds: ['crossbow'], ratio: .30, flat: 8 },
+    nails: { name: 'Pregos Industriais', icon: '⌁', baseIds: ['nailgun'], ratio: .25, flat: 40 }
   };
+
+  const ammoTypeAliases = Object.freeze({
+    handgun: 'handgun', pistol: 'handgun', pistola: 'handgun', revolver: 'handgun',
+    light: 'light', leve: 'light', smg: 'light', sub: 'light', submetralhadora: 'light', rifle: 'light',
+    shells: 'shells', shell: 'shells', shotgun: 'shells', escopeta: 'shells', cartucho: 'shells', cartuchos: 'shells',
+    precision: 'precision', precisao: 'precision', sniper: 'precision', fuzilprecisao: 'precision',
+    rockets: 'rockets', rocket: 'rockets', foguete: 'rockets', foguetes: 'rockets', missil: 'rockets', misseis: 'rockets',
+    arrows: 'arrows', arrow: 'arrows', flecha: 'arrows', flechas: 'arrows', crossbow: 'arrows', silentfang: 'arrows', silverfang: 'arrows',
+    nails: 'nails', nail: 'nails', prego: 'nails', pregos: 'nails', nailgun: 'nails', nailstorm: 'nails'
+  });
+
+  function normalizedToken(value) {
+    return String(value || '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase().replace(/^ammo[_\s-]*/, '').replace(/[^a-z0-9]/g, '');
+  }
+
+  function normalizeAmmoType(value) {
+    const token = normalizedToken(value);
+    return ammoTypeAliases[token] || (ammoCategories[token] ? token : null);
+  }
+
+  function weaponTokens(weapon) {
+    return [weapon?.baseId, weapon?.ammoType, weapon?.def?.ammoType, weapon?.name, weapon?.def?.name]
+      .map(normalizedToken).filter(Boolean);
+  }
+
+  function categoryMatchesWeapon(category, weapon) {
+    if (!category || !weapon?.def) return false;
+    const tokens = weaponTokens(weapon);
+    const baseIds = (category.baseIds || []).map(normalizedToken);
+    const excluded = (category.excludeBaseIds || []).map(normalizedToken);
+    if (tokens.some(token => baseIds.includes(token))) return true;
+    if (tokens.some(token => excluded.includes(token))) return false;
+    if (category === ammoCategories.arrows && tokens.some(token => /crossbow|silentfang|silverfang/.test(token))) return true;
+    if (category === ammoCategories.nails && tokens.some(token => /nailgun|nailstorm|pregadora/.test(token))) return true;
+    return category.kinds?.includes(weapon.def.kind) || false;
+  }
 
   function ammoTypeForWeapon(weapon) {
     if (!weapon?.def) return null;
-    return Object.keys(ammoCategories).find(type => ammoCategories[type].kinds.includes(weapon.def.kind)) || null;
+    const explicit = normalizeAmmoType(weapon.ammoType || weapon.def.ammoType);
+    if (explicit) return explicit;
+    return Object.keys(ammoCategories).find(type => categoryMatchesWeapon(ammoCategories[type], weapon)) || null;
+  }
+
+  function resolveAmmoType(item) {
+    if (!item) return null;
+    const candidates = [item.ammoType, item.baseId, item.id, item.name, item.def?.name, item.def?.ammoType];
+    for (const candidate of candidates) {
+      const type = normalizeAmmoType(candidate);
+      if (type) return type;
+    }
+    return null;
   }
 
   function allOwnedWeaponRefs() {
@@ -78,14 +130,15 @@
     const subtitle = document.querySelector('#ammoAllocationSubtitle');
     if (!modal || !list) return false;
 
-    let type = item.baseId?.startsWith('ammo_') ? item.baseId.slice(5) : null;
-    if (!type && item.baseId === 'ammoPack') type = ammoTypeForWeapon(currentWeapon());
+    let type = resolveAmmoType(item);
+    const genericPack = normalizedToken(item.baseId) === 'ammopack';
+    if (!type && genericPack) type = ammoTypeForWeapon(currentWeapon());
     const category = ammoCategories[type] || null;
-    const candidates = allOwnedWeaponRefs().filter(refItem => {
+    const candidates = category ? allOwnedWeaponRefs().filter(refItem => {
       const weapon = refItem.item;
-      if (weapon.def.kind === 'melee') return false;
-      return category ? category.kinds.includes(weapon.def.kind) : true;
-    });
+      if (!weapon?.def || weapon.def.kind === 'melee') return false;
+      return categoryMatchesWeapon(category, weapon);
+    }) : [];
 
     if (title) title.textContent = category?.name || item.name || 'Caixa de Munição';
     if (subtitle) subtitle.textContent = candidates.length
@@ -94,8 +147,8 @@
 
     list.innerHTML = candidates.length ? candidates.map((weaponRef, index) => {
       const weapon = weaponRef.item;
-      const amount = item.baseId === 'ammoPack'
-        ? Math.ceil(weapon.maxReserve * .45)
+      const amount = genericPack
+        ? Math.ceil(weapon.maxReserve * .18)
         : Math.max(category.flat, Math.round(weapon.maxReserve * category.ratio));
       const actual = Math.max(0, Math.min(amount, weapon.maxReserve - weapon.reserve));
       const location = weaponRef.source === 'weapon' ? `Equipada no slot ${weaponRef.index + 1}` : 'Guardada no inventário';
@@ -111,8 +164,8 @@
         const weaponRef = candidates[+button.dataset.ammoWeapon];
         if (!weaponRef) return;
         const weapon = weaponRef.item;
-        const amount = item.baseId === 'ammoPack'
-          ? Math.ceil(weapon.maxReserve * .45)
+        const amount = genericPack
+          ? Math.ceil(weapon.maxReserve * .18)
           : Math.max(category.flat, Math.round(weapon.maxReserve * category.ratio));
         const before = weapon.reserve;
         weapon.reserve = Math.min(weapon.maxReserve, weapon.reserve + amount);
@@ -127,15 +180,26 @@
       };
     });
 
+    modal.dataset.ammoType = type || 'unknown';
     modal.classList.add('show');
     return true;
   }
 
   window.__requestAmmoAllocation = function (item, ref) {
     if (!item || item.type !== 'consumable') return false;
-    if (item.baseId !== 'ammoPack' && !item.baseId?.startsWith('ammo_')) return false;
+    const genericPack = normalizedToken(item.baseId) === 'ammopack';
+    if (!genericPack && !resolveAmmoType(item)) return false;
     return openAmmoModal(item, ref);
   };
+
+  window.__deadSignalAmmo = Object.freeze({
+    categories: ammoCategories,
+    normalizeAmmoType,
+    resolveAmmoType,
+    ammoTypeForWeapon,
+    categoryMatchesWeapon,
+    openAmmoModal
+  });
 
   document.body.insertAdjacentHTML('beforeend', `
     <div id="ammoAllocationModal" class="ammo-allocation-modal" role="dialog" aria-modal="true" aria-labelledby="ammoAllocationTitle">
