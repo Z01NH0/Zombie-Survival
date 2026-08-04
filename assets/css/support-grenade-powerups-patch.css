@@ -1,0 +1,35 @@
+/* Dead Signal 11.0 — support slots, grenade, flashlight toggle and ammo compatibility */
+#flashlightBatteryHud{bottom:3px!important}
+#flashlightBatteryHud::after{content:var(--flashlight-key,'G');display:grid;place-items:center;min-width:22px;height:15px;padding:0 4px;border:1px solid rgba(255,255,255,.12);border-radius:6px;background:rgba(255,255,255,.05);font:900 8px ui-monospace,monospace;color:#dce7ef;letter-spacing:.05em}
+#flashlightBatteryHud.switched-off{opacity:.72;border-color:rgba(150,165,180,.28)}
+#flashlightBatteryHud.switched-off .battery-fill{filter:saturate(.15) brightness(.62)}
+#flashlightBatteryHud.switched-off .battery-value::before{content:'OFF ';color:#8e9aaa}
+#supportQuickSlots{display:grid;grid-template-columns:repeat(2,58px);gap:7px;margin-top:1px;pointer-events:none}
+.support-quick-slot{position:relative;width:58px;height:58px;border:1px solid rgba(255,255,255,.11);border-radius:13px;background:linear-gradient(145deg,rgba(8,13,20,.95),rgba(19,28,39,.88));box-shadow:0 10px 23px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.025);overflow:hidden;transition:.16s transform,.16s border-color,.16s box-shadow}
+.support-quick-slot.active{transform:translateX(4px);border-color:#58f2a2;box-shadow:0 0 0 1px rgba(88,242,162,.18),0 12px 28px rgba(0,0,0,.34),0 0 22px rgba(88,242,162,.12)}
+.support-quick-slot.empty{opacity:.62}
+.support-quick-slot .support-key{position:absolute;left:5px;top:4px;z-index:2;font:1000 8px ui-monospace,monospace;color:#dbe5ee}
+.support-quick-slot .support-icon{display:grid;place-items:center;width:100%;height:100%;padding-top:2px;font-size:25px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+.support-quick-slot .support-count{position:absolute;right:5px;bottom:4px;min-width:18px;padding:2px 4px;border-radius:6px;background:rgba(3,7,11,.86);font:1000 8px ui-monospace,monospace;text-align:center;color:#fff}
+.support-quick-slot .support-empty-mark{display:grid;place-items:center;width:100%;height:100%;font-size:17px;color:rgba(255,255,255,.16)}
+.support-inventory-section{margin:0 0 13px;padding:12px;border:1px solid rgba(255,255,255,.075);border-radius:16px;background:rgba(255,255,255,.022)}
+.support-inventory-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px;font-size:9px;font-weight:1000;letter-spacing:.14em;text-transform:uppercase;color:#9aa7b8}
+.support-inventory-title span:last-child{font-size:8px;color:#657185}
+.support-equip-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.support-equip-slot{position:relative;min-height:72px;padding:9px 10px 8px 48px;border:1px dashed rgba(255,255,255,.15);border-radius:13px;background:rgba(255,255,255,.025);cursor:pointer;transition:.16s border-color,.16s background,.16s transform}
+.support-equip-slot:hover{transform:translateY(-2px);border-color:rgba(88,242,162,.34);background:rgba(88,242,162,.045)}
+.support-equip-slot .support-slot-key{position:absolute;left:8px;top:8px;display:grid;place-items:center;width:27px;height:27px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.04);font:1000 9px ui-monospace,monospace;color:#e4edf4}
+.support-equip-slot .support-slot-icon{position:absolute;left:11px;bottom:8px;font-size:20px}
+.support-equip-slot b{display:block;font-size:9px;line-height:1.25;color:#eaf0f5}
+.support-equip-slot small{display:block;margin-top:5px;font-size:8px;line-height:1.35;color:#7f8c9d}
+.support-equip-slot.empty b{color:#7d8998}
+.support-action-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+.support-action-group .btn{min-width:0!important}
+.grenade-store-card{position:relative;overflow:hidden;border-color:rgba(255,160,70,.28)!important;background:linear-gradient(160deg,rgba(255,111,46,.08),rgba(255,255,255,.025))!important}
+.grenade-store-card::before{content:'';position:absolute;right:-30px;top:-30px;width:115px;height:115px;border-radius:50%;background:radial-gradient(circle,rgba(255,126,54,.18),transparent 68%);pointer-events:none}
+.grenade-store-card .item-icon{filter:drop-shadow(0 0 13px rgba(255,126,54,.42))}
+.grenade-price{color:#ffd166!important}
+.grenade-throw-hint{position:fixed;left:50%;bottom:98px;z-index:22;transform:translate(-50%,12px);padding:8px 12px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(4,8,13,.78);backdrop-filter:blur(8px);font:900 9px ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#dce6ef;opacity:0;pointer-events:none;transition:.18s}
+.grenade-throw-hint.show{opacity:1;transform:translate(-50%,0)}
+.custom-bind-note{font-size:8px;color:#758195;margin-top:3px}
+@media(max-width:840px){#supportQuickSlots{grid-template-columns:repeat(2,45px);gap:5px}.support-quick-slot{width:45px;height:45px;border-radius:10px}.support-quick-slot .support-icon{font-size:19px}.support-equip-row{grid-template-columns:1fr}.grenade-throw-hint{bottom:79px}}
