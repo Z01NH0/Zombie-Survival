@@ -134,6 +134,7 @@
     game.__batteryEmptyShown = false;
     game.__bossDeathPending = false;
     game.__bossNightActive = false;
+    game.__hostileCapPrimed = false;
     renderBatteryHud();
     return result;
   };
@@ -143,6 +144,7 @@
     ensureBattery();
     game.__batteryWarningShown = false;
     game.__batteryEmptyShown = game.flashlight.battery <= 0;
+    game.__hostileCapPrimed = false;
     renderBatteryHud();
     return result;
   };
@@ -371,6 +373,17 @@
       }
     }
     enforceRuntimeBudgets();
+
+    // Once an advanced wave has reached its intended crowd size, a vacancy is
+    // filled on the next update instead of waiting through another long spawn interval.
+    if (game.running && !game.paused && game.phase === 'night' && Number(game.night || 0) >= 5 && !game.__bossDeathPending) {
+      const aliveCount = aliveEnemies().length;
+      if (aliveCount >= MAX_HOSTILES - 1) game.__hostileCapPrimed = true;
+      if (game.__hostileCapPrimed && aliveCount < MAX_HOSTILES) {
+        game.spawnTimer = Math.min(Number.isFinite(game.spawnTimer) ? game.spawnTimer : .06, .06);
+      }
+    }
+
     renderBatteryHud();
     return result;
   };
@@ -389,6 +402,6 @@
   };
 
   const version = document.querySelector('#mainMenu .version');
-  if (version) version.textContent = 'Nightfall Endurance 8.0';
-  console.info('[Dead Signal] Performance, boss wave, ammo economy and flashlight battery patch 8.0 loaded.');
+  if (version) version.textContent = 'Nightfall Stability 8.1';
+  console.info('[Dead Signal] Performance, boss wave, ammo economy and flashlight battery patch 8.1 loaded.');
 })();
