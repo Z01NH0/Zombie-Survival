@@ -12,6 +12,18 @@
   };
   const angDiff = (a,b)=>Math.abs(Math.atan2(Math.sin(a-b), Math.cos(a-b)));
   const enemyFacingPlayer = enemy => Math.atan2(game.player.y - enemy.y, game.player.x - enemy.x);
+  const incomingBulletFor = enemy => {
+    let nearest=null, nearestDistance=enemy.r+20;
+    for(const bullet of game.bullets||[]){
+      if(!bullet||bullet.life<=0||bullet.hit?.has?.(enemy))continue;
+      const dx=enemy.x-bullet.x,dy=enemy.y-bullet.y,d=Math.hypot(dx,dy);
+      if(d>nearestDistance)continue;
+      const forward=Math.cos(bullet.a||0)*dx+Math.sin(bullet.a||0)*dy;
+      if(forward<=0)continue;
+      nearest=bullet;nearestDistance=d;
+    }
+    return nearest;
+  };
   const currentWeaponKind = ()=>{
     const p = game.player; if(!p || !p.weaponSlots) return null;
     const w = p.weaponSlots[p.activeWeapon];
@@ -91,6 +103,12 @@
   };
 
   spawnEnemy = function(){
+    /* Cada Ninhada reserva dois espaços para que sua morte consiga gerar
+       três bebês sem romper o teto de 30 ameaças vivas. */
+    const alive=(game.enemies||[]).filter(enemy=>!enemy.dead).length;
+    const broods=(game.enemies||[]).filter(enemy=>!enemy.dead&&enemy.type==='brood').length;
+    const reserved=Math.min(8,broods*2);
+    if(alive>=30-reserved)return;
     const before = game.enemies.length;
     const result = baseSpawnEnemy.apply(this, arguments);
     for(let i = before; i < game.enemies.length; i++) initSpecial(game.enemies[i]);
@@ -107,6 +125,7 @@
   Enemy.prototype.update = function(dt){
     initSpecial(this);
     if(this.dead) return;
+    if(this.type === 'reflector')this.reflectCd=Math.max(0,(this.reflectCd||0)-dt);
     if(this.type === 'lancer'){
       this.flash -= dt; this.hitCd -= dt; this.attackCd -= dt;
       this.chargeCd -= dt; this.chargeImpactCd -= dt; this.chargeTelegraph = Math.max(0, (this.chargeTelegraph||0) - dt);
@@ -119,7 +138,8 @@
         this.x += this.vx * dt; this.y += this.vy * dt;
         trail(this.x, this.y, '#f2c27a', 3);
         if(worldBlocked(this.x,this.y,this.r)){ this.x=ox; this.y=oy; this.chargeTime = 0; shockwave(this.x,this.y,'#ffba66',95,.26,5); }
-        if(d < this.r + p.r + 10 && this.chargeImpactCd <= 0){ this.chargeImpactCd = .5; p.hurt(this.damageValue*1.45); screenShake(7); this.chargeTime = 0; }
+        const impactDistance=Math.hypot(p.x-this.x,p.y-this.y);
+        if(impactDistance < this.r + p.r + 10 && this.chargeImpactCd <= 0){ this.chargeImpactCd = .5; p.hurt(this.damageValue*1.45); screenShake(7); this.chargeTime = 0; }
         return;
       }
       if(this.chargeCd <= 0 && d < 350 && d > 95){
@@ -169,17 +189,21 @@
       else { v *= this.bulletMitigation || .42; sparks(this.x,this.y,'#7f96a1',7); }
     }
     if(this.type === 'reflector' && !melee){
-      const fa = enemyFacingPlayer(this);
-      const from = Math.atan2(this.y - game.player.y, this.x - game.player.x);
-      if(angDiff(fa, from) < (this.reflectArc || .9)){
-        if((this.reflectCd||0) <= 0){
-          this.reflectCd = .24;
-          lineEffect(this.x,this.y, game.player.x, game.player.y, '#8be9ff', .18, 4);
-          sparks(this.x,this.y,'#8be9ff',8);
-          burst(this.x,this.y,'#8be9ff',6,120,3);
-          game.enemyBullets.push(new EnemyBullet(this.x,this.y, Math.atan2(game.player.y-this.y, game.player.x-this.x), 360, this.damageValue*.6, 'boss'));
+      const incoming=incomingBulletFor(this);
+      if(incoming){
+        const facing=enemyFacingPlayer(this);
+        const impactSide=Math.atan2(incoming.y-this.y,incoming.x-this.x);
+        if(angDiff(facing,impactSide)<(this.reflectArc||.9)){
+          incoming.life=0;
+          if((this.reflectCd||0)<=0){
+            this.reflectCd=.24;
+            lineEffect(this.x,this.y,game.player.x,game.player.y,'#8be9ff',.18,4);
+            sparks(this.x,this.y,'#8be9ff',8);
+            burst(this.x,this.y,'#8be9ff',6,120,3);
+            game.enemyBullets.push(new EnemyBullet(this.x,this.y,Math.atan2(game.player.y-this.y,game.player.x-this.x),360,this.damageValue*.6,'boss'));
+          }
+          return;
         }
-        return;
       }
     }
     return baseEnemyDamage.call(this, v, crit);
@@ -397,6 +421,19 @@
       ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.strokeRect(this.x-w/2,this.y-this.r-24,w,8);
       ctx.fillStyle = this.accent || '#ffd166'; ctx.font='900 12px system-ui'; ctx.textAlign='center'; ctx.fillText(this.name||'ABERRAÇÃO', this.x, this.y-this.r-32);
     }
+  };
+
+  window.__enemyOverhaulDebug={
+    types:[...specialTypes],
+    spawn(type,x=game.player?.x+180||300,y=game.player?.y||300,elite=false){
+      if(!ENEMIES[type])throw new Error(`Tipo especial desconhecido: ${type}`);
+      const enemy=initSpecial(new Enemy(type,x,y,elite));
+      game.enemies.push(enemy);
+      return enemy;
+    },
+    spawnBoss(){spawnBoss();return game.boss},
+    alive(type){return (game.enemies||[]).filter(enemy=>!enemy.dead&&(!type||enemy.type===type))},
+    initSpecial
   };
 
 })();
