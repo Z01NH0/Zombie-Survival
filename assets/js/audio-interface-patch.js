@@ -396,7 +396,7 @@
       };
     }
   }
-  setInterval(instrumentLootCrates, 350);
+  setInterval(instrumentLootCrates, 900);
 
   // Detecta o início da recarga independentemente de qual atalho, botão ou
   // rotina automática do módulo interno a iniciou.
@@ -405,7 +405,7 @@
     const timer = Number(game.player?.reloadTimer) || 0;
     if (timer > 0 && previousReloadTimer <= 0) gameAudio.play('reload');
     previousReloadTimer = timer;
-  }, 45);
+  }, 90);
 
   function meleeWouldHit(player, weapon) {
     const def = weapon.def;
@@ -424,6 +424,41 @@
     return (game.lootCrates || []).some(crate => !crate.dead && dist(player, crate) < range + crate.r);
   }
 
+  // Mapeamento explícito por arma. Algumas armas compartilham categoria de
+  // munição, mas precisam de uma identidade sonora diferente. A Widowmaker,
+  // por exemplo, continua sendo um revólver para a munição, porém usa o
+  // disparo pesado de precisão.
+  const weaponAudioProfiles = Object.freeze({
+    starter: 'gunshot',
+    pawp: 'sniper',
+    twin: 'gunshot',
+    thompson: 'machineGun',
+    killerbee: 'bazooka',
+    kitchen: 'melee',
+    axe: 'melee',
+    crowbar: 'melee',
+    pumper: 'shotgun',
+    chainsaw: 'shotgun',
+    ashmaker: 'machineGun',
+    widow: 'sniper',
+    nailgun: 'machineGun',
+    crossbow: 'crossbow',
+    boomstick: 'shotgun',
+    harvester: 'melee'
+  });
+  function audioProfileForWeapon(weapon) {
+    if (!weapon) return null;
+    const explicit = weaponAudioProfiles[weapon.baseId];
+    if (explicit) return explicit;
+    if (weapon.def?.kind === 'melee') return 'melee';
+    if (weapon.def?.kind === 'launcher') return 'bazooka';
+    if (weapon.def?.kind === 'shotgun') return 'shotgun';
+    if (weapon.def?.kind === 'sniper') return 'sniper';
+    if (weapon.def?.auto && (weapon.def?.kind === 'smg' || weapon.def?.kind === 'rifle')) return 'machineGun';
+    return 'gunshot';
+  }
+  window.__deadSignalWeaponAudioProfile = audioProfileForWeapon;
+
   const originalShootAudio = Player.prototype.shoot;
   Player.prototype.shoot = function () {
     const weapon = DBG.currentWeapon?.();
@@ -431,26 +466,15 @@
       weapon && this.fireCd <= 0 && !game.paused && this.reloadTimer <= 0 &&
       !weapon.broken && weapon.durability > 0
     );
-    const melee = weapon?.def?.kind === 'melee';
+    const profile = audioProfileForWeapon(weapon);
+    const melee = profile === 'melee';
     const enoughAmmo = melee || (weapon && weapon.mag >= (weapon.def.ammoCost || 1));
     const meleeHit = canAttempt && melee ? meleeWouldHit(this, weapon) : false;
     const result = originalShootAudio.apply(this, arguments);
     if (!canAttempt || !enoughAmmo) return result;
-    if (melee) {
-      gameAudio.play(meleeHit ? 'meleeHit' : 'meleeMiss');
-    } else if (weapon.baseId === 'crossbow') {
-      gameAudio.play('crossbow');
-    } else if (weapon.def.kind === 'launcher') {
-      gameAudio.play('bazooka');
-    } else if (weapon.def.kind === 'shotgun') {
-      gameAudio.play('shotgun');
-    } else if (weapon.def.kind === 'sniper') {
-      gameAudio.play('sniper');
-    } else if (weapon.def.auto && (weapon.def.kind === 'smg' || weapon.def.kind === 'rifle')) {
-      gameAudio.startLoop('machineGun');
-    } else {
-      gameAudio.play('gunshot');
-    }
+    if (profile === 'melee') gameAudio.play(meleeHit ? 'meleeHit' : 'meleeMiss');
+    else if (profile === 'machineGun') gameAudio.startLoop('machineGun');
+    else gameAudio.play(profile || 'gunshot');
     return result;
   };
 
@@ -460,14 +484,14 @@
     const mobileFiring = Boolean(touch?.aim?.active && Math.hypot(touch.aim.x || 0, touch.aim.y || 0) > 0.24);
     const holdingFire = Boolean(game?.mouse?.down || mobileFiring);
     const shouldLoop = Boolean(
-      game?.running && !game.paused && game.phase === 'night' && player && holdingFire &&
+      game?.running && !game.paused && player && player.quickSlotMode !== 'support' && holdingFire &&
       weapon && !weapon.broken && player.reloadTimer <= 0 &&
-      weapon.mag >= (weapon.def.ammoCost || 1) && weapon.def.auto &&
-      (weapon.def.kind === 'smg' || weapon.def.kind === 'rifle')
+      weapon.mag >= (weapon.def.ammoCost || 1) &&
+      audioProfileForWeapon(weapon) === 'machineGun'
     );
     if (shouldLoop) gameAudio.startLoop('machineGun');
     else gameAudio.stopLoop('machineGun');
-  }, 30);
+  }, 70);
 
   const originalBulletUpdateAudio = Bullet.prototype.update;
   Bullet.prototype.update = function (dt) {
@@ -534,7 +558,7 @@
     } else {
       nextZombieVoice = time + 900;
     }
-  }, 420);
+  }, 650);
 
   function updateReloadIndicator() {
     const indicator = document.querySelector('#reloadIndicator');
@@ -560,5 +584,18 @@
   const menuLead = document.querySelector('#mainMenu .lead');
   if (menuLead) menuLead.textContent = 'Survival horror com áudio dinâmico, arsenal detalhado, lojas integradas, interface compacta e ameaças que ganham presença conforme se aproximam.';
 
-  console.info('[Dead Signal] Áudio externo 4.0 carregado com loop de metralha e sons por classe.');
+  const visibleWeaponDefs = typeof WEAPON_DEFS === 'object' ? WEAPON_DEFS : null;
+  const audioAudit = Object.keys(visibleWeaponDefs || weaponAudioProfiles).map(baseId => ({
+    baseId,
+    arma: visibleWeaponDefs?.[baseId]?.name || baseId,
+    perfil: audioProfileForWeapon({ baseId, def: visibleWeaponDefs?.[baseId] || {} })
+  }));
+  window.__deadSignalAudioAudit={
+    profiles:weaponAudioProfiles,
+    profileForWeapon:audioProfileForWeapon,
+    effects:gameAudio.effectDefs,
+    music:gameAudio.musicDefs,
+    weapons:audioAudit
+  };
+  console.info('[Dead Signal] Áudio externo revisado: sons por arma, recarga, vazio, impactos, lojas, habilidades e ambiente.', audioAudit);
 })();
