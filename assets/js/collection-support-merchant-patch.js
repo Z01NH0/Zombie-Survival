@@ -9,6 +9,14 @@
   const itemIcon=item=>item?.def?.icon||'◆';
   const itemKind=item=>item?.type==='weapon'?'Arma':item?.type==='armor'?'Armadura':item?.ammoType||ammoWords.test(`${item?.baseId||''} ${item?.name||''}`)?'Munição':'Consumível';
   const isSupport=item=>Boolean(item?.type==='consumable'&&supportIds.has(norm(item.baseId))&&!ammoWords.test(`${item.baseId||''} ${item.name||''}`));
+  // AmmoDrop é criado dentro de um módulo privado. Em alguns navegadores,
+  // `ammoDefs` não fica visível para este patch, então o feed usa um mapa local.
+  const ammoFeedDefs={
+    handgun:{name:'Munição de Pistola',icon:'▰'},light:{name:'Munição Leve',icon:'▥'},
+    shells:{name:'Cartuchos de Escopeta',icon:'▤'},precision:{name:'Munição de Precisão',icon:'◆'},
+    rockets:{name:'Mísseis Compactos',icon:'▲'},arrows:{name:'Flechas Reforçadas',icon:'➶'},
+    nails:{name:'Pregos Industriais',icon:'⌁'}
+  };
 
   /* ================================================================
      FEED DE TODAS AS COLETAS DO CHÃO — rastreamento centralizado
@@ -70,24 +78,28 @@
     pushGroundPickup(item.name||item.def?.name||'Item',amount,itemIcon(item),itemColor(item),itemKind(item));
   }
   function reportPickup(pickup){
-    if(!pickup||reportedPickups.has(pickup))return;
-    reportedPickups.add(pickup);
+    if(!pickup||pickup.__pickupFeedReported||reportedPickups.has(pickup))return false;
+    let reported=false;
     if(pickup.item?.resource){
-      pushGroundPickup(pickup.label||'Fragmento do chefe',1,'☠',pickup.color||'#ffd166','Recurso especial');
-      return;
+      pushGroundPickup(pickup.label||'Fragmento do chefe',1,'☠',pickup.color||'#ffd166','Recurso especial');reported=true;
+    }else if(pickup.item){
+      reportItem(pickup.item);reported=true;
+    }else{
+      const external=typeof ammoDefs!=='undefined'?ammoDefs?.[pickup.type]:null;
+      const ammoDefinition=external||ammoFeedDefs[pickup.type];
+      if(ammoDefinition){
+        pushGroundPickup(ammoDefinition.name||'Munição',1,ammoDefinition.icon||'▰','#5cecff','Munição');reported=true;
+      }else{
+        const data={
+          xp:['Fragmento de experiência',1,'✦','#9d7cff','Experiência'],
+          heal:['Recuperação',1,'✚','#58f2a2','Cura'],
+          core:['Núcleo de energia',1,'◆','#ffd166','Recurso']
+        }[pickup.type];
+        if(data){pushGroundPickup(...data);reported=true}
+      }
     }
-    if(pickup.item){reportItem(pickup.item);return}
-    const ammoDefinition=typeof ammoDefs!=='undefined'?ammoDefs?.[pickup.type]:null;
-    if(ammoDefinition){
-      pushGroundPickup(ammoDefinition.name||'Munição',1,ammoDefinition.icon||'▰','#5cecff','Munição');
-      return;
-    }
-    const data={
-      xp:['Fragmento de experiência',1,'✦','#9d7cff','Experiência'],
-      heal:['Recuperação',1,'✚','#58f2a2','Cura'],
-      core:['Núcleo de energia',1,'◆','#ffd166','Recurso']
-    }[pickup.type];
-    if(data)pushGroundPickup(...data);
+    if(reported){pickup.__pickupFeedReported=true;reportedPickups.add(pickup)}
+    return reported;
   }
 
   /*
@@ -115,6 +127,28 @@
     updateWithPickupFeed.__universalPickupFeed=true;
     Player.prototype.update=updateWithPickupFeed;
   }
+
+
+  /* Confirma a coleta na própria classe do pickup. O rastreamento do loop
+     continua como segurança, mas estes wrappers cobrem munições e pickups
+     que encerram a coleta alterando `life` antes da remoção do array. */
+  function wrapPickupCollector(klass){
+    if(!klass?.prototype||typeof klass.prototype.collect!=='function'||klass.prototype.collect.__groundFeedWrapped)return;
+    const previous=klass.prototype.collect;
+    function collectWithGroundFeed(...args){
+      const beforeLife=Number(this.life);
+      const result=previous.apply(this,args);
+      const collected=(Number(this.life)<=0)||(Number.isFinite(beforeLife)&&beforeLife>0&&Number(this.life)<beforeLife&&Number(this.life)<=0);
+      if(collected)queueMicrotask(()=>reportPickup(this));
+      return result;
+    }
+    collectWithGroundFeed.__groundFeedWrapped=true;
+    klass.prototype.collect=collectWithGroundFeed;
+  }
+  try{if(typeof GearPickup!=='undefined')wrapPickupCollector(GearPickup)}catch(_){}
+  try{if(typeof AmmoDrop!=='undefined')wrapPickupCollector(AmmoDrop)}catch(_){}
+  try{if(typeof Pickup!=='undefined')wrapPickupCollector(Pickup)}catch(_){}
+  window.__deadSignalPickupDebug={pushGroundPickup,reportPickup,reportItem,wrapPickupCollector};
 
   /* ================================================================
      ARRASTAR E SOLTAR NOS SLOTS 4/5
@@ -169,16 +203,14 @@
       element.ondrop=event=>{event.preventDefault();event.stopPropagation();const src=parseSource(readSource(event));const ok=moveToSupport(src,index);clearDragMarks();if(!ok)pulseInvalid(element)};
     });
   }
-  const supportRow=document.getElementById('supportEquipRow');
-  if(supportRow)new MutationObserver(()=>requestAnimationFrame(enhanceSupportSlots)).observe(supportRow,{childList:true,subtree:true});
   const inventoryGrid=document.getElementById('inventoryGrid');
   if(inventoryGrid){
     inventoryGrid.addEventListener('dragover',event=>{const source=parseSource(readSource(event));if(source.source!=='support')return;const target=event.target.closest?.('[data-inv-slot]');if(!target)return;event.preventDefault();event.stopPropagation();const targetItem=player()?.inventory?.[Number(target.dataset.invSlot)];const valid=!targetItem||isSupport(targetItem);event.dataTransfer.dropEffect=valid?'move':'none';target.classList.toggle('support-return-valid',valid)},true);
     inventoryGrid.addEventListener('dragleave',event=>{event.target.closest?.('[data-inv-slot]')?.classList.remove('support-return-valid')},true);
     inventoryGrid.addEventListener('drop',event=>{const source=parseSource(readSource(event));if(source.source!=='support')return;const target=event.target.closest?.('[data-inv-slot]');if(!target)return;event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();const ok=moveSupportToInventory(source,Number(target.dataset.invSlot));clearDragMarks();if(!ok)pulseInvalid(target)},true);
   }
-  const inventoryScreen=document.getElementById('inventoryScreen');
-  if(inventoryScreen)new MutationObserver(()=>requestAnimationFrame(enhanceSupportSlots)).observe(inventoryScreen,{childList:true,subtree:true});
+  const previousSupportInventoryHook=window.__deadSignalRenderSupportInventory;
+  window.__deadSignalRenderSupportInventory=function(){previousSupportInventoryHook?.();enhanceSupportSlots()};
   requestAnimationFrame(enhanceSupportSlots);
 
   /* Loja reorganizada pelo vendor-overhaul-patch.js. */
