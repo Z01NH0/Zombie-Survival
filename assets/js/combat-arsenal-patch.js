@@ -822,7 +822,7 @@
         const t = i / 6;
         const px = ox + (this.x - ox) * t;
         const py = oy + (this.y - oy) * t;
-        game.fields.push(new Field(px, py, 92 * this.area, .52 + i * .025, 'shock', { damage: this.damage * 2.25, color: '#ffd84a' }));
+        game.fields.push(new Field(px, py, 92 * this.area, .52 + i * .025, 'shock', { damage: this.damage * 1.2375, color: '#ffd84a' }));
         lineEffect(px + rand(-28, 28), py + rand(-28, 28), px + rand(-55, 55), py + rand(-55, 55), i % 2 ? '#fff6ae' : '#ffd84a', .22, 2.5);
       }
       lineEffect(ox, oy, this.x, this.y, '#fff8c8', .42, 15);
