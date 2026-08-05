@@ -1,0 +1,9 @@
+/* Dead Signal 12.9 — HUD persistente e seleção clara entre armas e suporte */
+#weaponHud .weapon-slot-hud.support-standby{opacity:.56;filter:saturate(.72)}
+#weaponHud .weapon-slot-hud.support-standby.active{border-left-color:rgba(255,255,255,.08)!important;box-shadow:0 10px 28px rgba(0,0,0,.28)!important;transform:none!important}
+#weaponHud #supportQuickSlots{display:grid!important;visibility:visible!important;opacity:1!important;min-height:58px}
+#weaponHud .support-quick-slot.active{opacity:1!important;transform:translateX(5px) scale(1.03);border-color:#58f2a2!important;box-shadow:0 0 0 1px rgba(88,242,162,.23),0 0 25px rgba(88,242,162,.18)!important}
+#weaponHud .support-quick-slot.active::after{content:"EM MÃOS";position:absolute;left:5px;bottom:4px;color:#78f5b4;font:900 6px ui-monospace,monospace;letter-spacing:.08em}
+#weaponHud .support-quick-slot.active .support-count{bottom:4px}
+#weaponHud .reload-progress{display:block}
+#weaponHud .weapon-slot-hud:not(.reloading) .reload-progress{opacity:0}
