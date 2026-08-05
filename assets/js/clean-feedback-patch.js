@@ -99,6 +99,8 @@
 
   const previousShoot=Player.prototype.shoot;
   Player.prototype.shoot=function(...args){
+    /* Usar suporte não deve disparar os sinais de arma vazia/quebrada. */
+    if(this.quickSlotMode==='support')return previousShoot.apply(this,args);
     const weapon=(DBG.currentWeapon?.()||this.weaponSlots?.[this.activeWeapon])||null;
     const ranged=weapon&&weapon.def?.kind!=='melee';
     const cost=Math.max(1,Number(weapon?.def?.ammoCost)||1);
@@ -126,5 +128,5 @@
     if(noticeBox){noticeBox.textContent='';noticeBox.classList.remove('show')}
     if(gameplayClear())document.getElementById('transactionFeedback')?.classList.remove('show');
   };
-  setInterval(clearGeneric,650);
+  setInterval(clearGeneric,1800);
 })();
