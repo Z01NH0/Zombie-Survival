@@ -29,6 +29,17 @@
   let approvalOverlay = null;
   let pendingApproval = null;
 
+  // Capturado antes de qualquer script do jogo rodar. Isso distingue um save real que já
+  // existia ao abrir a página de um save-default criado por patches durante o bootstrap.
+  // Sem isso, um navegador novo pode criar {cores:0}, ganhar timestamp atual e bloquear
+  // indevidamente a restauração de um Cloud Save mais antigo porém legítimo.
+  const bootLocalState = Object.freeze({
+    hadSave: cfg.saveKeys.some(key => localStorage.getItem(key) !== null),
+    metaUpdatedAt: readMeta().updatedAt || null
+  });
+  let initialSyncCompleted = false;
+  let queuedPushReason = null;
+
   function normalizeOrigin(value) {
     try {
       return new URL(String(value)).origin;
@@ -117,16 +128,48 @@
     return true;
   }
 
+  function collectStorageValues() {
+    const storage = {};
+    for (const key of cfg.saveKeys) {
+      const value = localStorage.getItem(key);
+      if (value !== null) storage[key] = value;
+    }
+    return storage;
+  }
+
+  function comparePersistentProgress(remoteStorage) {
+    if (typeof cfg.progressScore !== 'function') return 0;
+    try {
+      const localScore = Number(cfg.progressScore(collectStorageValues()));
+      const remoteScore = Number(cfg.progressScore(remoteStorage));
+      if (!Number.isFinite(localScore) || !Number.isFinite(remoteScore) || localScore === remoteScore) return 0;
+      return remoteScore > localScore ? 1 : -1;
+    } catch (error) {
+      console.warn('[ZOINHO Bridge] Falha ao comparar progresso semântico; usando timestamps.', error);
+      return 0;
+    }
+  }
+
   function shouldApplyRemote(payload) {
     if (!payload || !payload.storage || typeof payload.storage !== 'object') return false;
     if (!hasLocalSave()) return true;
+
+    // Na primeira sincronização, se NÃO havia save quando a bridge carregou, qualquer
+    // localStorage criado depois é bootstrap/migração do próprio jogo. Ele não pode vencer
+    // um Cloud Save legítimo só porque recebeu um timestamp alguns milissegundos depois.
+    if (!initialSyncCompleted && !bootLocalState.hadSave) return true;
+
+    // Quando o jogo fornece um comparador de progresso persistente, ele tem precedência
+    // sobre relógios. Para Dead Signal isso protege núcleos/upgrades contra saves-default.
+    const progressComparison = comparePersistentProgress(payload.storage);
+    if (progressComparison !== 0) return progressComparison > 0;
 
     const localTime = Date.parse(readMeta().updatedAt || '');
     const remoteTime = Date.parse(payload.clientUpdatedAt || payload.portalReceivedAt || '');
     if (!Number.isFinite(remoteTime)) return false;
 
-    // Save local antigo, criado antes da bridge, ganha do remoto por segurança.
-    // Assim a primeira conexão nunca apaga progresso existente sem metadata comparável.
+    // Save local antigo, criado antes da bridge, ganha do remoto por segurança quando não
+    // existe metadata comparável. Isso protege progresso pré-Cloud Save já existente.
     if (!Number.isFinite(localTime)) return false;
     return remoteTime > localTime;
   }
@@ -199,13 +242,22 @@
   }
 
   function pushNow(reason = 'save') {
+    // Nenhum snapshot sai antes de o portal mandar o primeiro SYNC. Isso impede defaults
+    // e migrações de bootstrap de chegarem ao Supabase enquanto o Cloud Save legítimo
+    // ainda está sendo buscado.
+    if (!initialSyncCompleted) {
+      queuedPushReason = reason;
+      return false;
+    }
     if (!portalWindow || !portalOrigin || !sessionNonce) return false;
     state = 'sending';
+    queuedPushReason = null;
     return post('snapshot', { reason, snapshot: collectSnapshot() });
   }
 
   function schedulePush(reason = 'save') {
     markLocalSave();
+    queuedPushReason = reason;
     clearTimeout(pushTimer);
     pushTimer = setTimeout(() => pushNow(reason), 120);
   }
@@ -357,7 +409,11 @@
       lastAckAt,
       readyAttempts,
       hasLocalSave: hasLocalSave(),
-      approvedOrigins: [...readApprovedOrigins()]
+      approvedOrigins: [...readApprovedOrigins()],
+      bootHadLocalSave: bootLocalState.hadSave,
+      bootMetaUpdatedAt: bootLocalState.metaUpdatedAt,
+      initialSyncCompleted,
+      queuedPushReason
     })
   });
 
@@ -388,7 +444,8 @@
       if (!restoredThisLoad && message.snapshot && shouldApplyRemote(message.snapshot)) {
         if (applySnapshot(message.snapshot)) return;
       }
-      pushNow('sync-response');
+      initialSyncCompleted = true;
+      pushNow(queuedPushReason || 'sync-response');
       return;
     }
 
