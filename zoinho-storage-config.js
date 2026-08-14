@@ -16,5 +16,27 @@ window.ZOINHO_STORAGE_CONFIG = Object.freeze({
   allowOriginApproval: true,
   saveKeys: [
     'dead_signal_nightfall_v1'
-  ]
+  ],
+
+  // Critério semântico de conflito. Núcleos podem diminuir quando o jogador compra
+  // upgrades, então usamos núcleos atuais + custo acumulado dos níveis permanentes.
+  // Esse total é monotônico no fluxo normal do jogo e impede um save-default cores=0
+  // de vencer progresso real apenas por ter timestamp mais novo.
+  progressScore(storage) {
+    try {
+      const raw = storage?.dead_signal_nightfall_v1;
+      if (typeof raw !== 'string') return null;
+      const data = JSON.parse(raw);
+      let score = Math.max(0, Number(data?.cores) || 0);
+      const meta = data?.meta && typeof data.meta === 'object' ? data.meta : {};
+      for (const key of ['vitality', 'power', 'mobility', 'armor', 'focus', 'fortune']) {
+        const level = Math.max(0, Math.min(10, Math.floor(Number(meta[key]) || 0)));
+        // Custos: 3, 6, 9... => soma até o nível L = 3*L*(L+1)/2.
+        score += 3 * level * (level + 1) / 2;
+      }
+      return Number.isFinite(score) ? score : null;
+    } catch {
+      return null;
+    }
+  }
 });
