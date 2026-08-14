@@ -115,7 +115,9 @@
      FLASHLIGHT TOGGLE AND CUSTOM KEYS.
   ================================================================== */
   save.settings.keybinds=Object.assign({},save.settings.keybinds||{});
-  save.settings.keybinds.flashlight ||= 'g'; save.settings.keybinds.support1 ||= '4'; save.settings.keybinds.support2 ||= '5'; persist();
+  const addedSupportKeyDefaults=!save.settings.keybinds.flashlight||!save.settings.keybinds.support1||!save.settings.keybinds.support2;
+  save.settings.keybinds.flashlight ||= 'g'; save.settings.keybinds.support1 ||= '4'; save.settings.keybinds.support2 ||= '5';
+  // Não persiste defaults no bootstrap; o próximo save real inclui estas chaves.
   function toggleFlashlight(){if(!game.running||!game.player||!game.flashlight)return;if((game.flashlight.battery||0)<=0&&game.flashlight.enabled===false){notice('A LANTERNA ESTÁ SEM BATERIA');return}game.flashlight.enabled=game.flashlight.enabled===false;notice(game.flashlight.enabled?'LANTERNA LIGADA':'LANTERNA DESLIGADA');window.gameAudio?.play('menuButton',{gain:.42});updateHUD?.()}
 
   /* ==================================================================
