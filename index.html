@@ -114,8 +114,8 @@
 <section class="screen hidden" id="upgradeScreen"><div class="panel" style="width:min(1040px,95vw)"><div class="topline"><div><div class="kicker">Mutação de combate</div><h2>ESCOLHA UMA EVOLUÇÃO</h2></div></div><div class="choice-grid" id="choiceGrid"></div></div></section>
 <section class="screen hidden" id="pauseScreen"><div class="panel" style="width:min(680px,94vw);text-align:center"><div class="kicker">Operação suspensa</div><h2>PAUSADO</h2><p class="lead" style="margin:12px auto 18px">Respire. A escuridão continua esperando.</p><div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap"><button class="btn primary" id="resumeBtn">Continuar</button><button class="btn" id="pauseSettingsBtn">Configurações</button><button class="btn" id="quitBtn">Encerrar expedição</button></div></div></section>
 <section class="screen hidden" id="gameOverScreen"><div class="panel" style="width:min(720px,94vw);text-align:center"><div class="kicker">Sinal perdido</div><h2>FIM DA EXPEDIÇÃO</h2><div class="stats-grid" id="runStats"></div><div class="currency" style="margin-bottom:18px">◆ <span id="earnedCores">0</span> NÚCLEOS OBTIDOS</div><div style="display:flex;justify-content:center;gap:10px"><button class="btn primary" id="retryBtn">Tentar novamente</button><button class="btn" id="menuBtn">Menu principal</button></div></div></section>
-<script src="zoinho-storage-config.js?v=cloud-1.3"></script>
-<script src="zoinho-storage-bridge.js?v=cloud-1.3"></script>
+<script src="zoinho-storage-config.js?v=cloud-1.3.1"></script>
+<script src="zoinho-storage-bridge.js?v=cloud-1.3.1"></script>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],TAU=Math.PI*2,rand=(a,b)=>a+Math.random()*(b-a),pick=a=>a[(Math.random()*a.length)|0],clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t,dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const canvas=$('#game'),ctx=canvas.getContext('2d',{alpha:false}),mini=$('#mini'),mctx=mini.getContext('2d');let W=innerWidth,H=innerHeight,DPR=Math.min(devicePixelRatio||1,2);
