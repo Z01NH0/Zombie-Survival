@@ -138,7 +138,8 @@
     ['weapon1', 'Arma 1'], ['weapon2', 'Arma 2'], ['weapon3', 'Arma 3'], ['pause', 'Pausar']
   ];
   save.settings.keybinds = Object.assign({}, DEFAULT_BINDS, save.settings.keybinds || {});
-  persist();
+  // Migração somente em memória no boot. Persistir aqui criava um save cores=0 em
+  // navegadores novos e podia bloquear/sobrescrever o Cloud Save antes do handshake.
 
   const normalizedKey = event => {
     const key = String(event.key || '').toLowerCase();
