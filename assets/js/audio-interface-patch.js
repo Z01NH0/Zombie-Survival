@@ -227,9 +227,11 @@
     }
   }
 
+  const addedAudioSettingDefaults = save.settings.musicVolume == null || save.settings.sfxVolume == null;
   save.settings.musicVolume ??= 0.36;
   save.settings.sfxVolume ??= 0.72;
-  persist();
+  // Não persiste defaults durante o boot. Em navegador novo isso criava um save vazio
+  // antes do Cloud Save ser restaurado. Os defaults entram no próximo save real.
 
   const gameAudio = new ExternalAudioManager();
   window.gameAudio = gameAudio;
