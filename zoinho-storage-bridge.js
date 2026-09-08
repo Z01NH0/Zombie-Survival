@@ -25,6 +25,7 @@
   const ACCOUNT_BACKUPS_KEY = `zoinhoBridgeAccountBackups:${cfg.gameId}`;
   const RESTORED_KEY = `zoinhoBridgeRestored:${cfg.gameId}`;
   const ACCOUNT_SWITCH_KEY = `zoinhoBridgeAccountSwitch:${cfg.gameId}`;
+  const AUTO_PORTAL_SESSION_KEY = `zoinhoBridgeAutoPortalSession:${cfg.gameId}`;
   const staticTrustedOrigins = new Set(cfg.portalOrigins.map(normalizeOrigin).filter(Boolean));
 
   let portalWindow = null;
@@ -197,12 +198,33 @@
     return new Set(raw.map(normalizeOrigin).filter(Boolean));
   }
 
-  function rememberApprovedOrigin(origin) {
+  function readAutomaticPortalSession() {
+    try {
+      const raw = sessionStorage.getItem(AUTO_PORTAL_SESSION_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || parsed.version !== 1 || typeof parsed.origin !== 'string') return null;
+      const origin = normalizeOrigin(parsed.origin);
+      return origin ? { origin, establishedAt: parsed.establishedAt || null } : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function rememberAutomaticPortalSession(origin) {
     const normalized = normalizeOrigin(origin);
     if (!normalized) return false;
-    const approved = readApprovedOrigins();
-    approved.add(normalized);
-    return writeJsonStorage(APPROVED_ORIGINS_KEY, [...approved]);
+    try {
+      sessionStorage.setItem(AUTO_PORTAL_SESSION_KEY, JSON.stringify({
+        version: 1,
+        origin: normalized,
+        establishedAt: new Date().toISOString()
+      }));
+      return true;
+    } catch (error) {
+      console.warn('[ZOINHO Bridge] Não foi possível preservar a confiança automática desta aba.', error);
+      return false;
+    }
   }
 
   function isExpectedOpener(event) {
@@ -216,10 +238,13 @@
     if (normalizeOrigin(message?.portalOrigin || '') !== origin) return false;
     if (message?.bootSyncProtocol !== 1) return false;
 
-    // Quando o navegador fornece Referer, ele também precisa apontar para a mesma origem
-    // que abriu o jogo. Em navegadores que omitem Referer por privacidade, opener + origem
-    // de lançamento + HELLO ainda precisam coincidir.
-    if (referrerOrigin && referrerOrigin !== origin) return false;
+    // Na primeira navegação, o Referer (quando fornecido) precisa apontar para o portal.
+    // Depois de um restore/troca de conta, location.reload() cria um novo Document e alguns
+    // navegadores passam a reportar o próprio jogo como Referer. A confiança já validada
+    // nesta MESMA aba é preservada em sessionStorage para sobreviver somente ao reload.
+    const trustedSession = readAutomaticPortalSession();
+    const trustedReload = trustedSession?.origin === origin;
+    if (referrerOrigin && referrerOrigin !== origin && !trustedReload) return false;
 
     try {
       const parsed = new URL(origin);
@@ -433,9 +458,13 @@
     }, BOOT_TIMEOUT_MS);
   }
 
-  function showBootError(detail = 'Não foi possível acessar seu progresso na nuvem agora.') {
+  function showBootError(detail = 'Não foi possível acessar seu progresso na nuvem agora.', options = {}) {
     clearTimeout(bootTimer);
     setBootStage('error', 'Não foi possível sincronizar', detail);
+    if (options.retryable === false) {
+      const ui = getBootUi();
+      if (ui.retry) ui.retry.hidden = true;
+    }
   }
 
   function releaseBootGate(mode = 'synced') {
@@ -521,6 +550,9 @@
     portalWindow = event.source;
     portalOrigin = normalizeOrigin(event.origin);
     portalUserId = message.userId;
+    // O caller só chega aqui depois de isTrustedOrigin(). Guardamos a origem apenas na
+    // sessão da aba, suficiente para reloads controlados sem criar uma aprovação eterna.
+    if (autoSyncRequested) rememberAutomaticPortalSession(portalOrigin);
     portalSupportsBootAck = message.bootSyncProtocol === 1;
     sessionNonce = message.nonce;
     state = 'connected';
@@ -546,7 +578,10 @@
       detail: 'A origem que abriu o jogo não corresponde ao lançamento automático da ZOINHO.',
       observedPortalOrigin: origin
     });
-    showBootError('A conexão automática com o portal não pôde ser validada. Feche esta aba e abra o jogo novamente pela ZOINHO.');
+    showBootError(
+      'A conexão automática com o portal não pôde ser validada. Feche esta aba e abra o jogo novamente pela ZOINHO.',
+      { retryable: false }
+    );
   }
 
   function completeInitialSync(message) {
@@ -579,6 +614,7 @@
       launchPortalOrigin: launchPortalOrigin || null,
       referrerOrigin: referrerOrigin || null,
       automaticPortalTrust: Boolean(autoSyncRequested && launchPortalOrigin),
+      automaticPortalSessionOrigin: readAutomaticPortalSession()?.origin || null,
       bootHadLocalSave: bootLocalState.hadSave,
       bootMetaUpdatedAt: bootLocalState.metaUpdatedAt,
       ownerUserId: readMeta().ownerUserId || null,
